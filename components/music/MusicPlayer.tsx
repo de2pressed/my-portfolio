@@ -35,9 +35,14 @@ function formatPlaybackTime(seconds: number) {
 
 function readStoredPreference() {
   try {
-    return window.localStorage.getItem(MINIMIZED_KEY) === "1";
+    const stored = window.localStorage.getItem(MINIMIZED_KEY);
+    if (stored === null) {
+      return null;
+    }
+
+    return stored === "1";
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -61,11 +66,14 @@ export function MusicPlayer() {
     mute,
     unmute,
   } = useMusic();
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setIsMinimized(readStoredPreference());
+    const storedPreference = readStoredPreference();
+    if (storedPreference !== null) {
+      setIsMinimized(storedPreference);
+    }
     setHydrated(true);
   }, []);
 

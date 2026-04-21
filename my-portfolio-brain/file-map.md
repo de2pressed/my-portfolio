@@ -37,6 +37,7 @@
 
 ## UI And Loading
 
+- `components/background/AmbientBackground.tsx` - music-reactive background canvas with anchors spread across edges and corners
 - `components/loading/LoadingScreen.tsx` - initial loading surface and handoff animation
 - `components/loading/CookieConsent.tsx` - consent overlay and reveal animation that also serves as a playback gesture
 - `components/ui/GlassCursor.tsx` - smaller custom pointer treatment for fine pointer devices
@@ -48,8 +49,8 @@
 
 ## Music System
 
-- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API, uses muted autoplay, syncs metadata, and registers controls
-- `components/music/MusicPlayer.tsx` - floating playback widget with seek, volume, and minimize mode
+- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API, uses muted autoplay, syncs metadata, retries startup, and registers controls
+- `components/music/MusicPlayer.tsx` - floating playback widget with seek, volume, and default-minimized mode
 
 ## Public Sections
 

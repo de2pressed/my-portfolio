@@ -27,6 +27,9 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Increased selection contrast so drag-selected text is clearly visible in the dark theme.
 - Guarded music URL refreshes so the current soundtrack title is not overwritten by an unchanged settings response.
 - Triggered playback from the cookie decision action so the first accepted visit can start audio without requiring a reload.
+- Set the floating music player to start minimized by default while still honoring saved user preference.
+- Added an autoplay retry path so the hidden YouTube player keeps trying until first-load playback actually starts.
+- Spread the ambient background across edges and corners so the whole viewport feels populated instead of center-heavy.
 
 ## Files To Know
 

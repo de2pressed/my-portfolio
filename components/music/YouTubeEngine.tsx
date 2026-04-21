@@ -30,11 +30,23 @@ function loadYouTubeApi() {
   }
 
   window.__youtubeApiReadyPromise__ = new Promise<typeof YT>((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://www.youtube.com/iframe_api";
-    script.async = true;
-    document.body.appendChild(script);
+    const previousReady = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = () => resolve(window.YT as typeof YT);
+
+    if (typeof previousReady === "function") {
+      const chainedReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        previousReady();
+        chainedReady?.();
+      };
+    }
+
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      script.async = true;
+      document.body.appendChild(script);
+    }
   });
 
   return window.__youtubeApiReadyPromise__;
@@ -56,10 +68,19 @@ export function YouTubeEngine() {
   const volumeRef = useRef(volume);
   const previousTimeRef = useRef(0);
   const autoplayUnmutePendingRef = useRef(false);
+  const playbackRetryTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     volumeRef.current = volume;
   }, [volume]);
+
+  useEffect(() => {
+    return () => {
+      if (playbackRetryTimerRef.current !== null) {
+        window.clearTimeout(playbackRetryTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,6 +128,34 @@ export function YouTubeEngine() {
       }
     }
 
+    function startPlayback(player: ExtendedPlayer) {
+      let attempts = 0;
+
+      const attempt = () => {
+        if (cancelled || !playerRef.current) {
+          return;
+        }
+
+        const state = player.getPlayerState();
+        if (state === window.YT?.PlayerState.PLAYING) {
+          return;
+        }
+
+        player.playVideo();
+        attempts += 1;
+
+        if (attempts < 6 && !cancelled) {
+          playbackRetryTimerRef.current = window.setTimeout(attempt, 220);
+        }
+      };
+
+      if (playbackRetryTimerRef.current !== null) {
+        window.clearTimeout(playbackRetryTimerRef.current);
+      }
+
+      attempt();
+    }
+
     // Safety timeout: if the YouTube player never fires onReady or onError
     // (ad blockers, network issues, autoplay restrictions, etc.), force the
     // engine to "ready" so the loading screen doesn't block the site forever.
@@ -152,6 +201,7 @@ export function YouTubeEngine() {
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
               autoplayUnmutePendingRef.current = true;
+              player.setVolume(0);
               player.mute();
               const videoData = (player as ExtendedPlayer).getVideoData();
               syncTrack({
@@ -161,8 +211,7 @@ export function YouTubeEngine() {
                 duration: player.getDuration(),
                 isMuted: true,
               });
-              player.setVolume(volumeRef.current);
-              player.playVideo();
+              startPlayback(player as ExtendedPlayer);
               setPlayerReady(true);
 
               registerControls({
@@ -196,6 +245,11 @@ export function YouTubeEngine() {
               const player = event.target as ExtendedPlayer;
               const playing = event.data === window.YT?.PlayerState.PLAYING;
 
+              if (playbackRetryTimerRef.current !== null && playing) {
+                window.clearTimeout(playbackRetryTimerRef.current);
+                playbackRetryTimerRef.current = null;
+              }
+
               if (event.data === window.YT?.PlayerState.ENDED) {
                 const playlistIndex =
                   typeof player.getPlaylistIndex === "function" ? player.getPlaylistIndex() : -1;
@@ -225,6 +279,10 @@ export function YouTubeEngine() {
             onError: () => {
               markResolved();
               autoplayUnmutePendingRef.current = false;
+              if (playbackRetryTimerRef.current !== null) {
+                window.clearTimeout(playbackRetryTimerRef.current);
+                playbackRetryTimerRef.current = null;
+              }
               setPlayerError("Music unavailable");
             },
           },
@@ -268,6 +326,10 @@ export function YouTubeEngine() {
       window.clearTimeout(safetyTimeout);
       if (pollInterval) {
         window.clearInterval(pollInterval);
+      }
+      if (playbackRetryTimerRef.current !== null) {
+        window.clearTimeout(playbackRetryTimerRef.current);
+        playbackRetryTimerRef.current = null;
       }
       playerRef.current?.destroy();
       playerRef.current = null;

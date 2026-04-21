@@ -92,11 +92,6 @@ export function MusicProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     controlsRef.current = controls;
-
-    if (controls && pendingPlayRef.current) {
-      controls.play();
-      pendingPlayRef.current = false;
-    }
   }, [controls]);
 
   useEffect(() => {
@@ -155,7 +150,13 @@ export function MusicProvider({ children }: PropsWithChildren) {
   }, [resetPalette, setPaletteFromThumbnail, thumbnail]);
 
   const registerControls = useCallback((nextControls: PlayerControls) => {
+    controlsRef.current = nextControls;
     setControls(nextControls);
+
+    if (pendingPlayRef.current) {
+      nextControls.play();
+      pendingPlayRef.current = false;
+    }
   }, []);
 
   const syncTrack = useCallback((payload: {

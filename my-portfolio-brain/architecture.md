@@ -43,6 +43,7 @@ It also owns the phase state for:
 
 The shell hides content until the site is ready, then reveals the public page. On the public route it can show cookie consent before full reveal.
 The loading and consent phases now have a dedicated handoff animation so the transition feels continuous instead of like two separate overlays.
+The shell also treats consent resolution as the first playback gesture and retries playback once the music engine reports ready so first-load audio does not depend on a manual reload.
 
 ## Music Pipeline
 
@@ -58,6 +59,7 @@ Important behavior:
 - track data is synced from the player
 - current volume is stored in state and also mirrored in a ref for the player effect
 - autoplay starts muted, then unmutes after the player enters `PLAYING`
+- the player retries startup a few times on boot so muted autoplay has a chance to settle on the first visit
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the footer takeover grows as the user scrolls toward the footer
@@ -71,6 +73,7 @@ Important behavior:
 The extracted palette is written to CSS custom properties on `document.documentElement`.
 The theme context keeps the core canvas dark and the ink light so extracted colors only steer accents, glows, and ambient surfaces.
 The latest pass pushes the canvas closer to near-black, removes the grey wash from the ambient layers, and keeps glass surfaces more transparent so the content reads against a cleaner dark field.
+The ambient canvas now places glow anchors across the corners and edges too, instead of clustering the motion around the middle.
 
 Those variables are consumed by:
 

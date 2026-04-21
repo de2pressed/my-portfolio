@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 
 import { AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AmbientBackground } from "@/components/background/AmbientBackground";
 import { CookieConsent } from "@/components/loading/CookieConsent";
@@ -23,6 +23,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
   const { engineStatus, play } = useMusic();
   const [phase, setPhase] = useState<"loading" | "handoff" | "cookie" | "none">("loading");
   const [revealed, setRevealed] = useState(false);
+  const autoplayAttemptedRef = useRef(false);
 
   const musicReady = engineStatus === "ready" || engineStatus === "error";
   const isPublicRoute = pathname === "/";
@@ -73,9 +74,32 @@ export function ExperienceShell({ children }: PropsWithChildren) {
     setRevealed(false);
   }, [phase]);
 
-  function handleDecision(decision: "accepted" | "rejected") {
-    setConsent(decision);
+  useEffect(() => {
+    if (!hydrated || !isPublicRoute) {
+      autoplayAttemptedRef.current = false;
+      return;
+    }
+
+    if (consent === "unknown") {
+      autoplayAttemptedRef.current = false;
+      return;
+    }
+
+    if (engineStatus !== "ready" && engineStatus !== "error") {
+      return;
+    }
+
+    if (autoplayAttemptedRef.current) {
+      return;
+    }
+
+    autoplayAttemptedRef.current = true;
     play();
+  }, [consent, engineStatus, hydrated, isPublicRoute, play]);
+
+  function handleDecision(decision: "accepted" | "rejected") {
+    play();
+    setConsent(decision);
     setPhase("none");
     window.setTimeout(() => setRevealed(true), 160);
   }
