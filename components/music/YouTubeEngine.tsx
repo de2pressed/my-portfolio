@@ -18,6 +18,8 @@ type ExtendedPlayer = YT.Player & {
     title: string;
     video_id: string;
   };
+  isMuted: () => boolean;
+  getVolume: () => number;
 };
 
 function loadYouTubeApi() {
@@ -128,6 +130,17 @@ export function YouTubeEngine() {
       }
     }
 
+    function restoreAudio(player: ExtendedPlayer) {
+      if (!player.isMuted() && player.getVolume() > 0 && !autoplayUnmutePendingRef.current) {
+        return;
+      }
+
+      player.unMute();
+      player.setVolume(volumeRef.current);
+      autoplayUnmutePendingRef.current = false;
+      syncTrack({ isMuted: false });
+    }
+
     function startPlayback(player: ExtendedPlayer) {
       let attempts = 0;
 
@@ -175,8 +188,8 @@ export function YouTubeEngine() {
         }
 
         const player = new api.Player(hostRef.current, {
-          height: "1",
-          width: "1",
+          height: "200",
+          width: "200",
           videoId: source.videoId ?? undefined,
           playerVars: {
             autoplay: 1,
@@ -218,11 +231,19 @@ export function YouTubeEngine() {
                 play: () => player.playVideo(),
                 pause: () => player.pauseVideo(),
                 toggle: () => {
+                  const activePlayer = player as ExtendedPlayer;
                   const state = player.getPlayerState();
                   if (state === window.YT?.PlayerState.PLAYING) {
+                    if (activePlayer.isMuted() || activePlayer.getVolume() === 0 || autoplayUnmutePendingRef.current) {
+                      restoreAudio(activePlayer);
+                      return;
+                    }
+
                     player.pauseVideo();
                     return;
                   }
+
+                  restoreAudio(activePlayer);
                   player.playVideo();
                 },
                 next: () => player.nextVideo(),
@@ -357,5 +378,10 @@ export function YouTubeEngine() {
     }
   }, [source.playlistId, source.rawUrl, source.videoId]);
 
-  return <div ref={hostRef} className="pointer-events-none fixed left-[-9999px] top-[-9999px] h-px w-px opacity-0" />;
+  return (
+    <div
+      ref={hostRef}
+      className="pointer-events-none fixed left-[-9999px] top-[-9999px] h-[200px] w-[200px] opacity-0"
+    />
+  );
 }
