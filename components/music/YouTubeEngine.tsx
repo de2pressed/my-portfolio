@@ -107,6 +107,7 @@ export function YouTubeEngine() {
   const playlistFallbackAttemptedRef = useRef(false);
   const defaultFallbackAttemptedRef = useRef(false);
   const smoothedEnergyRef = useRef(0.08);
+  const energyHistoryRef = useRef<number[]>([]);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -139,24 +140,32 @@ export function YouTubeEngine() {
         return 0.08;
       }
 
-      // Dramatic bass pulse (slow, heavy) - increased multiplier
-      const bassPulse = Math.pow(Math.sin(currentTime * 3.0), 2) * 0.45;
+      // Dramatic bass pulse (slow, heavy) - reduced multiplier
+      const bassPulse = Math.pow(Math.sin(currentTime * 2.0), 2) * 0.35;
       
-      // Fast mid-range shimmer - increased multiplier
-      const midShimmer = Math.abs(Math.sin(currentTime * 8.0)) * 0.28;
+      // Fast mid-range shimmer - reduced multiplier
+      const midShimmer = Math.abs(Math.sin(currentTime * 5.0)) * 0.2;
       
-      // High-frequency sparkle - increased multiplier
-      const highSpark = Math.abs(Math.cos(currentTime * 16.0 + 1.5)) * 0.22;
+      // High-frequency sparkle - reduced multiplier
+      const highSpark = Math.abs(Math.cos(currentTime * 10.0 + 1.5)) * 0.15;
       
-      // Aggressive volume scaling - increased impact
-      const volumeScale = Math.pow(currentVolume / 100, 1.8) * 0.5;
+      // Aggressive volume scaling - reduced impact
+      const volumeScale = Math.pow(currentVolume / 100, 1.5) * 0.4;
       
       // Tempo burst for dynamic feel
-      const tempoBurst = Math.min(0.35, deltaTime * 1.5);
+      const tempoBurst = Math.min(0.3, deltaTime * 1.2);
       
       // Combine for dramatic energy range (0.1 to 1.0)
-      const energy = Math.min(1.0, 0.1 + bassPulse + midShimmer + highSpark + volumeScale + tempoBurst);
-      return energy;
+      const rawEnergy = Math.min(1.0, 0.1 + bassPulse + midShimmer + highSpark + volumeScale + tempoBurst);
+      
+      // Apply moving average to reduce fluctuations
+      energyHistoryRef.current.push(rawEnergy);
+      if (energyHistoryRef.current.length > 5) {
+        energyHistoryRef.current.shift();
+      }
+      const averagedEnergy = energyHistoryRef.current.reduce((sum, val) => sum + val, 0) / energyHistoryRef.current.length;
+      
+      return averagedEnergy;
     }
 
     function readPlaylist(player: ExtendedPlayer) {
@@ -600,7 +609,6 @@ export function YouTubeEngine() {
 
         pollInterval = window.setInterval(() => {
           if (!playerRef.current) {
-            console.log("[YouTubeEngine] Poll loop: playerRef is null, skipping");
             return;
           }
 
@@ -613,11 +621,10 @@ export function YouTubeEngine() {
             const isPlaying = state === window.YT?.PlayerState.PLAYING;
             const targetEnergy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
             
-            // Smooth interpolation: move 15% toward target each poll cycle
-            const smoothingFactor = 0.15;
+            // Smooth interpolation: move 5% toward target each poll cycle for buttery smooth transitions
+            const smoothingFactor = 0.05;
             smoothedEnergyRef.current = smoothedEnergyRef.current + (targetEnergy - smoothedEnergyRef.current) * smoothingFactor;
             
-            console.log("[YouTubeEngine] Poll loop executing:", { state, isPlaying, currentTime: snapshot.currentTime, deltaTime, volume: volumeRef.current, targetEnergy, smoothedEnergy: smoothedEnergyRef.current });
             syncTrack({
               title: snapshot.title ?? undefined,
               videoId: snapshot.videoId,

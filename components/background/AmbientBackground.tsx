@@ -103,10 +103,11 @@ function hslToRgb(hue: number, saturation: number, lightness: number) {
 function boostCanvasColor(hex: string) {
   const { red, green, blue } = hexToRgb(hex);
   const { hue, saturation, lightness } = rgbToHsl(red, green, blue);
-  const saturationBoost = saturation < 0.45 ? 1.5 : 1.22;
-  const lightnessBoost = lightness < 0.38 ? 1.14 : 1.06;
-  const boostedSaturation = clamp(saturation * saturationBoost + 0.06, 0.58, 1);
-  const boostedLightness = clamp(lightness * lightnessBoost + 0.02, 0.28, 0.76);
+  // Much gentler boost to preserve original colors
+  const saturationBoost = saturation < 0.45 ? 1.15 : 1.05;
+  const lightnessBoost = lightness < 0.38 ? 1.05 : 1.02;
+  const boostedSaturation = clamp(saturation * saturationBoost + 0.02, 0.35, 0.85);
+  const boostedLightness = clamp(lightness * lightnessBoost + 0.01, 0.25, 0.65);
   const boosted = hslToRgb(hue, boostedSaturation, boostedLightness);
   return rgbToHex(boosted.red, boosted.green, boosted.blue);
 }
@@ -120,7 +121,6 @@ export function AmbientBackground() {
 
   useEffect(() => {
     energyRef.current = energy;
-    console.log("[AmbientBackground] energy updated:", energy);
   }, [energy]);
 
   useEffect(() => {
@@ -222,9 +222,6 @@ export function AmbientBackground() {
 
     const draw = (time: number) => {
       const level = Math.max(0, Math.min(1, energyRef.current));
-      if (time % 60 === 0) {
-        console.log("[AmbientBackground] draw loop - level:", level, "energyRef.current:", energyRef.current);
-      }
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
       const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
@@ -269,7 +266,8 @@ export function AmbientBackground() {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const pulse = 1 + level * (blob.size < 96 ? 0.9 : 1.18);
+        const rawPulse = 1 + level * (blob.size < 96 ? 0.4 : 0.6);
+        const pulse = Math.min(blob.size < 96 ? 1.3 : 1.5, Math.max(1.0, rawPulse));
         const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;

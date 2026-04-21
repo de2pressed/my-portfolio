@@ -95,6 +95,14 @@ export function Footer({ name, email, note }: FooterProps) {
                 0.1 + cardProgress * 0.04
               }), 0 0 ${28 + cardProgress * 14}px rgba(var(--accent-rgb), ${0.05 + cardProgress * 0.08})`,
             }}
+            whileHover={{
+              y: 12 - cardProgress * 20,
+              scale: 0.92 + cardProgress * 0.14,
+              rotate: 1.5 - cardProgress * 1.5,
+              boxShadow: `0 32px 100px rgba(5,5,8,${0.32 + cardProgress * 0.1}), 0 0 0 1px rgba(var(--accent-rgb), ${
+                0.12 + cardProgress * 0.05
+              }), 0 0 ${32 + cardProgress * 18}px rgba(var(--accent-rgb), ${0.08 + cardProgress * 0.1})`,
+            }}
             transition={{
               opacity: { duration: 0.18, ease: "easeOut" },
               y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },

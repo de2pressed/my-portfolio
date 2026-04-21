@@ -167,7 +167,7 @@ export function MusicPlayer() {
   return (
     <motion.aside
       className={cn(
-        "fixed bottom-4 right-4 z-40 overflow-hidden border border-white/10 bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
+        "fixed bottom-4 right-4 z-40 overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4",
@@ -204,7 +204,7 @@ export function MusicPlayer() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.div
-              className="animate-spin relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-white/12 bg-[rgba(10,10,14,0.42)] shadow-[0_18px_50px_rgba(5,5,8,0.24)] sm:h-[5.5rem] sm:w-[5.5rem]"
+              className="animate-spin relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[rgba(10,10,14,0.42)] shadow-[0_18px_50px_rgba(5,5,8,0.24)] sm:h-[5.5rem] sm:w-[5.5rem]"
               style={{
                 animationDuration: "14s",
                 animationPlayState: isPlaying ? "running" : "paused",
@@ -235,7 +235,7 @@ export function MusicPlayer() {
                 </svg>
               </div>
               <div className="absolute inset-2 overflow-hidden rounded-full">{renderArtwork()}</div>
-              <div className="absolute inset-[2px] rounded-full border border-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]" />
+              <div className="absolute inset-[2px] rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]" />
               <div className="absolute inset-[38%] rounded-full bg-[rgba(255,255,255,0.12)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]" />
             </motion.div>
 
@@ -291,7 +291,7 @@ export function MusicPlayer() {
               </div>
               <input
                 aria-label="Track progress"
-                className="h-2 w-full cursor-pointer appearance-none rounded-full border border-white/18 accent-[rgb(var(--accent-rgb))]"
+                className="h-2 w-full cursor-pointer appearance-none rounded-full accent-[rgb(var(--accent-rgb))]"
                 disabled={duration <= 0}
                 max={Math.max(duration, 1)}
                 min={0}

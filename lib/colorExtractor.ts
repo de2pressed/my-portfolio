@@ -1,5 +1,5 @@
-const FALLBACK_COLORS = ["#151019", "#b93ca7", "#7a57e8", "#271d31", "#f2e8f6"];
-const FALLBACK_SUPPLEMENT = [FALLBACK_COLORS[2], FALLBACK_COLORS[4], FALLBACK_COLORS[1]];
+const FALLBACK_COLORS = ["#151019", "#2d2d3a", "#3d3d4a", "#4a4a5a", "#5a5a6a"];
+const FALLBACK_SUPPLEMENT = [FALLBACK_COLORS[2], FALLBACK_COLORS[3], FALLBACK_COLORS[4]];
 
 function rgbToHex(r: number, g: number, b: number) {
   return `#${[r, g, b]
@@ -12,7 +12,7 @@ function luminance(red: number, green: number, blue: number) {
 }
 
 function quantizeChannel(value: number) {
-  return Math.min(255, Math.round(value / 16) * 16);
+  return Math.min(255, Math.round(value / 8) * 8);
 }
 
 function quantize(values: Uint8ClampedArray) {
@@ -61,7 +61,6 @@ function quantize(values: Uint8ClampedArray) {
       return rgbToHex(r, g, b);
     });
 
-  console.log("[colorExtractor] Extracted palette:", sorted);
   return sorted;
 }
 
@@ -81,8 +80,8 @@ export async function extractPaletteFromImage(url: string) {
     });
 
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 200;
+    canvas.height = 200;
     const context = canvas.getContext("2d", { willReadFrequently: true });
 
     if (!context) {

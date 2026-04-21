@@ -220,7 +220,6 @@ export function MusicProvider({ children }: PropsWithChildren) {
   }, [resetPalette]);
 
   const setVisualLevel = useCallback((value: number) => {
-    console.log("[MusicContext] setVisualLevel called with:", value);
     setVisualLevelState(value);
   }, []);
 

@@ -98,7 +98,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/10 bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
@@ -113,7 +113,7 @@ export function Header({ name }: HeaderProps) {
                     cy="14"
                     fill="none"
                     r="10.5"
-                    stroke="rgba(255,255,255,0.18)"
+                    stroke="rgba(255,255,255,0.06)"
                     strokeWidth="2.2"
                   />
                   <circle
@@ -142,7 +142,7 @@ export function Header({ name }: HeaderProps) {
                 className={cn(
                   "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300",
                   activeSection === item.id
-                    ? "glass-button border-white/12 text-ink shadow-glass"
+                    ? "glass-button text-ink shadow-glass"
                     : "glass-button-muted text-ink/72",
                 )}
                 aria-current={activeSection === item.id ? "page" : undefined}
@@ -187,7 +187,7 @@ export function Header({ name }: HeaderProps) {
                     className={cn(
                       "flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] transition-all duration-300",
                       activeSection === item.id
-                        ? "glass-button border-white/12 text-ink shadow-glass"
+                        ? "glass-button text-ink shadow-glass"
                         : "glass-button-muted text-ink/76",
                     )}
                     aria-current={activeSection === item.id ? "page" : undefined}

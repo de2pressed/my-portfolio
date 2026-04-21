@@ -80,12 +80,12 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
 
           <div className="relative hidden h-52 items-center justify-center md:flex">
             <motion.div
-              className="absolute h-36 w-36 rounded-[36px] border border-white/10 bg-[rgba(10,10,14,0.34)] backdrop-blur-2xl"
+              className="absolute h-36 w-36 rounded-[36px] bg-[rgba(10,10,14,0.34)] backdrop-blur-2xl"
               animate={{ rotate: [0, 18, 0], scale: [1, 1.08, 1] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute h-44 w-44 rounded-full border border-white/10"
+              className="absolute h-44 w-44 rounded-full"
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
@@ -97,7 +97,7 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
           </div>
         </div>
 
-        <div className="mt-8 grid gap-3 border-t border-white/16 pt-6 text-[10px] uppercase tracking-[0.3em] text-ink/58 sm:grid-cols-3 sm:gap-4 md:mt-10">
+        <div className="mt-8 grid gap-3 pt-6 text-[10px] uppercase tracking-[0.3em] text-ink/58 sm:grid-cols-3 sm:gap-4 md:mt-10">
           {statusItems.map((label, index) => (
             <motion.div
               key={index}

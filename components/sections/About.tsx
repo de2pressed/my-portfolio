@@ -31,7 +31,7 @@ export function About({ summary, education }: AboutProps) {
             <p className="mt-6 max-w-3xl text-sm leading-8 text-ink/72 md:text-base">{summary}</p>
           </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-[rgba(10,10,14,0.38)] p-6">
+          <div className="rounded-[28px] bg-[rgba(10,10,14,0.38)] p-6">
             <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Education</p>
             <h3 className="mt-4 text-2xl font-semibold text-ink">{education.degree}</h3>
             <p className="mt-2 text-sm text-ink/72">{education.institution}</p>
