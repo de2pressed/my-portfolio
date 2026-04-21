@@ -135,26 +135,27 @@ export function YouTubeEngine() {
       deltaTime: number,
     ) {
       if (!isPlaying) {
-        return 0.06;
+        return 0.08;
       }
 
-      // Use faster, more varied frequencies for more precise pulsing
-      const base = Math.abs(Math.sin(currentTime * 3.5)) * 0.18;
-      const bass = Math.abs(Math.sin(currentTime * 2.2)) * 0.15;
-      const mid = Math.abs(Math.cos(currentTime * 5.8 + 0.3)) * 0.12;
-      const high = Math.abs(Math.sin(currentTime * 8.4 + 0.7)) * 0.1;
-      const shimmer = Math.abs(Math.cos(currentTime * 12.6 + 1.2)) * 0.08;
-      const spark = Math.abs(Math.sin(currentTime * 18.2 + 0.5)) * 0.06;
+      // Dramatic bass pulse (slow, heavy)
+      const bassPulse = Math.pow(Math.sin(currentTime * 2.5), 2) * 0.35;
       
-      // Stronger response to volume changes
-      const volumeFactor = (currentVolume / 100) * 0.35;
+      // Fast mid-range shimmer
+      const midShimmer = Math.abs(Math.sin(currentTime * 6.0)) * 0.2;
       
-      // Add tempo burst based on time delta between polls (indicates playback speed)
-      const tempoBurst = Math.min(0.25, Math.max(0, deltaTime * 0.8));
+      // High-frequency sparkle
+      const highSpark = Math.abs(Math.cos(currentTime * 12.0 + 1.5)) * 0.15;
       
-      // Combine all factors with stronger base response
-      const energy = Math.min(0.96, 0.15 + base + bass + mid + high + shimmer + spark + tempoBurst + volumeFactor);
-      console.log("[YouTubeEngine] deriveEnergy:", { currentTime, isPlaying, currentVolume, deltaTime, energy });
+      // Aggressive volume scaling (volume has major impact)
+      const volumeScale = Math.pow(currentVolume / 100, 1.5) * 0.4;
+      
+      // Tempo burst for dynamic feel
+      const tempoBurst = Math.min(0.3, deltaTime * 1.2);
+      
+      // Combine for dramatic energy range (0.1 to 1.0)
+      const energy = Math.min(1.0, 0.1 + bassPulse + midShimmer + highSpark + volumeScale + tempoBurst);
+      console.log("[YouTubeEngine] deriveEnergy:", { currentTime, isPlaying, currentVolume, deltaTime, energy, bassPulse, midShimmer, volumeScale });
       return energy;
     }
 
