@@ -312,9 +312,7 @@ export function YouTubeEngine() {
 
     function restoreAudio(player: ExtendedPlayer) {
       try {
-        // Simplified guard: only skip if not pending restore AND already has volume
-        // isMuted() can be unreliable across API versions, so we unconditionally unmute when pending
-        if (!autoplayUnmutePendingRef.current && player.getVolume() > 0) {
+        if (!player.isMuted() && player.getVolume() > 0 && !autoplayUnmutePendingRef.current) {
           return;
         }
 

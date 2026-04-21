@@ -266,8 +266,8 @@ export function AmbientBackground() {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const rawPulse = 1 + level * (blob.size < 96 ? 0.6 : 0.8);
-        const pulse = Math.min(blob.size < 96 ? 1.4 : 1.6, Math.max(1.0, rawPulse));
+        const rawPulse = 1 + level * (blob.size < 96 ? 1.2 : 1.5);
+        const pulse = Math.min(blob.size < 96 ? 2.0 : 2.3, Math.max(1.0, rawPulse));
         const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
@@ -290,11 +290,11 @@ export function AmbientBackground() {
 
         const radius = blob.size * pulse;
         const largeBlob = blob.size >= 96;
-        const blur = largeBlob ? 22 - level * 16 : 16 - level * 9;
+        const blur = largeBlob ? 22 - level * 18 : 16 - level * 12;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, largeBlob ? 0.28 + level * 0.44 : 0.22 + level * 0.38));
-        radial.addColorStop(0.55, hexToRgba(blob.color, largeBlob ? 0.12 + level * 0.16 : 0.08 + level * 0.12));
+        radial.addColorStop(0, hexToRgba(blob.color, largeBlob ? 0.32 + level * 0.48 : 0.26 + level * 0.42));
+        radial.addColorStop(0.55, hexToRgba(blob.color, largeBlob ? 0.16 + level * 0.20 : 0.12 + level * 0.16));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.globalCompositeOperation = "screen";
