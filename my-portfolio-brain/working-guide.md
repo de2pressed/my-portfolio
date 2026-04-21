@@ -62,7 +62,7 @@ Do not reintroduce these problems:
 - `context/MusicContext.tsx` and `context/ThemeContext.tsx` should keep stable callbacks
 - `app/admin/page.tsx` should continue redirecting to `/admin/login`
 - `app/login/page.tsx` should continue redirecting to `/admin/login`
-- `release-notes-v1.0.3.md` records the latest implemented changelog items and version bump
+- `release-notes-v1.0.4.md` records the latest implemented changelog items and version bump
 
 ## If You Need A Fast Mental Model
 

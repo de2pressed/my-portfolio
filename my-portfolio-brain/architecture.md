@@ -89,8 +89,11 @@ The theme context keeps the core canvas dark and the ink light so extracted colo
 The latest pass pushes the canvas closer to near-black, removes the grey wash from the ambient layers, and keeps glass surfaces more transparent so the content reads against a cleaner dark field.
 The ambient canvas now places glow anchors across the corners and edges too, instead of clustering the motion around the middle.
 The ambient particles also use a boosted rendition of the thumbnail palette so their color energy reads closer to the artwork instead of flattening into the dark background.
-- palette extraction now quantizes in 16-step buckets and rejects very dark swatches so thumbnail color reads survive the sampling pass
+- palette extraction now quantizes in 8-step buckets for more precise color capture and uses neutral grayscale fallback colors to prevent unwanted red/pink tones
 - the ambient canvas uses wider blob opacities and a tighter blur falloff so the motion reads brighter instead of washed out
+- ambient background now uses a 5-value moving average on energy calculations and increased smoothing factor (0.05) for buttery smooth transitions
+- blob pulse multipliers are reduced (0.6 for large, 0.4 for small) with min/max constraints to prevent excessive scaling
+- energy frequency multipliers are reduced (bass: 2.0, mid: 5.0, high: 10.0) for more deliberate, less snappy visual changes
 - the review section and cursor now reuse the active accent color so the music palette affects more than just the background
 
 Those variables are consumed by:

@@ -609,6 +609,7 @@ export function YouTubeEngine() {
 
         pollInterval = window.setInterval(() => {
           if (!playerRef.current) {
+            console.log("[YouTubeEngine] Poll loop: playerRef is null, skipping");
             return;
           }
 
@@ -625,6 +626,7 @@ export function YouTubeEngine() {
             const smoothingFactor = 0.05;
             smoothedEnergyRef.current = smoothedEnergyRef.current + (targetEnergy - smoothedEnergyRef.current) * smoothingFactor;
             
+            console.log("[YouTubeEngine] Poll loop executing:", { state, isPlaying, currentTime: snapshot.currentTime, deltaTime, volume: volumeRef.current, targetEnergy, smoothedEnergy: smoothedEnergyRef.current });
             syncTrack({
               title: snapshot.title ?? undefined,
               videoId: snapshot.videoId,

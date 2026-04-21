@@ -121,6 +121,7 @@ export function AmbientBackground() {
 
   useEffect(() => {
     energyRef.current = energy;
+    console.log("[AmbientBackground] energy updated:", energy);
   }, [energy]);
 
   useEffect(() => {
@@ -222,6 +223,9 @@ export function AmbientBackground() {
 
     const draw = (time: number) => {
       const level = Math.max(0, Math.min(1, energyRef.current));
+      if (time % 60 === 0) {
+        console.log("[AmbientBackground] draw loop - level:", level, "energyRef.current:", energyRef.current);
+      }
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
       const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
