@@ -114,10 +114,12 @@ function boostCanvasColor(hex: string) {
 
 export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { energy } = useMusicFrequency();
+  const { energy, currentTime, duration } = useMusicFrequency();
   const { palette } = useThemeColors();
   const energyRef = useRef(energy);
   const paletteRef = useRef(palette);
+  const songTimeRef = useRef(0);
+  const durationRef = useRef(0);
 
   useEffect(() => {
     energyRef.current = energy;
@@ -126,6 +128,14 @@ export function AmbientBackground() {
   useEffect(() => {
     paletteRef.current = palette;
   }, [palette]);
+
+  useEffect(() => {
+    songTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    durationRef.current = duration;
+  }, [duration]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -269,6 +279,12 @@ export function AmbientBackground() {
         context.restore();
       }
 
+      // Song time drives the visualizer — different song positions = different patterns
+      // This makes the visualizer evolve with the song instead of repeating the same loop
+      const songT = songTimeRef.current;
+      const songDur = durationRef.current || 180; // default 3 min
+      const songProgress = songT / songDur; // 0..1 across the whole song
+
       for (const [index, blob] of blobs.entries()) {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
@@ -278,10 +294,11 @@ export function AmbientBackground() {
         // Each blob represents ONE distinct frequency band of the song
         const bandRole = index % 4; // 0=bass, 1=mid, 2=high, 3=texture
 
-        // Song-section variation: every ~8 seconds the pattern shifts
-        const sectionPhase = Math.floor(t / 8);
-        const sectionSeed = (sectionPhase * 7 + index * 13) % 17 / 17;
-        const sectionDrift = Math.sin(sectionSeed * Math.PI * 2) * 0.12;
+        // Song-structure drift: use the song's actual position to shift patterns
+        // Different parts of the song (intro, verse, chorus) get different visual patterns
+        // This is what makes it feel synced to the song instead of repeating
+        const structureDrift = Math.sin(songProgress * Math.PI * 4 + phaseOffset) * 0.2;
+        const structureDrift2 = Math.cos(songProgress * Math.PI * 6 + phaseOffset * 0.7) * 0.15;
 
         // Each band has its OWN distinct frequency and behavior
         // No mixing — a bass blob ONLY shows bass, a high blob ONLY shows high
@@ -294,51 +311,50 @@ export function AmbientBackground() {
 
         switch (bandRole) {
           case 0: {
-            // BASS — heavy slow heave, big size swings, like a kick drum
-            // ~0.6 Hz: one deep pulse every ~1.7 seconds
-            const freq = 0.6 + sectionDrift;
-            bandSignal = Math.pow(Math.abs(Math.sin(t * freq * Math.PI + phaseOffset)), 2);
-            pulseScale = 1.0;    // up to 2× size at peak
-            pulseCap = 2.0;
-            swayAmount = 14;     // big positional heave
-            swayFreq = freq;     // sway matches the beat
-            opacityScale = 0.55; // bold opacity swings
+            // BASS — heavy kick, sharp attack + slow decay
+            // Use song time so the pattern follows the actual track position
+            const freq = 0.7 + structureDrift;
+            // Sharp attack: only the positive peak, raised to high power for snappy hit
+            const rawBass = Math.sin(songT * freq * Math.PI * 2 + phaseOffset);
+            bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.6) : Math.pow(Math.abs(rawBass), 3) * 0.15;
+            pulseScale = 1.2;    // up to 2.2× size at peak — very visible
+            pulseCap = 2.2;
+            swayAmount = 16;     // big positional heave
+            swayFreq = freq;
+            opacityScale = 0.6;  // bold opacity swings
             break;
           }
           case 1: {
             // MID — smooth rhythmic pulse, like vocals/melody
-            // ~1.4 Hz: gentle bounce
-            const freq = 1.4 + sectionDrift * 0.7;
-            bandSignal = Math.pow(Math.abs(Math.sin(t * freq * Math.PI + phaseOffset * 1.3)), 1.5);
-            pulseScale = 0.65;   // up to 1.65× size
-            pulseCap = 1.7;
-            swayAmount = 8;      // moderate sway
+            const freq = 1.5 + structureDrift * 0.7;
+            bandSignal = Math.pow(Math.abs(Math.sin(songT * freq * Math.PI * 2 + phaseOffset * 1.3)), 1.5);
+            pulseScale = 0.7;   // up to 1.7× size
+            pulseCap = 1.75;
+            swayAmount = 10;    // moderate sway
             swayFreq = freq * 0.8;
-            opacityScale = 0.4;
+            opacityScale = 0.45;
             break;
           }
           case 2: {
             // HIGH — sharp flicker, like hi-hats/snares
-            // ~3 Hz: rapid but smooth flickering
-            const freq = 3.0 + sectionDrift * 0.4;
-            bandSignal = Math.pow(Math.abs(Math.cos(t * freq * Math.PI + phaseOffset * 0.7)), 3);
-            pulseScale = 0.35;   // up to 1.35× — small size, sharp flicker
-            pulseCap = 1.4;
-            swayAmount = 4;      // small jitter
+            const freq = 3.2 + structureDrift2;
+            bandSignal = Math.pow(Math.abs(Math.cos(songT * freq * Math.PI * 2 + phaseOffset * 0.7)), 3);
+            pulseScale = 0.4;   // up to 1.4× — small size, sharp flicker
+            pulseCap = 1.45;
+            swayAmount = 5;     // small jitter
             swayFreq = freq * 0.6;
-            opacityScale = 0.5;  // opacity flickers more than size
+            opacityScale = 0.55; // opacity flickers more than size
             break;
           }
           default: {
             // TEXTURE — fast fine ripple, like atmosphere/reverb
-            // ~5 Hz: very fine continuous ripple
-            const freq = 5.0 + sectionDrift * 0.25;
-            bandSignal = Math.abs(Math.sin(t * freq * Math.PI + phaseOffset * 2.1));
-            pulseScale = 0.15;   // barely changes size — 1.15× max
-            pulseCap = 1.2;
-            swayAmount = 2;      // minimal movement
+            const freq = 5.5 + structureDrift2 * 0.5;
+            bandSignal = Math.abs(Math.sin(songT * freq * Math.PI * 2 + phaseOffset * 2.1));
+            pulseScale = 0.2;   // barely changes size — 1.2× max
+            pulseCap = 1.25;
+            swayAmount = 3;     // minimal movement
             swayFreq = freq * 0.4;
-            opacityScale = 0.6;  // mainly opacity ripple, not size
+            opacityScale = 0.65; // mainly opacity ripple, not size
             break;
           }
         }
@@ -351,30 +367,33 @@ export function AmbientBackground() {
         const rawPulse = 1 + effectiveLevel * pulseScale;
         const pulse = Math.min(pulseCap, Math.max(1.0, rawPulse));
 
+        // Reduce default orbital movement when music is active so visualizer is more visible
+        const orbitalDamp = 1 - baseLevel * 0.6; // 40% orbital at full energy
+
         // Position movement
         const crossSweep = (Math.sin(blobTime * 0.32 + phaseOffset) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
 
-        // Band-specific sway
-        const swayX = effectiveLevel * Math.sin(t * swayFreq * Math.PI + phaseOffset * 3.0) * swayAmount;
-        const swayY = effectiveLevel * Math.cos(t * swayFreq * Math.PI * 0.8 + phaseOffset * 2.5) * swayAmount * 0.6;
+        // Band-specific sway driven by song time
+        const swayX = effectiveLevel * Math.sin(songT * swayFreq * Math.PI * 2 + phaseOffset * 3.0) * swayAmount;
+        const swayY = effectiveLevel * Math.cos(songT * swayFreq * Math.PI * 1.6 + phaseOffset * 2.5) * swayAmount * 0.6;
 
         if (blob.kind === "cross") {
-          x += (crossSweep - 0.5) * width * 0.28 + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18;
+          x += (crossSweep - 0.5) * width * 0.28 * orbitalDamp + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18 * orbitalDamp;
           y +=
-            (Math.cos(blobTime * 0.24 + phaseOffset) - 0.5) * height * 0.18 +
-            Math.sin(blobTime * 0.26 + phaseOffset) * blob.orbitY * 0.16;
+            (Math.cos(blobTime * 0.24 + phaseOffset) - 0.5) * height * 0.18 * orbitalDamp +
+            Math.sin(blobTime * 0.26 + phaseOffset) * blob.orbitY * 0.16 * orbitalDamp;
         } else if (blob.kind === "drift") {
-          x += Math.sin(blobTime * 0.38 + phaseOffset) * blob.orbitX * 1.1 + Math.cos(blobTime * 0.17 + phaseOffset) * width * 0.032;
-          y += Math.sin(blobTime * 1.08 + phaseOffset) * blob.orbitY * 0.78;
+          x += Math.sin(blobTime * 0.38 + phaseOffset) * blob.orbitX * 1.1 * orbitalDamp + Math.cos(blobTime * 0.17 + phaseOffset) * width * 0.032 * orbitalDamp;
+          y += Math.sin(blobTime * 1.08 + phaseOffset) * blob.orbitY * 0.78 * orbitalDamp;
         } else {
-          x += Math.cos(blobTime + phaseOffset) * blob.orbitX;
-          y += Math.sin(blobTime * 1.15 + phaseOffset) * blob.orbitY;
+          x += Math.cos(blobTime + phaseOffset) * blob.orbitX * orbitalDamp;
+          y += Math.sin(blobTime * 1.15 + phaseOffset) * blob.orbitY * orbitalDamp;
         }
 
-        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 + swayX;
-        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 + swayY;
+        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 * orbitalDamp + swayX;
+        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 * orbitalDamp + swayY;
 
         const radius = blob.size * pulse;
         const largeBlob = blob.size >= 96;
