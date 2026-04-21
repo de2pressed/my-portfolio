@@ -7,6 +7,17 @@ import { motion } from "framer-motion";
 import { useMusic } from "@/context/MusicContext";
 import { cn } from "@/lib/utils";
 
+function formatPlaybackTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+
+  const totalSeconds = Math.floor(seconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
 export function MusicPlayer() {
   const {
     title,
@@ -14,6 +25,8 @@ export function MusicPlayer() {
     isPlaying,
     isMuted,
     volume,
+    currentTime,
+    duration,
     footerTakeover,
     engineStatus,
     errorMessage,
@@ -21,9 +34,12 @@ export function MusicPlayer() {
     playNext,
     playPrevious,
     setVolume,
+    seekTo,
     mute,
     unmute,
   } = useMusic();
+
+  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   return (
     <motion.aside
@@ -33,10 +49,12 @@ export function MusicPlayer() {
       )}
       animate={{
         opacity: 1 - Math.min(footerTakeover * 1.25, 1),
-        y: footerTakeover * 64,
-        scale: 1 - footerTakeover * 0.12,
+        x: footerTakeover * -34,
+        y: footerTakeover * 88,
+        scale: 1 + footerTakeover * 0.08,
+        rotate: footerTakeover * -1.2,
       }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="flex items-center gap-3">
         <div className="relative h-20 w-20 overflow-hidden rounded-[22px] bg-white/20">
@@ -71,6 +89,27 @@ export function MusicPlayer() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-ink/48">
+          <span>{formatPlaybackTime(currentTime)}</span>
+          <span>{duration > 0 ? formatPlaybackTime(duration) : "0:00"}</span>
+        </div>
+        <input
+          aria-label="Track progress"
+          className="h-2 w-full cursor-pointer appearance-none rounded-full border border-white/25 accent-[rgb(var(--accent-rgb))]"
+          disabled={duration <= 0}
+          max={Math.max(duration, 1)}
+          min={0}
+          onChange={(event) => seekTo(Number(event.target.value))}
+          style={{
+            background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${progress}%, rgba(255,255,255,0.22) ${progress}%, rgba(255,255,255,0.22) 100%)`,
+          }}
+          step={0.1}
+          type="range"
+          value={duration > 0 ? Math.min(currentTime, duration) : 0}
+        />
       </div>
 
       <div className="mt-3 flex items-center gap-3">

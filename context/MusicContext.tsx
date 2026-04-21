@@ -9,9 +9,10 @@ import {
   useState,
 } from "react";
 
+import { useResolvedYouTubeThumbnail } from "@/hooks/useResolvedYouTubeThumbnail";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
 import { useTheme } from "@/context/ThemeContext";
-import { getYouTubeThumbnail, parseYouTubeSource, type ParsedYouTubeSource } from "@/lib/youtube";
+import { parseYouTubeSource, type ParsedYouTubeSource } from "@/lib/youtube";
 
 type EngineStatus = "idle" | "loading" | "ready" | "error";
 
@@ -22,6 +23,7 @@ type PlayerControls = {
   next: () => void;
   previous: () => void;
   setVolume: (value: number) => void;
+  seekTo: (seconds: number) => void;
   load: (url: string) => void;
   mute: (mute: boolean) => void;
 };
@@ -33,6 +35,8 @@ type MusicContextValue = {
   isPlaying: boolean;
   isMuted: boolean;
   volume: number;
+  currentTime: number;
+  duration: number;
   engineStatus: EngineStatus;
   errorMessage: string | null;
   visualLevel: number;
@@ -41,9 +45,16 @@ type MusicContextValue = {
   setFooterTakeover: (value: number) => void;
   setPlayerReady: (ready: boolean) => void;
   setPlayerError: (message: string) => void;
-  syncTrack: (payload: { title?: string; videoId?: string | null; isPlaying?: boolean }) => void;
+  syncTrack: (payload: {
+    title?: string;
+    videoId?: string | null;
+    isPlaying?: boolean;
+    currentTime?: number;
+    duration?: number;
+  }) => void;
   setVisualLevel: (value: number) => void;
   setVolume: (value: number) => void;
+  seekTo: (seconds: number) => void;
   registerControls: (controls: PlayerControls) => void;
   togglePlayback: () => void;
   playNext: () => void;
@@ -61,15 +72,17 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [musicUrl, setMusicUrl] = useState(DEFAULT_MUSIC_URL);
   const [source, setSource] = useState(() => parseYouTubeSource(DEFAULT_MUSIC_URL));
   const [title, setTitle] = useState("Loading soundtrack...");
-  const [thumbnail, setThumbnail] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(62);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [engineStatus, setEngineStatus] = useState<EngineStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [visualLevel, setVisualLevelState] = useState(0.2);
   const [footerTakeover, setFooterTakeover] = useState(0);
   const [controls, setControls] = useState<PlayerControls | null>(null);
+  const thumbnail = useResolvedYouTubeThumbnail(source.videoId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
 
   useEffect(() => {
@@ -84,6 +97,9 @@ export function MusicProvider({ children }: PropsWithChildren) {
         if (!cancelled && payload.value) {
           setMusicUrl(payload.value);
           setSource(parseYouTubeSource(payload.value));
+          setTitle("Loading soundtrack...");
+          setCurrentTime(0);
+          setDuration(0);
         }
       } catch (error) {
         console.warn("Using default music URL because the settings request failed.", error);
@@ -98,6 +114,9 @@ export function MusicProvider({ children }: PropsWithChildren) {
       if (typeof nextUrl === "string" && nextUrl) {
         setMusicUrl(nextUrl);
         setSource(parseYouTubeSource(nextUrl));
+        setTitle("Loading soundtrack...");
+        setCurrentTime(0);
+        setDuration(0);
         controls?.load(nextUrl);
       }
     };
@@ -111,15 +130,13 @@ export function MusicProvider({ children }: PropsWithChildren) {
   }, [controls]);
 
   useEffect(() => {
-    const nextThumbnail = getYouTubeThumbnail(source.videoId);
-    setThumbnail(nextThumbnail);
-
-    if (nextThumbnail) {
-      void setPaletteFromThumbnail(nextThumbnail);
-    } else {
-      resetPalette();
+    if (thumbnail) {
+      void setPaletteFromThumbnail(thumbnail);
+      return;
     }
-  }, [resetPalette, setPaletteFromThumbnail, source.videoId]);
+
+    resetPalette();
+  }, [resetPalette, setPaletteFromThumbnail, thumbnail]);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -136,7 +153,13 @@ export function MusicProvider({ children }: PropsWithChildren) {
     setControls(nextControls);
   }, []);
 
-  const syncTrack = useCallback((payload: { title?: string; videoId?: string | null; isPlaying?: boolean }) => {
+  const syncTrack = useCallback((payload: {
+    title?: string;
+    videoId?: string | null;
+    isPlaying?: boolean;
+    currentTime?: number;
+    duration?: number;
+  }) => {
     if (payload.title) {
       setTitle(payload.title);
     }
@@ -151,6 +174,14 @@ export function MusicProvider({ children }: PropsWithChildren) {
     if (typeof payload.isPlaying === "boolean") {
       setIsPlaying(payload.isPlaying);
     }
+
+    if (typeof payload.currentTime === "number" && Number.isFinite(payload.currentTime)) {
+      setCurrentTime(Math.max(0, payload.currentTime));
+    }
+
+    if (typeof payload.duration === "number" && Number.isFinite(payload.duration)) {
+      setDuration(Math.max(0, payload.duration));
+    }
   }, []);
 
   const setPlayerReady = useCallback((ready: boolean) => {
@@ -164,6 +195,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
     setEngineStatus("error");
     setErrorMessage(message);
     setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
     resetPalette();
   }, [resetPalette]);
 
@@ -175,6 +208,12 @@ export function MusicProvider({ children }: PropsWithChildren) {
     setVolumeState(value);
     controls?.setVolume(value);
   }, [controls]);
+
+  const seekTo = useCallback((seconds: number) => {
+    const nextSeconds = Math.max(0, duration > 0 ? Math.min(duration, seconds) : seconds);
+    setCurrentTime(nextSeconds);
+    controls?.seekTo(nextSeconds);
+  }, [controls, duration]);
 
   const togglePlayback = useCallback(() => {
     controls?.toggle();
@@ -209,6 +248,9 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const loadMusicUrl = useCallback((url: string) => {
     setMusicUrl(url);
     setSource(parseYouTubeSource(url));
+    setTitle("Loading soundtrack...");
+    setCurrentTime(0);
+    setDuration(0);
     controls?.load(url);
   }, [controls]);
 
@@ -221,6 +263,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
         isPlaying,
         isMuted,
         volume,
+        currentTime,
+        duration,
         engineStatus,
         errorMessage,
         visualLevel,
@@ -232,6 +276,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
         syncTrack,
         setVisualLevel,
         setVolume,
+        seekTo,
         registerControls,
         togglePlayback,
         playNext,

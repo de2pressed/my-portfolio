@@ -14,7 +14,7 @@ function getSetting(settings: SettingEntry[], key: string, fallback = "") {
 
 export function MusicLinkEditor({ settings }: MusicLinkEditorProps) {
   const [musicUrl, setMusicUrl] = useState(getSetting(settings, "music_url"));
-  const [version, setVersion] = useState(getSetting(settings, "site_version", "v1.0.0"));
+  const [version, setVersion] = useState(getSetting(settings, "site_version", "v1.0.1"));
   const [status, setStatus] = useState<string | null>(null);
 
   async function saveSetting(key: string, value: string) {

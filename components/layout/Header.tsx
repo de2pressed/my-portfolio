@@ -2,7 +2,9 @@
 
 import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { id: "about", label: "About" },
@@ -18,6 +20,39 @@ type HeaderProps = {
 
 export function Header({ name }: HeaderProps) {
   const [open, setOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("hero");
+
+  useEffect(() => {
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter((section): section is HTMLElement => Boolean(section));
+    const heroSection = document.getElementById("hero");
+
+    const observedSections = heroSection ? [heroSection, ...sections] : sections;
+    if (observedSections.length === 0) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const next = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+
+        if (next?.target instanceof HTMLElement) {
+          setActiveSection(next.target.id);
+        }
+      },
+      {
+        threshold: [0.4, 0.55, 0.7],
+        rootMargin: "-10% 0px -45% 0px",
+      },
+    );
+
+    observedSections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
 
   function navigateTo(sectionId: string) {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -29,7 +64,7 @@ export function Header({ name }: HeaderProps) {
       <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/30 bg-white/18 px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
-            className="text-left"
+            className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
             onClick={() => navigateTo("hero")}
             type="button"
           >
@@ -40,7 +75,13 @@ export function Header({ name }: HeaderProps) {
           <nav className="hidden items-center gap-2 md:flex">
             {navItems.map((item) => (
               <button
-                className="glass-button-muted px-4 py-2 text-xs uppercase tracking-[0.24em] text-ink/72"
+                className={cn(
+                  "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300",
+                  activeSection === item.id
+                    ? "glass-button border-white/45 text-ink shadow-glass"
+                    : "glass-button-muted text-ink/72",
+                )}
+                aria-current={activeSection === item.id ? "page" : undefined}
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 type="button"
@@ -79,7 +120,13 @@ export function Header({ name }: HeaderProps) {
               <div className="space-y-3">
                 {navItems.map((item) => (
                   <button
-                    className="glass-button-muted flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] text-ink/76"
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] transition-all duration-300",
+                      activeSection === item.id
+                        ? "glass-button border-white/45 text-ink shadow-glass"
+                        : "glass-button-muted text-ink/76",
+                    )}
+                    aria-current={activeSection === item.id ? "page" : undefined}
                     key={item.id}
                     onClick={() => navigateTo(item.id)}
                     type="button"

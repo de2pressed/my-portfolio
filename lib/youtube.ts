@@ -4,6 +4,8 @@ export type ParsedYouTubeSource = {
   playlistId: string | null;
 };
 
+export type YouTubeThumbnailQuality = "maxresdefault" | "sddefault" | "hqdefault";
+
 function normalizeSource(rawUrl: string) {
   return rawUrl.trim();
 }
@@ -45,4 +47,14 @@ export function getYouTubeThumbnail(videoId: string | null) {
   }
 
   return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+export function getYouTubeThumbnailCandidates(videoId: string | null): string[] {
+  if (!videoId) {
+    return [];
+  }
+
+  return ["maxresdefault", "sddefault", "hqdefault"].map(
+    (quality) => `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`,
+  );
 }

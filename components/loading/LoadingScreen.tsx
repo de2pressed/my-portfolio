@@ -5,10 +5,26 @@ import { motion } from "framer-motion";
 type LoadingScreenProps = {
   phase: "loading" | "handoff";
   musicReady: boolean;
+  handoffToCookie: boolean;
 };
 
-export function LoadingScreen({ phase, musicReady }: LoadingScreenProps) {
+export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScreenProps) {
   const statusLabel = musicReady ? "Score aligned" : "Buffering soundtrack";
+  const exitVariant = handoffToCookie
+    ? {
+        opacity: 0,
+        scale: 0.72,
+        x: 0,
+        y: -36,
+        rotate: -6,
+        clipPath: "inset(0 44% 0 44% round 42px)",
+        filter: "blur(24px)",
+      }
+    : {
+        opacity: 0,
+        scale: 1.02,
+        filter: "blur(18px)",
+      };
 
   return (
     <motion.div
@@ -18,8 +34,8 @@ export function LoadingScreen({ phase, musicReady }: LoadingScreenProps) {
         opacity: 1,
         backdropFilter: phase === "handoff" ? "blur(24px)" : "blur(0px)",
       }}
-      exit={{ opacity: 0, scale: 1.02, filter: "blur(18px)" }}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+      exit={exitVariant}
+      transition={{ duration: handoffToCookie ? 0.78 : 0.65, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="absolute inset-0">
         <motion.div
@@ -42,8 +58,9 @@ export function LoadingScreen({ phase, musicReady }: LoadingScreenProps) {
       <motion.div
         className="glass-panel relative w-full max-w-3xl rounded-[42px] px-6 py-12 shadow-[0_30px_120px_rgba(56,36,20,0.18)] md:px-10"
         animate={{
-          borderRadius: phase === "handoff" ? "32px" : "42px",
-          scale: phase === "handoff" ? 0.96 : 1,
+          borderRadius: phase === "handoff" ? "28px" : "42px",
+          scale: phase === "handoff" ? 0.95 : 1,
+          y: phase === "handoff" ? 6 : 0,
         }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >

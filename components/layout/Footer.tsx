@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
+import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
@@ -75,11 +76,14 @@ export function Footer({ name, email, note }: FooterProps) {
             </div>
           </div>
 
-          <div
+          <motion.div
             className="relative overflow-hidden rounded-[30px] border border-white/28 bg-white/18 p-4 shadow-[0_24px_90px_rgba(52,38,22,0.16)] backdrop-blur-2xl"
-            style={{
-              transform: `scale(${0.92 + footerTakeover * 0.08})`,
+            animate={{
+              opacity: Math.min(1, Math.max(0, (footerTakeover - 0.38) * 2.5)),
+              y: 22 - footerTakeover * 24,
+              scale: 0.94 + footerTakeover * 0.08,
             }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
               <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-white/18">
@@ -120,7 +124,7 @@ export function Footer({ name, email, note }: FooterProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </footer>

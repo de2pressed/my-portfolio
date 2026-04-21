@@ -19,6 +19,16 @@ export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const visualLevel = useMusicFrequency();
   const { palette } = useThemeColors();
+  const visualLevelRef = useRef(visualLevel);
+  const paletteRef = useRef(palette);
+
+  useEffect(() => {
+    visualLevelRef.current = visualLevel;
+  }, [visualLevel]);
+
+  useEffect(() => {
+    paletteRef.current = palette;
+  }, [palette]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,30 +65,38 @@ export function AmbientBackground() {
     }));
 
     const draw = (time: number) => {
+      const level = Math.max(0, Math.min(1, visualLevelRef.current));
+      const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : ["#e8bc8a"];
+
       context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       const gradient = context.createLinearGradient(0, 0, 0, window.innerHeight);
-      gradient.addColorStop(0, "rgba(255,248,240,0.78)");
-      gradient.addColorStop(1, "rgba(241,233,224,0.88)");
+      gradient.addColorStop(0, `rgba(255,248,240,${0.78 + level * 0.08})`);
+      gradient.addColorStop(1, `rgba(241,233,224,${0.9 - level * 0.06})`);
       context.fillStyle = gradient;
       context.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       for (const [index, blob] of blobs.entries()) {
-        blob.color = palette[index % palette.length] ?? blob.color;
+        blob.color = currentPalette[index % currentPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const pulse = 1 + visualLevel * 0.6;
+        const pulse = 1 + level * 0.78;
         const x = window.innerWidth / 2 + Math.cos(t + blob.angle) * blob.radius;
         const y = window.innerHeight / 2 + Math.sin(t * 1.2 + blob.angle) * blob.radius * 0.42;
         const radius = blob.size * pulse;
+        const blur = 10 + level * 16;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, 0.28));
+        radial.addColorStop(0, hexToRgba(blob.color, 0.16 + level * 0.26));
+        radial.addColorStop(0.55, hexToRgba(blob.color, 0.08 + level * 0.12));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
+        context.save();
+        context.filter = `blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
         context.fill();
+        context.restore();
       }
 
       animationFrame = window.requestAnimationFrame(draw);
@@ -91,7 +109,7 @@ export function AmbientBackground() {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
-  }, [palette, visualLevel]);
+  }, []);
 
   return <canvas ref={canvasRef} className="fixed inset-0 z-0 h-full w-full opacity-90" aria-hidden="true" />;
 }

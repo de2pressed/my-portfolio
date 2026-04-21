@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 type CookieConsentProps = {
   storageAvailable: boolean;
   onDecision: (decision: "accepted" | "rejected") => void;
+  revealFromHandoff: boolean;
 };
 
-export function CookieConsent({ storageAvailable, onDecision }: CookieConsentProps) {
+export function CookieConsent({ storageAvailable, onDecision, revealFromHandoff }: CookieConsentProps) {
   return (
     <motion.div
-      className="fixed inset-0 z-[81] flex items-center justify-center bg-[rgba(247,239,230,0.66)] px-4 backdrop-blur-xl"
+      className="fixed inset-0 z-[81] flex items-center justify-center bg-[rgba(247,239,230,0.7)] px-4 backdrop-blur-xl"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -18,9 +19,18 @@ export function CookieConsent({ storageAvailable, onDecision }: CookieConsentPro
     >
       <motion.div
         className="glass-panel noise-mask relative max-w-xl rounded-[36px] p-8 shadow-[0_30px_110px_rgba(52,34,20,0.18)]"
-        initial={{ scale: 0.9, y: 28, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        initial={
+          revealFromHandoff
+            ? { scale: 0.12, y: 0, opacity: 0, rotate: -2, filter: "blur(14px)" }
+            : { scale: 0.9, y: 28, opacity: 0 }
+        }
+        animate={{ scale: 1, y: 0, opacity: 1, rotate: 0, filter: "blur(0px)" }}
+        transition={
+          revealFromHandoff
+            ? { type: "spring", stiffness: 160, damping: 18, mass: 0.8 }
+            : { duration: 0.65, ease: [0.22, 1, 0.36, 1] }
+        }
+        style={{ transformOrigin: "center center" }}
       >
         <p className="glass-chip mb-4 w-fit">Cookie Consent</p>
         <h2 className="text-3xl font-semibold text-ink md:text-4xl">Anonymous insight only.</h2>

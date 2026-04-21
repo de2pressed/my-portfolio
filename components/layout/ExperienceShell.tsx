@@ -26,6 +26,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
 
   const musicReady = engineStatus === "ready" || engineStatus === "error";
   const isPublicRoute = pathname === "/";
+  const showCookieHandoff = isPublicRoute && consent === "unknown";
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -33,7 +34,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
         return;
       }
 
-      if (isPublicRoute && consent === "unknown") {
+      if (showCookieHandoff) {
         setPhase("handoff");
         window.setTimeout(() => setPhase("cookie"), 520);
         return;
@@ -44,7 +45,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
     }, 2250);
 
     return () => window.clearTimeout(timer);
-  }, [consent, hydrated, isPublicRoute, musicReady]);
+  }, [consent, hydrated, isPublicRoute, musicReady, showCookieHandoff]);
 
   // Hard safety timeout: guarantee the loading screen always dismisses,
   // even if the music engine and cookie context both fail to report readiness.
@@ -93,13 +94,21 @@ export function ExperienceShell({ children }: PropsWithChildren) {
       </div>
 
       {revealed ? <MusicPlayer /> : null}
-      {isPublicRoute && revealed ? <VersionBadge /> : null}
+      {revealed ? <VersionBadge /> : null}
 
       <AnimatePresence mode="wait">
-        {showLoading ? <LoadingScreen key="loading" musicReady={musicReady} phase={phase === "handoff" ? "handoff" : "loading"} /> : null}
+        {showLoading ? (
+          <LoadingScreen
+            key="loading"
+            handoffToCookie={showCookieHandoff}
+            musicReady={musicReady}
+            phase={phase === "handoff" ? "handoff" : "loading"}
+          />
+        ) : null}
         {showCookie ? (
           <CookieConsent
             key="cookie"
+            revealFromHandoff={showCookieHandoff}
             onDecision={handleDecision}
             storageAvailable={storageAvailable}
           />
