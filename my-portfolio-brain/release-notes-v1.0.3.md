@@ -40,6 +40,7 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Hardened the music bootstrap path so autoplay recovery restores audio before the first explicit play gesture and the loading title only clears when real metadata exists.
 - Swapped the seeded soundtrack off the brittle `RD...` radio mix and added a playlist-error fallback so the player can recover to a plain video instead of staying unavailable.
 - Added an explicit playlist queue reload path so a playlist source that boots as a single looping video can recover into real next/previous navigation.
+- Resolved playlist order from the active video ID when YouTube reports `getPlaylistIndex() === -1`, which prevents the first track from looping as if it were a single video.
 - Synced the Supabase seed so future `db reset` runs keep the plain-video soundtrack instead of restoring the old radio mix.
 - Tightened the album-art crop in the footer and compact player and removed the brown overlay wash that was tinting the cover art.
 - Updated the default soundtrack seed to the provided `cxKs2b5lRsA` playlist URL so local fallback and Supabase reset both use the same playlist source.

@@ -174,6 +174,28 @@ export function YouTubeEngine() {
       };
     }
 
+    function resolvePlaylistPosition(player: ExtendedPlayer) {
+      const snapshot = readCurrentTrack(player);
+
+      if (snapshot.playlistIndex >= 0) {
+        return snapshot;
+      }
+
+      const resolvedIndex =
+        snapshot.videoId && snapshot.playlist.length > 0
+          ? snapshot.playlist.findIndex((entry) => entry === snapshot.videoId)
+          : -1;
+
+      if (resolvedIndex < 0) {
+        return snapshot;
+      }
+
+      return {
+        ...snapshot,
+        playlistIndex: resolvedIndex,
+      };
+    }
+
     function disableShuffle(player: ExtendedPlayer) {
       try {
         player.setShuffle(false);
@@ -183,8 +205,8 @@ export function YouTubeEngine() {
     }
 
     function movePlaylist(player: ExtendedPlayer, step: 1 | -1) {
-      const playlist = readPlaylist(player);
-      const playlistIndex = readPlaylistIndex(player);
+      const snapshot = resolvePlaylistPosition(player);
+      const { playlist, playlistIndex } = snapshot;
 
       if (playlistIndex >= 0 && playlist.length > 0) {
         if (step > 0) {
@@ -208,6 +230,7 @@ export function YouTubeEngine() {
         player.loadPlaylist({
           list: source.playlistId,
           listType: "playlist",
+          index: 0,
         });
         disableShuffle(player);
 
@@ -360,6 +383,7 @@ export function YouTubeEngine() {
                   player.loadPlaylist({
                     list: source.playlistId,
                     listType: "playlist",
+                    index: 0,
                   });
                   disableShuffle(activePlayer);
                 }
@@ -441,34 +465,18 @@ export function YouTubeEngine() {
                 }
 
                 if (event.data === window.YT?.PlayerState.ENDED) {
-                  const playlist = readPlaylist(player);
-                  const playlistIndex = readPlaylistIndex(player);
-
-                  if (playlistIndex >= 0 && playlistIndex + 1 < playlist.length) {
-                    player.playVideoAt(playlistIndex + 1);
+                  if (source.playlistId) {
+                    movePlaylist(player, 1);
                     return;
                   }
 
-                  if (playlistIndex === -1) {
-                    if (source.playlistId) {
-                      player.loadPlaylist({
-                        list: source.playlistId,
-                        listType: "playlist",
-                      });
-                      disableShuffle(player);
-                      startPlayback(player);
-                      return;
-                    }
-
-                    previousTimeRef.current = 0;
-                    syncTrack({
-                      isPlaying: true,
-                      currentTime: 0,
-                    });
-                    player.seekTo(0, true);
-                    player.playVideo();
-                  }
-
+                  previousTimeRef.current = 0;
+                  syncTrack({
+                    isPlaying: true,
+                    currentTime: 0,
+                  });
+                  player.seekTo(0, true);
+                  player.playVideo();
                   return;
                 }
 

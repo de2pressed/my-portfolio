@@ -64,6 +64,7 @@ Important behavior:
 - the boot path restores audio before the first explicit play gesture when autoplay is still pending
 - if a playlist boot fails, the engine falls back to the track's video ID so the player does not get stuck in a hard unavailable state
 - if YouTube exposes no playlist queue on first load, the engine explicitly reloads the playlist so next/previous navigation has a real queue to work with
+- if the player reports a playlist index of `-1`, the engine resolves the current track from the loaded video ID before deciding whether to advance
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the music context seeds thumbnail extraction from the raw music URL when the parsed playlist source does not carry a video ID
