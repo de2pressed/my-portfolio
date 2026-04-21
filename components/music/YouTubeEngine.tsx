@@ -11,6 +11,9 @@ declare global {
     YT?: typeof YT;
     onYouTubeIframeAPIReady?: () => void;
     __youtubeApiReadyPromise__?: Promise<typeof YT>;
+    YTConfig?: {
+      host?: string;
+    };
   }
 }
 
@@ -22,6 +25,7 @@ type ExtendedPlayer = YT.Player & {
   getPlaylist: () => string[];
   getPlaylistIndex: () => number;
   getVideoUrl: () => string;
+  getIframe: () => HTMLIFrameElement;
   isMuted: () => boolean;
   getVolume: () => number;
   playVideoAt: (index: number) => void;
@@ -38,6 +42,11 @@ function loadYouTubeApi() {
   }
 
   window.__youtubeApiReadyPromise__ = new Promise<typeof YT>((resolve) => {
+    window.YTConfig = {
+      ...(window.YTConfig ?? {}),
+      host: "https://www.youtube.com",
+    };
+
     const previousReady = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = () => resolve(window.YT as typeof YT);
 
@@ -58,6 +67,23 @@ function loadYouTubeApi() {
   });
 
   return window.__youtubeApiReadyPromise__;
+}
+
+function sendPlayerCommand(player: ExtendedPlayer, func: string, args: unknown[] = []) {
+  try {
+    const iframe = typeof player.getIframe === "function" ? player.getIframe() : null;
+    const targetWindow = iframe?.contentWindow;
+
+    if (!targetWindow) {
+      return false;
+    }
+
+    targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+    return true;
+  } catch (error) {
+    console.warn(`YouTube ${func} command failed.`, error);
+    return false;
+  }
 }
 
 export function YouTubeEngine() {
@@ -210,43 +236,39 @@ export function YouTubeEngine() {
 
       if (playlistIndex >= 0 && playlist.length > 0) {
         if (step > 0) {
-          const nextIndex = playlistIndex + 1;
-          if (nextIndex < playlist.length) {
-            player.playVideoAt(nextIndex);
-          }
+          const nextIndex = (playlistIndex + 1) % playlist.length;
+          sendPlayerCommand(player, "playVideoAt", [nextIndex]);
           return;
         }
 
-        if (playlistIndex === 0) {
-          player.seekTo(0, true);
-          return;
-        }
-
-        player.playVideoAt(Math.max(0, playlistIndex - 1));
+        const previousIndex = (playlistIndex - 1 + playlist.length) % playlist.length;
+        sendPlayerCommand(player, "playVideoAt", [previousIndex]);
         return;
       }
 
       if (source.playlistId) {
-        player.loadPlaylist({
-          list: source.playlistId,
-          listType: "playlist",
-          index: 0,
-        });
+        sendPlayerCommand(player, "loadPlaylist", [
+          {
+            list: source.playlistId,
+            listType: "playlist",
+            index: 0,
+          },
+        ]);
         disableShuffle(player);
 
         if (step > 0) {
           startPlayback(player);
         } else {
-          player.seekTo(0, true);
+          sendPlayerCommand(player, "seekTo", [0, true]);
         }
 
         return;
       }
 
       if (step > 0) {
-        player.nextVideo();
+        sendPlayerCommand(player, "nextVideo");
       } else {
-        player.previousVideo();
+        sendPlayerCommand(player, "previousVideo");
       }
     }
 
@@ -254,16 +276,18 @@ export function YouTubeEngine() {
       const parsed = parseYouTubeSource(rawUrl);
 
       if (parsed.playlistId) {
-        player.loadPlaylist({
-          list: parsed.playlistId,
-          listType: "playlist",
-        });
+        sendPlayerCommand(player as ExtendedPlayer, "loadPlaylist", [
+          {
+            list: parsed.playlistId,
+            listType: "playlist",
+          },
+        ]);
         disableShuffle(player as ExtendedPlayer);
         return;
       }
 
       if (parsed.videoId) {
-        player.loadVideoById(parsed.videoId);
+        sendPlayerCommand(player as ExtendedPlayer, "loadVideoById", [parsed.videoId]);
       }
     }
 
@@ -273,8 +297,8 @@ export function YouTubeEngine() {
           return;
         }
 
-        player.unMute();
-        player.setVolume(volumeRef.current);
+        sendPlayerCommand(player, "unMute");
+        sendPlayerCommand(player, "setVolume", [volumeRef.current]);
         autoplayUnmutePendingRef.current = false;
         syncTrack({ isMuted: false });
       } catch (error) {
@@ -301,7 +325,7 @@ export function YouTubeEngine() {
             return;
           }
 
-          player.playVideo();
+          sendPlayerCommand(player, "playVideo");
           attempts += 1;
 
           if (attempts < 6 && !cancelled) {
@@ -346,20 +370,24 @@ export function YouTubeEngine() {
         playlistFallbackAttemptedRef.current = false;
         defaultFallbackAttemptedRef.current = false;
 
+        const playerVars = {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          enablejsapi: 1,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
+          iv_load_policy: 3,
+          origin: window.location.origin,
+          widget_referrer: window.location.href,
+        } as YT.PlayerOptions["playerVars"] & { widget_referrer?: string };
+
         const playerConfig: YT.PlayerOptions = {
           height: "200",
           width: "200",
-          playerVars: {
-            autoplay: 1,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            modestbranding: 1,
-            playsinline: 1,
-            rel: 0,
-            iv_load_policy: 3,
-            origin: window.location.origin,
-          },
+          playerVars,
           events: {
             onReady: () => {
               if (cancelled) {
@@ -377,11 +405,13 @@ export function YouTubeEngine() {
                 disableShuffle(activePlayer);
 
                 if (readPlaylist(activePlayer).length === 0) {
-                  player.loadPlaylist({
-                    list: source.playlistId,
-                    listType: "playlist",
-                    index: 0,
-                  });
+                  sendPlayerCommand(activePlayer, "loadPlaylist", [
+                    {
+                      list: source.playlistId,
+                      listType: "playlist",
+                      index: 0,
+                    },
+                  ]);
                   disableShuffle(activePlayer);
                 }
               }
@@ -389,8 +419,8 @@ export function YouTubeEngine() {
               autoplayUnmutePendingRef.current = true;
 
               try {
-                player.setVolume(0);
-                player.mute();
+                sendPlayerCommand(activePlayer, "setVolume", [0]);
+                sendPlayerCommand(activePlayer, "mute");
               } catch (error) {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
@@ -401,9 +431,11 @@ export function YouTubeEngine() {
                     restoreAudio(activePlayer);
                   }
 
-                  player.playVideo();
+                  sendPlayerCommand(activePlayer, "playVideo");
                 },
-                pause: () => player.pauseVideo(),
+                pause: () => {
+                  sendPlayerCommand(activePlayer, "pauseVideo");
+                },
                 toggle: () => {
                   const state = player.getPlayerState();
                   if (state === window.YT?.PlayerState.PLAYING) {
@@ -412,7 +444,7 @@ export function YouTubeEngine() {
                       return;
                     }
 
-                    player.pauseVideo();
+                    sendPlayerCommand(activePlayer, "pauseVideo");
                     return;
                   }
 
@@ -420,19 +452,23 @@ export function YouTubeEngine() {
                     restoreAudio(activePlayer);
                   }
 
-                  player.playVideo();
+                  sendPlayerCommand(activePlayer, "playVideo");
                 },
                 next: () => movePlaylist(activePlayer, 1),
                 previous: () => movePlaylist(activePlayer, -1),
-                setVolume: (nextVolume) => player.setVolume(nextVolume),
-                seekTo: (seconds) => player.seekTo(seconds, true),
+                setVolume: (nextVolume) => {
+                  sendPlayerCommand(activePlayer, "setVolume", [nextVolume]);
+                },
+                seekTo: (seconds) => {
+                  sendPlayerCommand(activePlayer, "seekTo", [seconds, true]);
+                },
                 load: (url) => applySource(player, url),
                 mute: (mute) => {
                   if (mute) {
-                    player.mute();
+                    sendPlayerCommand(activePlayer, "mute");
                     return;
                   }
-                  player.unMute();
+                  sendPlayerCommand(activePlayer, "unMute");
                 },
               });
 
@@ -472,8 +508,8 @@ export function YouTubeEngine() {
                     isPlaying: true,
                     currentTime: 0,
                   });
-                  player.seekTo(0, true);
-                  player.playVideo();
+                  sendPlayerCommand(player, "seekTo", [0, true]);
+                  sendPlayerCommand(player, "playVideo");
                   return;
                 }
 
@@ -514,9 +550,9 @@ export function YouTubeEngine() {
               if (source.playlistId && fallbackVideoId && !playlistFallbackAttemptedRef.current) {
                 playlistFallbackAttemptedRef.current = true;
                 try {
-                  player.loadVideoById(fallbackVideoId);
-                  player.mute();
-                  player.setVolume(0);
+                  sendPlayerCommand(player as ExtendedPlayer, "loadVideoById", [fallbackVideoId]);
+                  sendPlayerCommand(player as ExtendedPlayer, "mute");
+                  sendPlayerCommand(player as ExtendedPlayer, "setVolume", [0]);
                   autoplayUnmutePendingRef.current = true;
                   startPlayback(player as ExtendedPlayer);
                   return;
@@ -620,15 +656,17 @@ export function YouTubeEngine() {
     const player = playerRef.current;
 
     if (source.playlistId) {
-      player.loadPlaylist({
-        list: source.playlistId,
-        listType: "playlist",
-      });
+      sendPlayerCommand(player as ExtendedPlayer, "loadPlaylist", [
+        {
+          list: source.playlistId,
+          listType: "playlist",
+        },
+      ]);
       return;
     }
 
     if (source.videoId) {
-      player.loadVideoById(source.videoId);
+      sendPlayerCommand(player as ExtendedPlayer, "loadVideoById", [source.videoId]);
     }
   }, [source.playlistId, source.rawUrl]);
 

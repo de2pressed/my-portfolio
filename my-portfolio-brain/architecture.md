@@ -65,6 +65,8 @@ Important behavior:
 - if a playlist boot fails, the engine falls back to the track's video ID so the player does not get stuck in a hard unavailable state
 - if YouTube exposes no playlist queue on first load, the engine explicitly reloads the playlist so next/previous navigation has a real queue to work with
 - if the player reports a playlist index of `-1`, the engine resolves the current track from the loaded video ID before deciding whether to advance
+- player commands now go directly to the iframe `contentWindow` with a wildcard `postMessage` target so deployed origins do not trip YouTube's internal origin check on play, pause, seek, mute, volume, and playlist navigation
+- the embed enables the JS API explicitly and supplies `widget_referrer` so the command bridge stays valid on Vercel preview origins
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the music context seeds thumbnail extraction from the raw music URL when the parsed playlist source does not carry a video ID

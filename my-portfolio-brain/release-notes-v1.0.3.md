@@ -41,6 +41,8 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Swapped the seeded soundtrack off the brittle `RD...` radio mix and added a playlist-error fallback so the player can recover to a plain video instead of staying unavailable.
 - Added an explicit playlist queue reload path so a playlist source that boots as a single looping video can recover into real next/previous navigation.
 - Resolved playlist order from the active video ID when YouTube reports `getPlaylistIndex() === -1`, which prevents the first track from looping as if it were a single video.
+- Switched the music controls to direct iframe commands with a wildcard `postMessage` target so play, pause, seek, mute, volume, and track navigation keep working on deployed Vercel origins.
+- Enabled the YouTube JS API explicitly and added `widget_referrer` to the player config so the command bridge initializes more reliably.
 - Synced the Supabase seed so future `db reset` runs keep the plain-video soundtrack instead of restoring the old radio mix.
 - Tightened the album-art crop in the footer and compact player and removed the brown overlay wash that was tinting the cover art.
 - Updated the default soundtrack seed to the provided `cxKs2b5lRsA` playlist URL so local fallback and Supabase reset both use the same playlist source.
