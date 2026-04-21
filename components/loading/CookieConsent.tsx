@@ -38,7 +38,7 @@ export function CookieConsent({ storageAvailable, onDecision, revealFromHandoff 
           visits, session length, and section engagement. No personal data is collected.
         </p>
         {!storageAvailable ? (
-          <p className="mt-4 rounded-2xl border border-amber-300/24 bg-[rgba(255,255,255,0.12)] px-4 py-3 text-sm text-ink/72">
+          <p className="mt-4 rounded-2xl border border-amber-300/20 bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink/72">
             Local storage is unavailable in this browser, so analytics will remain disabled even if
             you accept.
           </p>

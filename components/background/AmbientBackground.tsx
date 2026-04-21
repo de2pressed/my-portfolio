@@ -44,7 +44,7 @@ export function AmbientBackground() {
     let animationFrame = 0;
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const blobCount = mediaQuery.matches ? 8 : 12;
-    const fallbackPalette = palette.length > 0 ? palette : ["#e8bc8a"];
+    const fallbackPalette = palette.length > 0 ? palette : ["#b93ca7", "#7b5fd1", "#f0dcff"];
 
     type BlobConfig = {
       angle: number;

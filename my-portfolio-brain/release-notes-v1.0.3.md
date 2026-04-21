@@ -4,7 +4,7 @@ This note records the work completed from `CHANGELOG-4.md` and the version bump 
 
 ## Summary
 
-This release closes the remaining runtime gaps from the changelog audit and pushes the site toward a darker, more premium glass surface.
+This release closes the remaining runtime gaps from the changelog audit and pushes the site toward a darker, violet-black premium glass surface.
 
 ## Implemented Changes
 
@@ -12,6 +12,7 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Raised the custom cursor above the loading and consent overlays and redesigned it as a high-contrast pointer arrow.
 - Kept the minimized music player in a square card form instead of an oval pill.
 - Lowered glass opacity across shared tokens and key surfaces so the background shows through more clearly in the dark theme.
+- Shifted the ambient mood toward a deeper magenta-violet glow so the page reads closer to the intended dark-mode reference.
 - Increased ambient background density with more particles, smaller fast movers, and more varied orbital paths.
 - Removed redundant chip labels and implementation-flavored copy from the loading, cookie, and footer surfaces.
 - Tuned public and admin-facing glass surfaces so they feel darker, lighter, and more consistent with the new theme.

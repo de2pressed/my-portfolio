@@ -43,17 +43,17 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
     >
       <div className="absolute inset-0">
         <motion.div
-          className="absolute left-[12%] top-[18%] h-44 w-44 rounded-full bg-[rgba(var(--warm-rgb),0.18)] blur-3xl"
+          className="absolute left-[12%] top-[18%] h-44 w-44 rounded-full bg-[rgba(var(--accent-rgb),0.18)] blur-3xl"
           animate={{ x: [0, 36, -18, 0], y: [0, -22, 18, 0], scale: [1, 1.16, 0.98, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute right-[14%] top-[22%] h-56 w-56 rounded-full bg-[rgba(var(--lavender-rgb),0.16)] blur-3xl"
+          className="absolute right-[14%] top-[22%] h-56 w-56 rounded-full bg-[rgba(var(--lavender-rgb),0.18)] blur-3xl"
           animate={{ x: [0, -40, 14, 0], y: [0, 24, -16, 0], scale: [1, 0.94, 1.12, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-[18%] left-[32%] h-64 w-64 rounded-full bg-[rgba(var(--teal-rgb),0.14)] blur-3xl"
+          className="absolute bottom-[18%] left-[32%] h-64 w-64 rounded-full bg-[rgba(var(--teal-rgb),0.12)] blur-3xl"
           animate={{ x: [0, 20, -24, 0], y: [0, -28, 16, 0], scale: [1, 1.08, 0.97, 1] }}
           transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -80,12 +80,12 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
 
           <div className="relative hidden h-52 items-center justify-center md:flex">
             <motion.div
-              className="absolute h-36 w-36 rounded-[36px] border border-white/24 bg-[rgba(255,255,255,0.12)] backdrop-blur-2xl"
+              className="absolute h-36 w-36 rounded-[36px] border border-white/10 bg-[rgba(10,10,14,0.34)] backdrop-blur-2xl"
               animate={{ rotate: [0, 18, 0], scale: [1, 1.08, 1] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute h-44 w-44 rounded-full border border-white/22"
+              className="absolute h-44 w-44 rounded-full border border-white/10"
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />

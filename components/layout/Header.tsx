@@ -61,7 +61,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/18 bg-[rgba(255,255,255,0.12)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/10 bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
@@ -78,7 +78,7 @@ export function Header({ name }: HeaderProps) {
                 className={cn(
                   "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300",
                   activeSection === item.id
-                    ? "glass-button border-white/45 text-ink shadow-glass"
+                    ? "glass-button border-white/12 text-ink shadow-glass"
                     : "glass-button-muted text-ink/72",
                 )}
                 aria-current={activeSection === item.id ? "page" : undefined}
@@ -105,7 +105,7 @@ export function Header({ name }: HeaderProps) {
       <AnimatePresence>
         {open ? (
           <motion.div
-            className="fixed inset-0 z-[31] bg-[rgba(10,10,14,0.72)] px-4 pt-24 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-[31] bg-[rgba(4,4,8,0.82)] px-4 pt-24 backdrop-blur-xl md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -123,7 +123,7 @@ export function Header({ name }: HeaderProps) {
                     className={cn(
                       "flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] transition-all duration-300",
                       activeSection === item.id
-                        ? "glass-button border-white/45 text-ink shadow-glass"
+                        ? "glass-button border-white/12 text-ink shadow-glass"
                         : "glass-button-muted text-ink/76",
                     )}
                     aria-current={activeSection === item.id ? "page" : undefined}

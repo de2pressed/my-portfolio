@@ -1,23 +1,24 @@
 :root {
-  --canvas-rgb: 15 14 18;
-  --ink-rgb: 244 238 232;
-  --warm-rgb: 196 149 108;
-  --accent-rgb: 208 126 108;
-  --lavender-rgb: 149 140 182;
-  --teal-rgb: 74 131 127;
+  --canvas-rgb: 7 7 10;
+  --ink-rgb: 246 239 230;
+  --warm-rgb: 222 188 156;
+  --accent-rgb: 186 61 166;
+  --lavender-rgb: 128 100 197;
+  --teal-rgb: 68 122 134;
   --glass-border-rgb: 255 255 255;
-  --surface-shadow: 0 24px 80px rgba(4, 4, 6, 0.38);
+  --surface-shadow: 0 24px 80px rgba(2, 2, 4, 0.56);
   --surface-glow:
-    0 0 0 1px rgba(255, 255, 255, 0.14),
-    0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 28px 90px rgba(6, 6, 10, 0.42);
-  --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
-  --glass-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08));
-  --panel-edge: linear-gradient(120deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.03));
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 28px 90px rgba(2, 2, 4, 0.52);
+  --glass-fill: linear-gradient(135deg, rgba(18, 18, 24, 0.72), rgba(10, 10, 14, 0.42));
+  --glass-strong: linear-gradient(145deg, rgba(22, 22, 30, 0.76), rgba(12, 12, 18, 0.48));
+  --panel-edge: linear-gradient(120deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.02));
   --ambient-gradient:
-    radial-gradient(circle at 18% 22%, rgba(var(--warm-rgb), 0.16), transparent 28%),
-    radial-gradient(circle at 78% 18%, rgba(var(--lavender-rgb), 0.12), transparent 34%),
-    radial-gradient(circle at 82% 72%, rgba(var(--teal-rgb), 0.1), transparent 30%),
-    radial-gradient(circle at 24% 78%, rgba(var(--accent-rgb), 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(18, 17, 24, 0.98), rgba(9, 9, 13, 0.99));
+    radial-gradient(circle at 50% 30%, rgba(var(--accent-rgb), 0.22), transparent 18%),
+    radial-gradient(circle at 18% 22%, rgba(var(--warm-rgb), 0.08), transparent 30%),
+    radial-gradient(circle at 78% 18%, rgba(var(--lavender-rgb), 0.18), transparent 34%),
+    radial-gradient(circle at 82% 72%, rgba(var(--teal-rgb), 0.08), transparent 30%),
+    radial-gradient(circle at 24% 78%, rgba(var(--accent-rgb), 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(8, 8, 12, 0.98), rgba(4, 4, 6, 0.99));
 }

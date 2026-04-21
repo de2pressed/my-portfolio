@@ -80,7 +80,7 @@ export function Footer({ name, email, note }: FooterProps) {
           </div>
 
           <motion.div
-            className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.08)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.22)] backdrop-blur-2xl"
+            className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,10,14,0.4)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.28)] backdrop-blur-2xl"
             animate={{
               opacity: Math.min(1, Math.max(0, (footerTakeover - 0.6) * 2.5)),
               y: 28 - footerTakeover * 34,
@@ -90,7 +90,7 @@ export function Footer({ name, email, note }: FooterProps) {
             transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
-              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(255,255,255,0.08)]">
+              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)]">
                 {thumbnail ? (
                   <Image
                     alt={title}
@@ -101,12 +101,12 @@ export function Footer({ name, email, note }: FooterProps) {
                     unoptimized
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(var(--warm-rgb),0.44),rgba(var(--accent-rgb),0.16))]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(var(--accent-rgb),0.32),rgba(var(--lavender-rgb),0.14))]" />
                 )}
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(22,16,12,0.48))]" />
               </div>
 
-              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(255,255,255,0.06)] p-5">
+              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(10,10,14,0.32)] p-5">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-ink/56">Immersive music zone</p>
                   <h3 className="mt-2 text-2xl font-semibold text-ink">{title}</h3>

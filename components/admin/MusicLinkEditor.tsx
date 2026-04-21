@@ -63,13 +63,13 @@ export function MusicLinkEditor({ settings }: MusicLinkEditorProps) {
 
       <div className="grid gap-4">
         <input
-          className="w-full rounded-[20px] border border-white/20 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.34)] focus:bg-[rgba(255,255,255,0.18)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+          className="w-full rounded-[20px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.28)] focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
           onChange={(event) => setMusicUrl(event.target.value)}
           placeholder="YouTube video or playlist URL"
           value={musicUrl}
         />
         <input
-          className="w-full rounded-[20px] border border-white/20 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.34)] focus:bg-[rgba(255,255,255,0.18)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+          className="w-full rounded-[20px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.28)] focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
           onChange={(event) => setVersion(event.target.value)}
           placeholder="Site version"
           value={version}

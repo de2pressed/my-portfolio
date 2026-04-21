@@ -197,7 +197,7 @@ export function CollectionManager({
               .slice()
               .sort((a, b) => a.sort_order - b.sort_order)
               .map((record) => (
-                <article className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4" key={record.id}>
+                <article className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-4" key={record.id}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-lg font-semibold text-ink">
@@ -231,45 +231,45 @@ export function CollectionManager({
                 </article>
               ))
           ) : (
-            <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4 text-sm text-ink/64">
+            <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-4 text-sm text-ink/64">
               No entries yet.
             </div>
           )}
         </div>
 
-        <form className="space-y-4 rounded-[28px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-5" onSubmit={submitForm}>
+        <form className="space-y-4 rounded-[28px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-5" onSubmit={submitForm}>
           <input name="id" type="hidden" value={String(activeDraft.id ?? "")} />
           <input name="created_at" type="hidden" value={String(activeDraft.created_at ?? new Date().toISOString())} />
 
           {resource === "skills" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.name ?? "")} name="name" placeholder="Skill name" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.category ?? "")} name="category" placeholder="Category" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.icon ?? "")} name="icon" placeholder="Icon label (optional)" />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.name ?? "")} name="name" placeholder="Skill name" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.category ?? "")} name="category" placeholder="Category" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.icon ?? "")} name="icon" placeholder="Icon label (optional)" />
             </>
           ) : null}
 
           {resource === "experience" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.organization ?? "")} name="organization" placeholder="Organization" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.date_range ?? "")} name="date_range" placeholder="Date range" required />
-              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.organization ?? "")} name="organization" placeholder="Organization" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.date_range ?? "")} name="date_range" placeholder="Date range" required />
+              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
             </>
           ) : null}
 
           {resource === "projects" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
-              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.tech_stack ?? "")} name="tech_stack" placeholder="Comma separated tech stack" required />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
-              <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.image_url ?? "")} name="image_url" placeholder="Optional image URL" />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
+              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.tech_stack ?? "")} name="tech_stack" placeholder="Comma separated tech stack" required />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
+              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.image_url ?? "")} name="image_url" placeholder="Optional image URL" />
             </>
           ) : null}
 
-          <input className="w-full rounded-[18px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm" defaultValue={String(activeDraft.sort_order ?? 1)} min={1} name="sort_order" placeholder="Sort order" type="number" />
+          <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.sort_order ?? 1)} min={1} name="sort_order" placeholder="Sort order" type="number" />
 
           <div className="flex gap-3">
             <button className="glass-button" type="submit">

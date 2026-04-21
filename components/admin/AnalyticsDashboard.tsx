@@ -16,22 +16,22 @@ export function AnalyticsDashboard({ summary }: AnalyticsDashboardProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4">
+        <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-4">
           <p className="text-xs uppercase tracking-[0.26em] text-ink/48">Total visits</p>
           <p className="mt-3 text-3xl font-semibold text-ink">{summary.totalVisits}</p>
         </div>
-        <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4">
+        <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-4">
           <p className="text-xs uppercase tracking-[0.26em] text-ink/48">Unique visitors</p>
           <p className="mt-3 text-3xl font-semibold text-ink">{summary.uniqueVisitors}</p>
         </div>
-        <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4">
+        <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-4">
           <p className="text-xs uppercase tracking-[0.26em] text-ink/48">Avg session</p>
           <p className="mt-3 text-3xl font-semibold text-ink">{formatDuration(summary.averageSessionDuration)}</p>
         </div>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-5">
+        <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-5">
           <p className="text-xs uppercase tracking-[0.26em] text-ink/48">Most viewed sections</p>
           <div className="mt-4 space-y-3">
             {summary.mostViewedSections.length > 0 ? (
@@ -47,7 +47,7 @@ export function AnalyticsDashboard({ summary }: AnalyticsDashboardProps) {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-5">
+        <div className="rounded-[24px] border border-white/10 bg-[rgba(10,10,14,0.34)] p-5">
           <p className="text-xs uppercase tracking-[0.26em] text-ink/48">Recent activity</p>
           <div className="mt-4 space-y-3">
             {summary.recentActivity.length > 0 ? (
