@@ -70,6 +70,7 @@ Important behavior:
 - the music context seeds thumbnail extraction from the raw music URL when the parsed playlist source does not carry a video ID
 - the Supabase seed mirrors the default soundtrack URL so a reset does not reintroduce the old radio mix
 - the default soundtrack now points at the provided `cxKs2b5lRsA` playlist URL so local fallback and Supabase seed stay in sync
+- the floating player applies its blur as a plain style value instead of an animated filter so Framer Motion does not emit invalid negative blur keyframes
 - thumbnail extraction now uses a same-origin proxy so the browser can read YouTube pixels and extract palette colors reliably
 - the footer and compact player now crop the thumbnail more tightly and avoid a brown wash overlay so the album art reads cleaner
 - the footer takeover grows as the user scrolls toward the footer

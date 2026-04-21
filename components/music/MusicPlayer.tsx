@@ -148,6 +148,7 @@ export function MusicPlayer() {
   const takeoverFade = clamp((footerTakeover - 0.52) / 0.26, 0, 1);
   const takeoverDepth = footerTakeover * footerTakeover;
   const takeoverBlur = takeoverFade * 8;
+  const takeoverFilter = `blur(${takeoverBlur}px)`;
 
   const renderArtwork = () =>
     thumbnail ? (
@@ -179,8 +180,8 @@ export function MusicPlayer() {
         y: takeoverDepth * (isMinimized ? 360 : 480),
         scale: 1 + takeoverDepth * 0.24,
         rotate: takeoverDepth * -3,
-        filter: `blur(${takeoverBlur}px)`,
       }}
+      style={{ filter: takeoverFilter }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
     >
       <button

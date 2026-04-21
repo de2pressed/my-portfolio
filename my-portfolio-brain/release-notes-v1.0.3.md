@@ -44,6 +44,7 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Synced the Supabase seed so future `db reset` runs keep the plain-video soundtrack instead of restoring the old radio mix.
 - Tightened the album-art crop in the footer and compact player and removed the brown overlay wash that was tinting the cover art.
 - Updated the default soundtrack seed to the provided `cxKs2b5lRsA` playlist URL so local fallback and Supabase reset both use the same playlist source.
+- Moved the floating player's blur off Framer Motion animation so the console stops emitting invalid negative blur keyframes.
 - Added a same-origin YouTube thumbnail proxy and tightened palette extraction so the ambient colors track the actual thumbnail instead of collapsing into dark swatches.
 - Increased ambient blob opacity and reduced blur more aggressively so the background reads brighter and more vibrant during playback.
 - Reworked the floating player to footer takeover into a single choreographed motion, with a later fade window for the player and a spring-like arrival for the footer card.

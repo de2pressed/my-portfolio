@@ -346,10 +346,9 @@ export function YouTubeEngine() {
         playlistFallbackAttemptedRef.current = false;
         defaultFallbackAttemptedRef.current = false;
 
-        const player = new api.Player(hostRef.current, {
+        const playerConfig: YT.PlayerOptions = {
           height: "200",
           width: "200",
-          videoId: source.playlistId ? undefined : source.videoId ?? undefined,
           playerVars: {
             autoplay: 1,
             controls: 0,
@@ -360,8 +359,6 @@ export function YouTubeEngine() {
             rel: 0,
             iv_load_policy: 3,
             origin: window.location.origin,
-            list: source.playlistId ?? undefined,
-            listType: source.playlistId ? "playlist" : undefined,
           },
           events: {
             onReady: () => {
@@ -541,7 +538,19 @@ export function YouTubeEngine() {
               setPlayerError("Music unavailable");
             },
           },
-        });
+        };
+
+        if (source.playlistId) {
+          playerConfig.playerVars = {
+            ...playerConfig.playerVars,
+            list: source.playlistId,
+            listType: "playlist",
+          };
+        } else if (source.videoId) {
+          playerConfig.videoId = source.videoId;
+        }
+
+        const player = new api.Player(hostRef.current, playerConfig);
 
         pollInterval = window.setInterval(() => {
           if (!playerRef.current) {
