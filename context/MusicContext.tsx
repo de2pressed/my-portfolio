@@ -3,6 +3,7 @@
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -131,11 +132,11 @@ export function MusicProvider({ children }: PropsWithChildren) {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [controls]);
 
-  function registerControls(nextControls: PlayerControls) {
+  const registerControls = useCallback((nextControls: PlayerControls) => {
     setControls(nextControls);
-  }
+  }, []);
 
-  function syncTrack(payload: { title?: string; videoId?: string | null; isPlaying?: boolean }) {
+  const syncTrack = useCallback((payload: { title?: string; videoId?: string | null; isPlaying?: boolean }) => {
     if (payload.title) {
       setTitle(payload.title);
     }
@@ -150,66 +151,66 @@ export function MusicProvider({ children }: PropsWithChildren) {
     if (typeof payload.isPlaying === "boolean") {
       setIsPlaying(payload.isPlaying);
     }
-  }
+  }, []);
 
-  function setPlayerReady(ready: boolean) {
+  const setPlayerReady = useCallback((ready: boolean) => {
     setEngineStatus(ready ? "ready" : "loading");
     if (ready) {
       setErrorMessage(null);
     }
-  }
+  }, []);
 
-  function setPlayerError(message: string) {
+  const setPlayerError = useCallback((message: string) => {
     setEngineStatus("error");
     setErrorMessage(message);
     setIsPlaying(false);
     resetPalette();
-  }
+  }, [resetPalette]);
 
-  function setVisualLevel(value: number) {
+  const setVisualLevel = useCallback((value: number) => {
     setVisualLevelState(value);
-  }
+  }, []);
 
-  function setVolume(value: number) {
+  const setVolume = useCallback((value: number) => {
     setVolumeState(value);
     controls?.setVolume(value);
-  }
+  }, [controls]);
 
-  function togglePlayback() {
+  const togglePlayback = useCallback(() => {
     controls?.toggle();
-  }
+  }, [controls]);
 
-  function playNext() {
+  const playNext = useCallback(() => {
     controls?.next();
-  }
+  }, [controls]);
 
-  function playPrevious() {
+  const playPrevious = useCallback(() => {
     controls?.previous();
-  }
+  }, [controls]);
 
-  function play() {
+  const play = useCallback(() => {
     controls?.play();
-  }
+  }, [controls]);
 
-  function pause() {
+  const pause = useCallback(() => {
     controls?.pause();
-  }
+  }, [controls]);
 
-  function mute() {
+  const mute = useCallback(() => {
     setIsMuted(true);
     controls?.mute(true);
-  }
+  }, [controls]);
 
-  function unmute() {
+  const unmute = useCallback(() => {
     setIsMuted(false);
     controls?.mute(false);
-  }
+  }, [controls]);
 
-  function loadMusicUrl(url: string) {
+  const loadMusicUrl = useCallback((url: string) => {
     setMusicUrl(url);
     setSource(parseYouTubeSource(url));
     controls?.load(url);
-  }
+  }, [controls]);
 
   return (
     <MusicContext.Provider

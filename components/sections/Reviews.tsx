@@ -26,9 +26,15 @@ export function Reviews({ reviews }: ReviewsProps) {
   const [form, setForm] = useState<FormState>(initialForm);
   const [status, setStatus] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
     setStatus("Sending review...");
 
     try {
@@ -51,6 +57,8 @@ export function Reviews({ reviews }: ReviewsProps) {
     } catch (error) {
       console.warn("Review submission failed.", error);
       setStatus("The review could not be submitted right now.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -136,8 +144,8 @@ export function Reviews({ reviews }: ReviewsProps) {
                 value={form.message}
               />
             </div>
-            <button className="glass-button" type="submit">
-              Submit review
+            <button className="glass-button disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Submitting..." : "Submit review"}
             </button>
             {status ? <p className="text-sm text-ink/68">{status}</p> : null}
           </motion.form>

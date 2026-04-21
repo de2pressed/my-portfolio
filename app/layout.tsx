@@ -18,10 +18,40 @@ const bodyFont = Manrope({
   variable: "--font-body",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://my-portfolio-ten-iota-uezn9vq1ge.vercel.app");
+
 export const metadata: Metadata = {
+  ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   title: "Jayant Kumar | Personal Portfolio",
   description:
     "A music-driven, immersive DevOps portfolio for Jayant Kumar with editable content, cinematic motion, and a glass-built interface.",
+  icons: {
+    icon: "/favicon.svg",
+  },
+  openGraph: {
+    title: "Jayant Kumar | Personal Portfolio",
+    description:
+      "A music-driven, immersive DevOps portfolio for Jayant Kumar with editable content, cinematic motion, and a glass-built interface.",
+    type: "website",
+    url: "/",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Jayant Kumar | Personal Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jayant Kumar | Personal Portfolio",
+    description:
+      "A music-driven, immersive DevOps portfolio for Jayant Kumar with editable content, cinematic motion, and a glass-built interface.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

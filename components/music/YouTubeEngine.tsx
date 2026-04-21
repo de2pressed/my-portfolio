@@ -53,6 +53,11 @@ export function YouTubeEngine() {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YT.Player | null>(null);
   const sourceRef = useRef(source.rawUrl);
+  const volumeRef = useRef(volume);
+
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,7 +139,12 @@ export function YouTubeEngine() {
 
               markResolved();
               playerRef.current = player;
-              player.setVolume(volume);
+              const videoData = (player as ExtendedPlayer).getVideoData();
+              syncTrack({
+                title: videoData.title || "Untitled soundtrack",
+                videoId: videoData.video_id || null,
+              });
+              player.setVolume(volumeRef.current);
               player.playVideo();
               setPlayerReady(true);
 
@@ -189,7 +199,7 @@ export function YouTubeEngine() {
             videoId: video.video_id || null,
             isPlaying: state === window.YT?.PlayerState.PLAYING,
           });
-          setVisualLevel(deriveEnergy(currentTime, state === window.YT?.PlayerState.PLAYING, volume));
+          setVisualLevel(deriveEnergy(currentTime, state === window.YT?.PlayerState.PLAYING, volumeRef.current));
         }, 400);
       } catch (error) {
         console.warn("YouTube IFrame API failed to initialize.", error);
@@ -209,7 +219,7 @@ export function YouTubeEngine() {
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [registerControls, setPlayerError, setPlayerReady, setVisualLevel, source.playlistId, source.rawUrl, source.videoId, syncTrack, volume]);
+  }, [registerControls, setPlayerError, setPlayerReady, setVisualLevel, source.playlistId, source.rawUrl, source.videoId, syncTrack]);
 
   useEffect(() => {
     if (!playerRef.current || sourceRef.current === source.rawUrl) {

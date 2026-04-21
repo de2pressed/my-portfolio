@@ -4,6 +4,7 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -49,14 +50,14 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     applyPalette(palette);
   }, [palette]);
 
-  async function setPaletteFromThumbnail(thumbnailUrl: string) {
+  const setPaletteFromThumbnail = useCallback(async (thumbnailUrl: string) => {
     const colors = await extractPaletteFromImage(thumbnailUrl);
     setPalette(colors);
-  }
+  }, []);
 
-  function resetPalette() {
+  const resetPalette = useCallback(() => {
     setPalette(getFallbackPalette());
-  }
+  }, []);
 
   return (
     <ThemeContext.Provider

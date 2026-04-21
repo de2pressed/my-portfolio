@@ -49,7 +49,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
   // Hard safety timeout: guarantee the loading screen always dismisses,
   // even if the music engine and cookie context both fail to report readiness.
   useEffect(() => {
-    if (phase === "none") {
+    if (phase === "none" || phase === "cookie") {
       return;
     }
 
