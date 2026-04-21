@@ -6,6 +6,7 @@ import {
   useContext,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -45,13 +46,19 @@ function applyPalette(palette: string[]) {
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const [palette, setPalette] = useState<string[]>(() => getFallbackPalette());
+  const paletteRequestIdRef = useRef(0);
 
   useEffect(() => {
     applyPalette(palette);
   }, [palette]);
 
   const setPaletteFromThumbnail = useCallback(async (thumbnailUrl: string) => {
+    const requestId = paletteRequestIdRef.current + 1;
+    paletteRequestIdRef.current = requestId;
     const colors = await extractPaletteFromImage(thumbnailUrl);
+    if (requestId !== paletteRequestIdRef.current) {
+      return;
+    }
     setPalette(colors);
   }, []);
 

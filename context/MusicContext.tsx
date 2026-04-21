@@ -167,15 +167,21 @@ export function MusicProvider({ children }: PropsWithChildren) {
     duration?: number;
     isMuted?: boolean;
   }) => {
-    if (payload.title) {
-      setTitle(payload.title);
+    const nextTitle = payload.title;
+    if (nextTitle) {
+      setTitle((currentTitle) => (currentTitle === nextTitle ? currentTitle : nextTitle));
     }
 
     if (typeof payload.videoId !== "undefined") {
-      setSource((current) => ({
-        ...current,
-        videoId: payload.videoId ?? null,
-      }));
+      const nextVideoId = payload.videoId ?? null;
+      setSource((current) =>
+        current.videoId === nextVideoId
+          ? current
+          : {
+              ...current,
+              videoId: nextVideoId,
+            },
+      );
     }
 
     if (typeof payload.isPlaying === "boolean") {

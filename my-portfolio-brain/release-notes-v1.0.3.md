@@ -29,7 +29,9 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Triggered playback from the cookie decision action so the first accepted visit can start audio without requiring a reload.
 - Set the floating music player to start minimized by default while still honoring saved user preference.
 - Added an autoplay retry path so the hidden YouTube player keeps trying until first-load playback actually starts.
+- Hardened the player `onReady` path so metadata and mute failures do not abort control registration, and the player now falls back to a non-loading title when YouTube metadata is unavailable.
 - Spread the ambient background across edges and corners so the whole viewport feels populated instead of center-heavy.
+- Boosted the ambient particle palette so the canvas colors hold closer to the thumbnail's saturation and read less washed out in motion.
 - Normalized the remaining admin panel form and error text to the light ink palette so dark browser defaults do not leak through.
 
 ## Files To Know

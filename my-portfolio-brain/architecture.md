@@ -74,6 +74,7 @@ The extracted palette is written to CSS custom properties on `document.documentE
 The theme context keeps the core canvas dark and the ink light so extracted colors only steer accents, glows, and ambient surfaces.
 The latest pass pushes the canvas closer to near-black, removes the grey wash from the ambient layers, and keeps glass surfaces more transparent so the content reads against a cleaner dark field.
 The ambient canvas now places glow anchors across the corners and edges too, instead of clustering the motion around the middle.
+The ambient particles also use a boosted rendition of the thumbnail palette so their color energy reads closer to the artwork instead of flattening into the dark background.
 
 Those variables are consumed by:
 

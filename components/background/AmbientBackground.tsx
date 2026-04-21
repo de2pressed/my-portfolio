@@ -15,6 +15,102 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function hexToRgb(hex: string) {
+  const normalized = hex.replace("#", "");
+  const expanded =
+    normalized.length === 3 ? normalized.split("").map((part) => `${part}${part}`).join("") : normalized;
+  const red = Number.parseInt(expanded.slice(0, 2), 16);
+  const green = Number.parseInt(expanded.slice(2, 4), 16);
+  const blue = Number.parseInt(expanded.slice(4, 6), 16);
+  return { red, green, blue };
+}
+
+function rgbToHex(red: number, green: number, blue: number) {
+  return `#${[red, green, blue]
+    .map((value) => clamp(Math.round(value), 0, 255).toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+function rgbToHsl(red: number, green: number, blue: number) {
+  const r = red / 255;
+  const g = green / 255;
+  const b = blue / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const lightness = (max + min) / 2;
+
+  if (max === min) {
+    return { hue: 0, saturation: 0, lightness };
+  }
+
+  const delta = max - min;
+  const saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+  let hue = 0;
+
+  switch (max) {
+    case r:
+      hue = (g - b) / delta + (g < b ? 6 : 0);
+      break;
+    case g:
+      hue = (b - r) / delta + 2;
+      break;
+    default:
+      hue = (r - g) / delta + 4;
+      break;
+  }
+
+  return { hue: hue / 6, saturation, lightness };
+}
+
+function hslToRgb(hue: number, saturation: number, lightness: number) {
+  if (saturation === 0) {
+    const value = lightness * 255;
+    return { red: value, green: value, blue: value };
+  }
+
+  const hueToRgb = (p: number, q: number, t: number) => {
+    let nextT = t;
+    if (nextT < 0) {
+      nextT += 1;
+    }
+    if (nextT > 1) {
+      nextT -= 1;
+    }
+    if (nextT < 1 / 6) {
+      return p + (q - p) * 6 * nextT;
+    }
+    if (nextT < 1 / 2) {
+      return q;
+    }
+    if (nextT < 2 / 3) {
+      return p + (q - p) * (2 / 3 - nextT) * 6;
+    }
+    return p;
+  };
+
+  const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+  const p = 2 * lightness - q;
+  const red = hueToRgb(p, q, hue + 1 / 3) * 255;
+  const green = hueToRgb(p, q, hue) * 255;
+  const blue = hueToRgb(p, q, hue - 1 / 3) * 255;
+  return { red, green, blue };
+}
+
+function boostCanvasColor(hex: string) {
+  const { red, green, blue } = hexToRgb(hex);
+  const { hue, saturation, lightness } = rgbToHsl(red, green, blue);
+  const saturationBoost = saturation < 0.45 ? 1.5 : 1.22;
+  const lightnessBoost = lightness < 0.38 ? 1.14 : 1.06;
+  const boostedSaturation = clamp(saturation * saturationBoost + 0.06, 0.58, 1);
+  const boostedLightness = clamp(lightness * lightnessBoost + 0.02, 0.28, 0.76);
+  const boosted = hslToRgb(hue, boostedSaturation, boostedLightness);
+  return rgbToHex(boosted.red, boosted.green, boosted.blue);
+}
+
 export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const visualLevel = useMusicFrequency();
@@ -45,6 +141,7 @@ export function AmbientBackground() {
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const blobCount = mediaQuery.matches ? 8 : 12;
     const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
+    const canvasPalette = fallbackPalette.map(boostCanvasColor);
     const anchorPositions = mediaQuery.matches
       ? [
           { x: 0.06, y: 0.08 },
@@ -125,6 +222,7 @@ export function AmbientBackground() {
     const draw = (time: number) => {
       const level = Math.max(0, Math.min(1, visualLevelRef.current));
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
+      const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -138,31 +236,33 @@ export function AmbientBackground() {
         height * 0.34,
         Math.max(width, height) * 0.68,
       );
-      gradient.addColorStop(0, `rgba(76,16,64,${0.62 - level * 0.08})`);
-      gradient.addColorStop(0.16, `rgba(20,6,24,${0.9 - level * 0.05})`);
-      gradient.addColorStop(0.42, `rgba(5,5,8,${0.98 - level * 0.02})`);
+      gradient.addColorStop(0, `rgba(76,16,64,${0.58 - level * 0.07})`);
+      gradient.addColorStop(0.16, `rgba(20,6,24,${0.88 - level * 0.04})`);
+      gradient.addColorStop(0.42, `rgba(5,5,8,${0.97 - level * 0.02})`);
       gradient.addColorStop(1, "rgba(0,0,0,1)");
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
 
-      const edgeGlowColor = currentPalette[0] ?? "#b93ca7";
       const glowPoints = [
-        { x: width * 0.08, y: height * 0.1, opacity: 0.08 },
-        { x: width * 0.92, y: height * 0.12, opacity: 0.07 },
-        { x: width * 0.08, y: height * 0.86, opacity: 0.06 },
-        { x: width * 0.92, y: height * 0.84, opacity: 0.07 },
+        { x: width * 0.08, y: height * 0.1, opacity: 0.1, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
+        { x: width * 0.92, y: height * 0.12, opacity: 0.09, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
+        { x: width * 0.08, y: height * 0.86, opacity: 0.08, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
+        { x: width * 0.92, y: height * 0.84, opacity: 0.09, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
       ];
 
       for (const point of glowPoints) {
         const halo = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, Math.max(width, height) * 0.18);
-        halo.addColorStop(0, hexToRgba(edgeGlowColor, point.opacity));
-        halo.addColorStop(1, hexToRgba(edgeGlowColor, 0));
+        halo.addColorStop(0, hexToRgba(point.color, point.opacity));
+        halo.addColorStop(1, hexToRgba(point.color, 0));
+        context.save();
+        context.globalCompositeOperation = "screen";
         context.fillStyle = halo;
         context.fillRect(0, 0, width, height);
+        context.restore();
       }
 
       for (const [index, blob] of blobs.entries()) {
-        blob.color = currentPalette[index % currentPalette.length] ?? blob.color;
+        blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
         const pulse = 1 + level * (blob.size < 96 ? 0.72 : 1.05);
@@ -187,14 +287,15 @@ export function AmbientBackground() {
         y += Math.cos(t * 0.19 + blob.phase) * blob.orbitY * 0.12;
 
         const radius = blob.size * pulse;
-        const blur = blob.size < 96 ? 6 + level * 12 : 10 + level * 16;
+        const blur = blob.size < 96 ? 7 + level * 13 : 11 + level * 17;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.18 + level * 0.22 : 0.12 + level * 0.24));
-        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.075 + level * 0.08 : 0.06 + level * 0.1));
+        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.25 + level * 0.2 : 0.18 + level * 0.22));
+        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.1 + level * 0.08 : 0.08 + level * 0.1));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
-        context.filter = `blur(${blur}px)`;
+        context.globalCompositeOperation = "screen";
+        context.filter = `saturate(${1.18 + level * 0.28}) contrast(${1.04 + level * 0.06}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);

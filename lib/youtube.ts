@@ -10,6 +10,44 @@ function normalizeSource(rawUrl: string) {
   return rawUrl.trim();
 }
 
+function extractVideoIdFromPathname(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (segments.length === 0) {
+    return null;
+  }
+
+  if (segments[0] === "shorts" || segments[0] === "embed" || segments[0] === "live") {
+    return segments[1] ?? null;
+  }
+
+  if (segments[0] === "watch") {
+    return null;
+  }
+
+  return segments[0] ?? null;
+}
+
+export function extractYouTubeVideoId(rawUrl: string) {
+  const normalized = normalizeSource(rawUrl);
+
+  if (!normalized) {
+    return null;
+  }
+
+  try {
+    const url = new URL(normalized);
+    const queryVideoId = url.searchParams.get("v");
+    if (queryVideoId) {
+      return queryVideoId;
+    }
+
+    return extractVideoIdFromPathname(url.pathname);
+  } catch {
+    return null;
+  }
+}
+
 export function parseYouTubeSource(rawUrl: string): ParsedYouTubeSource {
   const normalized = normalizeSource(rawUrl);
 
@@ -23,8 +61,7 @@ export function parseYouTubeSource(rawUrl: string): ParsedYouTubeSource {
 
   try {
     const url = new URL(normalized);
-    const isShort = url.hostname.includes("youtu.be");
-    const videoId = isShort ? url.pathname.replace("/", "") : url.searchParams.get("v");
+    const videoId = extractYouTubeVideoId(normalized);
     const playlistId = url.searchParams.get("list");
 
     return {
