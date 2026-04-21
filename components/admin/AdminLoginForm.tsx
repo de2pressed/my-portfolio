@@ -105,10 +105,10 @@ export function AdminLoginForm() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(var(--accent-rgb),0.16),transparent_35%),linear-gradient(140deg,rgba(255,255,255,0.3),transparent_30%)]" />
           <div className="relative">
             <div className="flex items-center gap-4">
-                <div
+              <div
                 className={`flex h-14 w-14 items-center justify-center rounded-[18px] border ${
                   errorPulse
-                    ? "border-rose-300/50 bg-rose-100/24 text-rose-950"
+                    ? "border-rose-300/50 bg-rose-100/24 text-rose-100"
                     : "border-white/10 bg-[rgba(10,10,14,0.38)] text-ink"
                 }`}
               >
@@ -123,7 +123,7 @@ export function AdminLoginForm() {
             <p
               className={`mt-5 rounded-[22px] border px-4 py-4 text-sm leading-7 ${
                 errorPulse
-                  ? "border-rose-300/40 bg-rose-100/24 text-rose-950"
+                  ? "border-rose-300/40 bg-rose-100/24 text-rose-100"
                   : "border-white/10 bg-[rgba(10,10,14,0.34)] text-ink/72"
               }`}
             >
@@ -132,7 +132,7 @@ export function AdminLoginForm() {
             </p>
 
             {errorPulse ? (
-              <div className="mt-4 rounded-[18px] border border-rose-300/40 bg-rose-100/26 px-4 py-3 text-xs uppercase tracking-[0.28em] text-rose-950">
+              <div className="mt-4 rounded-[18px] border border-rose-300/40 bg-rose-100/26 px-4 py-3 text-xs uppercase tracking-[0.28em] text-rose-100">
                 Access denied
               </div>
             ) : null}
@@ -170,7 +170,7 @@ export function AdminLoginForm() {
               >
                 Enter panel
               </button>
-              {status ? <p className={`text-sm ${errorPulse ? "text-rose-800" : "text-ink/64"}`}>{status}</p> : null}
+              {status ? <p className={`text-sm ${errorPulse ? "text-rose-100" : "text-ink/64"}`}>{status}</p> : null}
             </form>
           </div>
         </motion.section>

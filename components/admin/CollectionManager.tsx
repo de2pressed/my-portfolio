@@ -98,6 +98,12 @@ function normalizePayload(resource: CollectionManagerProps["resource"], value: R
   };
 }
 
+const fieldClass =
+  "w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/40";
+
+const textareaClass =
+  "min-h-[180px] w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/40";
+
 export function CollectionManager({
   resource,
   title,
@@ -243,33 +249,33 @@ export function CollectionManager({
 
           {resource === "skills" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.name ?? "")} name="name" placeholder="Skill name" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.category ?? "")} name="category" placeholder="Category" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.icon ?? "")} name="icon" placeholder="Icon label (optional)" />
+              <input className={fieldClass} defaultValue={String(activeDraft.name ?? "")} name="name" placeholder="Skill name" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.category ?? "")} name="category" placeholder="Category" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.icon ?? "")} name="icon" placeholder="Icon label (optional)" />
             </>
           ) : null}
 
           {resource === "experience" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.organization ?? "")} name="organization" placeholder="Organization" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.date_range ?? "")} name="date_range" placeholder="Date range" required />
-              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
+              <input className={fieldClass} defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.organization ?? "")} name="organization" placeholder="Organization" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.date_range ?? "")} name="date_range" placeholder="Date range" required />
+              <textarea className={textareaClass} defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
             </>
           ) : null}
 
           {resource === "projects" ? (
             <>
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
-              <textarea className="min-h-[180px] w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.tech_stack ?? "")} name="tech_stack" placeholder="Comma separated tech stack" required />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
-              <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.image_url ?? "")} name="image_url" placeholder="Optional image URL" />
+              <input className={fieldClass} defaultValue={String(activeDraft.title ?? "")} name="title" placeholder="Title" required />
+              <textarea className={textareaClass} defaultValue={String(activeDraft.description ?? "")} name="description" placeholder="One bullet per line" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.tech_stack ?? "")} name="tech_stack" placeholder="Comma separated tech stack" required />
+              <input className={fieldClass} defaultValue={String(activeDraft.link ?? "")} name="link" placeholder="Optional link" />
+              <input className={fieldClass} defaultValue={String(activeDraft.image_url ?? "")} name="image_url" placeholder="Optional image URL" />
             </>
           ) : null}
 
-          <input className="w-full rounded-[18px] border border-white/10 bg-[rgba(10,10,14,0.36)] px-4 py-3 text-sm" defaultValue={String(activeDraft.sort_order ?? 1)} min={1} name="sort_order" placeholder="Sort order" type="number" />
+          <input className={fieldClass} defaultValue={String(activeDraft.sort_order ?? 1)} min={1} name="sort_order" placeholder="Sort order" type="number" />
 
           <div className="flex gap-3">
             <button className="glass-button" type="submit">

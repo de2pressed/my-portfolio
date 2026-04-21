@@ -30,6 +30,7 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Set the floating music player to start minimized by default while still honoring saved user preference.
 - Added an autoplay retry path so the hidden YouTube player keeps trying until first-load playback actually starts.
 - Spread the ambient background across edges and corners so the whole viewport feels populated instead of center-heavy.
+- Normalized the remaining admin panel form and error text to the light ink palette so dark browser defaults do not leak through.
 
 ## Files To Know
 
