@@ -121,7 +121,6 @@ export function AmbientBackground() {
 
   useEffect(() => {
     energyRef.current = energy;
-    console.log("[AmbientBackground] energy updated:", energy);
   }, [energy]);
 
   useEffect(() => {
@@ -223,7 +222,6 @@ export function AmbientBackground() {
 
     const draw = (time: number) => {
       const level = Math.max(0, Math.min(1, energyRef.current));
-      console.log("[AmbientBackground] draw loop - level:", level, "energyRef.current:", energyRef.current);
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
       const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
@@ -268,8 +266,8 @@ export function AmbientBackground() {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const rawPulse = 1 + level * (blob.size < 96 ? 0.4 : 0.6);
-        const pulse = Math.min(blob.size < 96 ? 1.3 : 1.5, Math.max(1.0, rawPulse));
+        const rawPulse = 1 + level * (blob.size < 96 ? 0.6 : 0.8);
+        const pulse = Math.min(blob.size < 96 ? 1.4 : 1.6, Math.max(1.0, rawPulse));
         const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
