@@ -170,7 +170,7 @@ export function MusicPlayer() {
         "fixed bottom-4 right-4 z-40 overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
-          : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4",
+          : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4 z-50",
         footerTakeover > 0.72 && "pointer-events-none",
       )}
       layout

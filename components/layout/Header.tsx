@@ -98,7 +98,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 mx-auto rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
