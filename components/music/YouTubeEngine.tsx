@@ -146,7 +146,9 @@ export function YouTubeEngine() {
       const counterpoint = Math.abs(Math.cos(currentTime * 8.2 + 1.4)) * 0.08;
       const tempoBurst = Math.min(0.28, Math.max(0, deltaTime * 0.42));
       const volumeFactor = (currentVolume / 100) * 0.22;
-      return Math.min(0.94, 0.1 + base + shimmer + detail + texture + spark + counterpoint + tempoBurst + volumeFactor);
+      const energy = Math.min(0.94, 0.1 + base + shimmer + detail + texture + spark + counterpoint + tempoBurst + volumeFactor);
+      console.log("[YouTubeEngine] deriveEnergy:", { currentTime, isPlaying, currentVolume, deltaTime, energy });
+      return energy;
     }
 
     function readPlaylist(player: ExtendedPlayer) {
@@ -590,6 +592,7 @@ export function YouTubeEngine() {
 
         pollInterval = window.setInterval(() => {
           if (!playerRef.current) {
+            console.log("[YouTubeEngine] Poll loop: playerRef is null, skipping");
             return;
           }
 
@@ -599,16 +602,18 @@ export function YouTubeEngine() {
             const snapshot = readCurrentTrack(player);
             const deltaTime = Math.max(0, snapshot.currentTime - previousTimeRef.current);
             previousTimeRef.current = snapshot.currentTime;
+            const isPlaying = state === window.YT?.PlayerState.PLAYING;
+            console.log("[YouTubeEngine] Poll loop executing:", { state, isPlaying, currentTime: snapshot.currentTime, deltaTime, volume: volumeRef.current });
             syncTrack({
               title: snapshot.title ?? undefined,
               videoId: snapshot.videoId,
-              isPlaying: state === window.YT?.PlayerState.PLAYING,
+              isPlaying,
               currentTime: snapshot.currentTime,
               duration: snapshot.duration,
             });
-            setVisualLevel(
-              deriveEnergy(snapshot.currentTime, state === window.YT?.PlayerState.PLAYING, volumeRef.current, deltaTime),
-            );
+            const energy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
+            console.log("[YouTubeEngine] Calling setVisualLevel with energy:", energy);
+            setVisualLevel(energy);
           } catch (error) {
             console.warn("YouTube poll loop failed.", error);
           }
