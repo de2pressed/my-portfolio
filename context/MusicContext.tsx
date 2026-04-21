@@ -13,7 +13,7 @@ import {
 import { useResolvedYouTubeThumbnail } from "@/hooks/useResolvedYouTubeThumbnail";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
 import { useTheme } from "@/context/ThemeContext";
-import { parseYouTubeSource, type ParsedYouTubeSource } from "@/lib/youtube";
+import { extractYouTubeVideoId, parseYouTubeSource, type ParsedYouTubeSource } from "@/lib/youtube";
 
 type EngineStatus = "idle" | "loading" | "ready" | "error";
 
@@ -84,7 +84,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [visualLevel, setVisualLevelState] = useState(0.2);
   const [footerTakeover, setFooterTakeover] = useState(0);
   const [controls, setControls] = useState<PlayerControls | null>(null);
-  const thumbnail = useResolvedYouTubeThumbnail(source.videoId);
+  const thumbnailSourceId = source.videoId ?? extractYouTubeVideoId(source.rawUrl);
+  const thumbnail = useResolvedYouTubeThumbnail(thumbnailSourceId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
   const controlsRef = useRef<PlayerControls | null>(null);
   const pendingPlayRef = useRef(false);

@@ -76,6 +76,7 @@ export function YouTubeEngine() {
   const previousTimeRef = useRef(0);
   const autoplayUnmutePendingRef = useRef(false);
   const playbackRetryTimerRef = useRef<number | null>(null);
+  const playlistFallbackAttemptedRef = useRef(false);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -300,6 +301,8 @@ export function YouTubeEngine() {
           return;
         }
 
+        playlistFallbackAttemptedRef.current = false;
+
         const player = new api.Player(hostRef.current, {
           height: "200",
           width: "200",
@@ -463,6 +466,22 @@ export function YouTubeEngine() {
                 window.clearTimeout(playbackRetryTimerRef.current);
                 playbackRetryTimerRef.current = null;
               }
+
+              const fallbackVideoId = extractYouTubeVideoId(source.rawUrl);
+              if (source.playlistId && fallbackVideoId && !playlistFallbackAttemptedRef.current) {
+                playlistFallbackAttemptedRef.current = true;
+                try {
+                  player.loadVideoById(fallbackVideoId);
+                  player.mute();
+                  player.setVolume(0);
+                  autoplayUnmutePendingRef.current = true;
+                  startPlayback(player as ExtendedPlayer);
+                  return;
+                } catch (error) {
+                  console.warn("YouTube playlist fallback failed.", error);
+                }
+              }
+
               setPlayerError("Music unavailable");
             },
           },
