@@ -193,7 +193,26 @@ export function YouTubeEngine() {
               sourceRef.current = source.rawUrl;
             },
             onStateChange: (event) => {
+              const player = event.target as ExtendedPlayer;
               const playing = event.data === window.YT?.PlayerState.PLAYING;
+
+              if (event.data === window.YT?.PlayerState.ENDED) {
+                const playlistIndex =
+                  typeof player.getPlaylistIndex === "function" ? player.getPlaylistIndex() : -1;
+
+                if (playlistIndex === -1) {
+                  previousTimeRef.current = 0;
+                  syncTrack({
+                    isPlaying: true,
+                    currentTime: 0,
+                  });
+                  player.seekTo(0, true);
+                  player.playVideo();
+                }
+
+                return;
+              }
+
               if (playing && autoplayUnmutePendingRef.current && playerRef.current) {
                 playerRef.current.unMute();
                 playerRef.current.setVolume(volumeRef.current);

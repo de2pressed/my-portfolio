@@ -32,7 +32,7 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
 
   return (
     <motion.div
-      className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.62),rgba(255,255,255,0.12)_38%,rgba(255,247,239,0.96)_100%)] px-4"
+      className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(8,8,14,0.92),rgba(14,14,20,0.7)_38%,rgba(18,18,26,0.98)_100%)] px-4"
       initial={{ opacity: 1 }}
       animate={{
         opacity: 1,
@@ -43,24 +43,24 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
     >
       <div className="absolute inset-0">
         <motion.div
-          className="absolute left-[12%] top-[18%] h-44 w-44 rounded-full bg-[rgba(var(--warm-rgb),0.32)] blur-3xl"
+          className="absolute left-[12%] top-[18%] h-44 w-44 rounded-full bg-[rgba(var(--warm-rgb),0.18)] blur-3xl"
           animate={{ x: [0, 36, -18, 0], y: [0, -22, 18, 0], scale: [1, 1.16, 0.98, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute right-[14%] top-[22%] h-56 w-56 rounded-full bg-[rgba(var(--lavender-rgb),0.28)] blur-3xl"
+          className="absolute right-[14%] top-[22%] h-56 w-56 rounded-full bg-[rgba(var(--lavender-rgb),0.16)] blur-3xl"
           animate={{ x: [0, -40, 14, 0], y: [0, 24, -16, 0], scale: [1, 0.94, 1.12, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-[18%] left-[32%] h-64 w-64 rounded-full bg-[rgba(var(--teal-rgb),0.22)] blur-3xl"
+          className="absolute bottom-[18%] left-[32%] h-64 w-64 rounded-full bg-[rgba(var(--teal-rgb),0.14)] blur-3xl"
           animate={{ x: [0, 20, -24, 0], y: [0, -28, 16, 0], scale: [1, 1.08, 0.97, 1] }}
           transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
       <motion.div
-        className="glass-panel relative w-full max-w-[92vw] rounded-[32px] px-5 py-8 shadow-[0_30px_120px_rgba(56,36,20,0.18)] sm:px-6 md:max-w-6xl md:px-8 md:py-10 lg:max-w-7xl xl:max-w-[82rem] xl:px-10 xl:py-12"
+        className="glass-panel relative w-full max-w-[92vw] rounded-[32px] px-5 py-8 shadow-[0_30px_120px_rgba(4,5,8,0.34)] sm:px-6 md:max-w-6xl md:px-8 md:py-10 lg:max-w-7xl xl:max-w-[82rem] xl:px-10 xl:py-12"
         animate={{
           borderRadius: phase === "handoff" ? "28px" : "42px",
           scale: phase === "handoff" ? 0.95 : 1,
@@ -70,7 +70,6 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
       >
         <div className="grid gap-8 md:grid-cols-[1.25fr_0.75fr] md:items-center lg:gap-10">
           <div className="space-y-5">
-            <p className="glass-chip w-fit">Initialization Sequence</p>
             <h1 className="max-w-2xl text-3xl font-semibold leading-[0.95] text-balance text-ink sm:text-4xl md:text-5xl xl:text-6xl">
               Jayant Kumar's portfolio is loading.
             </h1>
@@ -81,12 +80,12 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
 
           <div className="relative hidden h-52 items-center justify-center md:flex">
             <motion.div
-              className="absolute h-36 w-36 rounded-[36px] border border-white/70 bg-white/26 backdrop-blur-2xl"
+              className="absolute h-36 w-36 rounded-[36px] border border-white/24 bg-[rgba(255,255,255,0.12)] backdrop-blur-2xl"
               animate={{ rotate: [0, 18, 0], scale: [1, 1.08, 1] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute h-44 w-44 rounded-full border border-white/65"
+              className="absolute h-44 w-44 rounded-full border border-white/22"
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
@@ -98,7 +97,7 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
           </div>
         </div>
 
-        <div className="mt-8 grid gap-3 border-t border-white/26 pt-6 text-[10px] uppercase tracking-[0.3em] text-ink/58 sm:grid-cols-3 sm:gap-4 md:mt-10">
+        <div className="mt-8 grid gap-3 border-t border-white/16 pt-6 text-[10px] uppercase tracking-[0.3em] text-ink/58 sm:grid-cols-3 sm:gap-4 md:mt-10">
           {statusItems.map((label, index) => (
             <motion.div
               key={index}

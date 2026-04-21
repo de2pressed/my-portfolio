@@ -65,7 +65,7 @@ export function ContentEditor({ entries }: ContentEditorProps) {
 
       <div className="grid gap-4">
         {items.map((entry) => (
-          <article className="rounded-[24px] border border-white/28 bg-white/16 p-4" key={entry.id}>
+          <article className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-4" key={entry.id}>
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ink/68">{entry.section}</p>
               <button
@@ -82,7 +82,7 @@ export function ContentEditor({ entries }: ContentEditorProps) {
               </button>
             </div>
             <textarea
-              className="min-h-[140px] w-full rounded-[20px] border border-white/26 bg-white/22 px-4 py-3 text-sm text-ink outline-none"
+              className="min-h-[140px] w-full rounded-[20px] border border-white/18 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none"
               defaultValue={serializeContent(entry.content)}
               id={entry.id}
             />

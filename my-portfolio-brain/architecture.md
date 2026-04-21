@@ -79,7 +79,7 @@ Those variables are consumed by:
 
 If extraction fails, the theme falls back to a default palette.
 The background canvas also reads the palette and the music visual level so it can amplify the atmosphere when playback energy rises.
-The glass system now uses a stronger frosted fill and more visible edge highlight so the surfaces read as real glass instead of a faint blur.
+The glass system now uses a darker base, lower-opacity fill, and stronger backdrop blur so the surfaces read as premium glass instead of opaque panels.
 
 ## Interaction Layer
 
@@ -88,7 +88,7 @@ The interaction layer includes:
 - `components/layout/Header.tsx` for active section tracking and navigation highlighting
 - `components/ui/GlassCursor.tsx` for custom cursor behavior on fine pointers
 
-The header now uses intersection observers to keep the active section highlighted. The cursor changes size and emphasis on interactive targets such as links and buttons.
+The header now uses intersection observers to keep the active section highlighted. The cursor is a topmost pointer arrow that changes size and emphasis on interactive targets such as links and buttons.
 
 ## Consent And Analytics
 
@@ -126,6 +126,8 @@ The current code already contains the important hardening changes:
 - `context/MusicContext.tsx` now uses stable callbacks
 - `context/ThemeContext.tsx` now uses stable callbacks
 - `components/music/YouTubeEngine.tsx` no longer rebuilds on every volume change
+- `components/music/YouTubeEngine.tsx` now loops single-track playback on `ENDED`
+- `components/ui/GlassCursor.tsx` now sits above overlays and renders as a high-contrast pointer
 - `app/admin/page.tsx` redirects to `/admin/login`
 - `app/login/page.tsx` redirects to `/admin/login`
 - `app/layout.tsx` includes metadata and preview assets

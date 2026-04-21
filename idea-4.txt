@@ -1,0 +1,8 @@
+
+Changelog 4:
+Remove duplicate text.
+More transparency on the background while maintaining the frosted glass effect
+A more dynamic background, that has more particles.
+The minimized music player currently is very unscaled, and it scales down to a oval, it should scale down in a more apple-eque way, not a bad oval way.
+The cursor is invisible on accept cookies screen, and overall the cursor is very hard to notice, the cursor also needs to be like the triangular shape like the traditional cursor, the cursor should be contrasting element to the website, so its visible easily.
+After music stops playing, it doesnt loop, it should loop.

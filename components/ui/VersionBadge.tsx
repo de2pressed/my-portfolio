@@ -32,7 +32,7 @@ export function VersionBadge() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-40 rounded-full border border-white/30 bg-white/20 px-3 py-1.5 text-xs uppercase tracking-[0.28em] text-ink/70 shadow-glass backdrop-blur-xl">
+    <div className="pointer-events-none fixed bottom-4 left-4 z-40 rounded-full border border-white/18 bg-[rgba(255,255,255,0.08)] px-3 py-1.5 text-xs uppercase tracking-[0.28em] text-ink/70 shadow-glass backdrop-blur-xl">
       {version}
     </div>
   );

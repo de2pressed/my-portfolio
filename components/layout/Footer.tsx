@@ -68,7 +68,6 @@ export function Footer({ name, email, note }: FooterProps) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--teal-rgb),0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(var(--accent-rgb),0.2),transparent_28%)]" />
         <div className="relative grid gap-8 lg:grid-cols-[1fr_1.25fr] lg:items-end">
           <div className="space-y-5">
-            <p className="glass-chip w-fit">Footer Takeover</p>
             <h2 className="text-3xl font-semibold text-ink md:text-5xl">Scroll low enough and the soundtrack takes the room.</h2>
             <p className="max-w-xl text-sm leading-7 text-ink/72 md:text-base">{note}</p>
             <div className="flex flex-wrap items-center gap-3 text-sm text-ink/68">
@@ -81,7 +80,7 @@ export function Footer({ name, email, note }: FooterProps) {
           </div>
 
           <motion.div
-            className="relative overflow-hidden rounded-[30px] border border-white/32 bg-white/22 p-4 shadow-[0_24px_90px_rgba(52,38,22,0.16)] backdrop-blur-2xl"
+            className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.08)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.22)] backdrop-blur-2xl"
             animate={{
               opacity: Math.min(1, Math.max(0, (footerTakeover - 0.6) * 2.5)),
               y: 28 - footerTakeover * 34,
@@ -91,7 +90,7 @@ export function Footer({ name, email, note }: FooterProps) {
             transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
-              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-white/22">
+              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(255,255,255,0.08)]">
                 {thumbnail ? (
                   <Image
                     alt={title}
@@ -107,13 +106,10 @@ export function Footer({ name, email, note }: FooterProps) {
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(22,16,12,0.48))]" />
               </div>
 
-              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-white/18 p-5">
+              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(255,255,255,0.06)] p-5">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-ink/56">Immersive music zone</p>
                   <h3 className="mt-2 text-2xl font-semibold text-ink">{title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-ink/68">
-                    The current track drives the color atmosphere, the canvas pulse, and the footer takeover.
-                  </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">

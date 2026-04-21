@@ -124,14 +124,14 @@ export function Reviews({ reviews }: ReviewsProps) {
             <p className="text-xs uppercase tracking-[0.26em] text-ink/52">Leave a review</p>
             <div className="grid gap-4">
               <input
-                className="rounded-[20px] border border-white/36 bg-[rgba(255,255,255,0.28)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.42)] focus:bg-[rgba(255,255,255,0.36)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="rounded-[20px] border border-white/22 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.36)] focus:bg-[rgba(255,255,255,0.18)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
                 onChange={(event) => setForm((current) => ({ ...current, display_name: event.target.value }))}
                 placeholder="Display name"
                 required
                 value={form.display_name}
               />
               <input
-                className="rounded-[20px] border border-white/36 bg-[rgba(255,255,255,0.28)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.42)] focus:bg-[rgba(255,255,255,0.36)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="rounded-[20px] border border-white/22 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.36)] focus:bg-[rgba(255,255,255,0.18)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
                 onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                 placeholder="Email"
                 required
@@ -139,7 +139,7 @@ export function Reviews({ reviews }: ReviewsProps) {
                 value={form.email}
               />
               <textarea
-                className="min-h-[180px] rounded-[24px] border border-white/36 bg-[rgba(255,255,255,0.28)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.42)] focus:bg-[rgba(255,255,255,0.36)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="min-h-[180px] rounded-[24px] border border-white/22 bg-[rgba(255,255,255,0.14)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:border-[rgba(var(--accent-rgb),0.36)] focus:bg-[rgba(255,255,255,0.18)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
                 onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
                 placeholder="Message"
                 required

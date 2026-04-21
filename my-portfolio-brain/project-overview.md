@@ -1,6 +1,6 @@
 # Project Overview
 
-Current release: `v1.0.2`
+Current release: `v1.0.3`
 
 ## What This Project Is
 
@@ -9,10 +9,11 @@ This is a music-driven personal portfolio for Jayant Kumar.
 The public site is intentionally immersive. It combines:
 
 - a cinematic loading and consent flow
-- a glass and ambient visual system
+- a dark glass and ambient visual system
 - a YouTube-backed soundtrack player
 - dynamic palette extraction from the current track thumbnail
 - public reviews and section analytics
+- a custom pointer cursor and footer takeover that stay visible above overlays
 
 The admin area is a protected control room for editing the content that appears on the public site.
 
@@ -22,6 +23,7 @@ The admin area is a protected control room for editing the content that appears 
 - Let content be editable without changing the React components.
 - Work with Supabase when configured, but still run locally with seeded fallback data.
 - Keep the music, color palette, and footer takeover linked to the current track.
+- Keep the theme darker and the glass surfaces more transparent than the earlier warm variant.
 
 ## Tech Stack
 

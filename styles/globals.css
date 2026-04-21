@@ -10,7 +10,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
     var(--ambient-gradient);
   color: rgb(var(--ink-rgb));
   font-family: var(--font-body), sans-serif;
@@ -24,8 +24,8 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.46), transparent 45%),
-    radial-gradient(circle at 100% 100%, rgba(var(--teal-rgb), 0.06), transparent 28%);
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(var(--teal-rgb), 0.05), transparent 28%);
   content: "";
   pointer-events: none;
 }
@@ -34,10 +34,10 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: -1;
-  opacity: 0.45;
+  opacity: 0.16;
   background-image:
-    linear-gradient(transparent 96%, rgba(255, 255, 255, 0.28) 100%),
-    linear-gradient(90deg, transparent 96%, rgba(255, 255, 255, 0.22) 100%);
+    linear-gradient(transparent 96%, rgba(255, 255, 255, 0.08) 100%),
+    linear-gradient(90deg, transparent 96%, rgba(255, 255, 255, 0.06) 100%);
   background-size: 28px 28px;
   content: "";
   pointer-events: none;
@@ -49,7 +49,7 @@ body::after {
 }
 
 * {
-  border-color: rgba(var(--glass-border-rgb), 0.22);
+  border-color: rgba(var(--glass-border-rgb), 0.12);
 }
 
 @media (pointer: fine) {
@@ -100,7 +100,7 @@ body::after {
   .glass-panel {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(var(--glass-border-rgb), 0.28);
+    border: 1px solid rgba(var(--glass-border-rgb), 0.12);
     background: var(--glass-fill);
     box-shadow: var(--surface-glow);
     backdrop-filter: blur(30px) saturate(1.18);
@@ -109,10 +109,10 @@ body::after {
   .glass-panel::before {
     position: absolute;
     inset: 0;
-    background: linear-gradient(140deg, rgba(255, 255, 255, 0.64), transparent 28%);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), transparent 28%);
     content: "";
     pointer-events: none;
-    opacity: 0.78;
+    opacity: 0.36;
   }
 
   .glass-panel::after {
@@ -120,20 +120,20 @@ body::after {
     inset: 0;
     border-radius: inherit;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.66),
-      inset 1px 0 0 rgba(255, 255, 255, 0.18),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 1px 0 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
     content: "";
     pointer-events: none;
   }
 
   .glass-button {
     @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-transform duration-300;
-    border: 1px solid rgba(var(--glass-border-rgb), 0.38);
+    border: 1px solid rgba(var(--glass-border-rgb), 0.14);
     background: var(--glass-strong);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.74),
-      0 14px 38px rgba(60, 42, 24, 0.16);
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 14px 38px rgba(5, 5, 8, 0.2);
     backdrop-filter: blur(22px) saturate(1.12);
   }
 
@@ -143,13 +143,13 @@ body::after {
 
   .glass-button-muted {
     @apply glass-button;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
   }
 
   .glass-chip {
     @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em];
-    border: 1px solid rgba(var(--glass-border-rgb), 0.34);
-    background: rgba(255, 255, 255, 0.26);
+    border: 1px solid rgba(var(--glass-border-rgb), 0.14);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(18px) saturate(1.08);
   }
 
@@ -170,7 +170,7 @@ body::after {
   }
 
   .soft-border {
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.18);
   }
 }
 

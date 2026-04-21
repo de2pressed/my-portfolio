@@ -73,7 +73,7 @@ export function ReviewManager({ reviews }: ReviewManagerProps) {
 
       <div className="space-y-4">
         {items.map((review) => (
-          <article className="rounded-[24px] border border-white/28 bg-white/16 p-5" key={review.id}>
+          <article className="rounded-[24px] border border-white/18 bg-[rgba(255,255,255,0.1)] p-5" key={review.id}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-lg font-semibold text-ink">{review.display_name}</p>

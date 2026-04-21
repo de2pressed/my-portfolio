@@ -9,6 +9,7 @@
 - `next.config.mjs` - Next.js config and remote image patterns
 - `package.json` - scripts and dependencies
 - `README.md` in this folder - entry point for the AI handoff docs
+- `release-notes-v1.0.3.md` - latest handoff note for CHANGELOG-4 and the v1.0.3 bump
 
 ## App Router
 

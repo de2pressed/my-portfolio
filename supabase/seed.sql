@@ -92,7 +92,7 @@ on conflict (id) do nothing;
 insert into public.settings (id, key, value, updated_at)
 values
   ('setting-music', 'music_url', 'https://www.youtube.com/watch?v=ZAz3rnLGthg&list=RDZAz3rnLGthg', timezone('utc', now())),
-  ('setting-version', 'site_version', 'v1.0.2', timezone('utc', now()))
+  ('setting-version', 'site_version', 'v1.0.3', timezone('utc', now()))
 on conflict (id) do update
 set value = excluded.value,
     updated_at = excluded.updated_at;

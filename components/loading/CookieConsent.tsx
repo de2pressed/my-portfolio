@@ -11,7 +11,7 @@ type CookieConsentProps = {
 export function CookieConsent({ storageAvailable, onDecision, revealFromHandoff }: CookieConsentProps) {
   return (
     <motion.div
-      className="fixed inset-0 z-[81] flex items-center justify-center bg-[rgba(247,239,230,0.7)] px-4 backdrop-blur-xl"
+      className="fixed inset-0 z-[81] flex items-center justify-center bg-[rgba(9,10,14,0.72)] px-4 backdrop-blur-xl"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -32,14 +32,13 @@ export function CookieConsent({ storageAvailable, onDecision, revealFromHandoff 
         }
         style={{ transformOrigin: "center center" }}
       >
-        <p className="glass-chip mb-4 w-fit">Cookie Consent</p>
         <h2 className="text-3xl font-semibold text-ink md:text-4xl">Anonymous insight only.</h2>
         <p className="mt-4 text-sm leading-7 text-ink/72 md:text-base">
           Cookies are used purely to improve the website experience through anonymous analytics like
           visits, session length, and section engagement. No personal data is collected.
         </p>
         {!storageAvailable ? (
-          <p className="mt-4 rounded-2xl border border-amber-300/40 bg-white/28 px-4 py-3 text-sm text-ink/72">
+          <p className="mt-4 rounded-2xl border border-amber-300/24 bg-[rgba(255,255,255,0.12)] px-4 py-3 text-sm text-ink/72">
             Local storage is unavailable in this browser, so analytics will remain disabled even if
             you accept.
           </p>

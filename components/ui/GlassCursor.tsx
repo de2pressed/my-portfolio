@@ -2,6 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
+const DEFAULT_SIZE = 26;
+const HOVER_SIZE = 32;
+const TIP_OFFSET_X = 2;
+const TIP_OFFSET_Y = 1;
+
 export function GlassCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const pointer = useRef({ x: -100, y: -100, tx: -100, ty: -100 });
@@ -28,15 +33,13 @@ export function GlassCursor() {
         return;
       }
 
-      cursorRef.current.style.width = interactive.current ? "44px" : "32px";
-      cursorRef.current.style.height = interactive.current ? "44px" : "32px";
-      cursorRef.current.style.opacity = interactive.current ? "0.78" : "1";
-      cursorRef.current.style.backgroundColor = interactive.current
-        ? "rgba(255,255,255,0.14)"
-        : "rgba(255,255,255,0.20)";
-      cursorRef.current.style.boxShadow = interactive.current
-        ? "0 0 0 1px rgba(255,255,255,0.28), 0 0 28px rgba(var(--accent-rgb), 0.18), inset 0 1px 0 rgba(255,255,255,0.5)"
-        : "0 0 0 1px rgba(255,255,255,0.2), 0 0 24px rgba(var(--accent-rgb), 0.22), inset 0 1px 0 rgba(255,255,255,0.44)";
+      const size = interactive.current ? HOVER_SIZE : DEFAULT_SIZE;
+      cursorRef.current.style.width = `${size}px`;
+      cursorRef.current.style.height = `${size}px`;
+      cursorRef.current.style.opacity = "1";
+      cursorRef.current.style.filter = interactive.current
+        ? "drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.3)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6))"
+        : "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))";
     };
 
     const updatePosition = (event: PointerEvent) => {
@@ -72,8 +75,7 @@ export function GlassCursor() {
       state.ty += (state.y - state.ty) * 0.24;
 
       if (cursorRef.current) {
-        const size = interactive.current ? 44 : 32;
-        cursorRef.current.style.transform = `translate3d(${state.tx - size / 2}px, ${state.ty - size / 2}px, 0)`;
+        cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0)`;
       }
 
       frame = window.requestAnimationFrame(tick);
@@ -107,14 +109,27 @@ export function GlassCursor() {
     <div
       ref={cursorRef}
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-[70] hidden h-8 w-8 rounded-full border border-white/60 bg-white/20 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_12px_40px_rgba(61,44,27,0.16)] backdrop-blur-md md:block"
+      className="pointer-events-none fixed left-0 top-0 z-[200] hidden md:block"
       style={{
-        boxShadow:
-          "0 0 0 1px rgba(255,255,255,0.2), 0 0 24px rgba(var(--accent-rgb), 0.22), inset 0 1px 0 rgba(255,255,255,0.44)",
+        willChange: "transform, width, height, opacity, filter",
         transition:
-          "width 180ms ease, height 180ms ease, opacity 180ms ease, background-color 180ms ease, box-shadow 180ms ease",
-        willChange: "transform, width, height, opacity, background-color, box-shadow",
+          "width 160ms ease, height 160ms ease, opacity 160ms ease, filter 160ms ease",
       }}
-    />
+    >
+      <svg
+        aria-hidden="true"
+        className="block h-full w-full"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M2 1.5V22.5L7.4 17.1L10.8 23.3L13.1 22.1L9.8 16.1H19L2 1.5Z"
+          fill="rgb(var(--ink-rgb))"
+          stroke="rgba(255,255,255,0.88)"
+          strokeLinejoin="round"
+          strokeWidth="1.2"
+        />
+      </svg>
+    </div>
   );
 }

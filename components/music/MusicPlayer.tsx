@@ -94,9 +94,9 @@ export function MusicPlayer() {
   return (
     <motion.aside
       className={cn(
-        "fixed bottom-4 right-4 z-40 overflow-hidden border border-white/34 bg-white/22 shadow-[0_18px_60px_rgba(53,37,21,0.16)] backdrop-blur-2xl md:bottom-6 md:right-6",
+        "fixed bottom-4 right-4 z-40 overflow-hidden border border-white/14 bg-[rgba(255,255,255,0.08)] shadow-[0_18px_60px_rgba(5,5,8,0.22)] backdrop-blur-2xl md:bottom-6 md:right-6",
         isMinimized
-          ? "w-[10rem] rounded-[999px] p-3 sm:w-[11rem]"
+          ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4",
         footerTakeover > 0.84 && "pointer-events-none",
       )}
@@ -123,32 +123,32 @@ export function MusicPlayer() {
         {isMinimized ? (
           <motion.div
             key="minimized"
-            className="flex flex-col items-center gap-3 pt-6"
+            className="flex h-full flex-col items-center justify-start gap-2 pt-7"
             initial={{ opacity: 0, scale: 0.94, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.div
-              className="animate-spin relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-white/40 bg-white/20 shadow-[0_18px_50px_rgba(53,37,21,0.18)]"
+              className="animate-spin relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-white/18 bg-[rgba(255,255,255,0.08)] shadow-[0_18px_50px_rgba(5,5,8,0.2)] sm:h-[5.5rem] sm:w-[5.5rem]"
               style={{
                 animationDuration: "14s",
                 animationPlayState: isPlaying ? "running" : "paused",
               }}
             >
               <div className="absolute inset-2 overflow-hidden rounded-full">{renderArtwork()}</div>
-              <div className="absolute inset-[2px] rounded-full border border-white/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]" />
-              <div className="absolute inset-[38%] rounded-full bg-[rgba(255,255,255,0.42)] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]" />
+              <div className="absolute inset-[2px] rounded-full border border-white/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]" />
+              <div className="absolute inset-[38%] rounded-full bg-[rgba(255,255,255,0.22)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42)]" />
             </motion.div>
 
-            <div className="flex items-center gap-2">
-              <button className="glass-button-muted h-9 w-9 rounded-full p-0" onClick={playPrevious} type="button">
+            <div className="flex items-center gap-1.5">
+              <button className="glass-button-muted h-8 w-8 rounded-full p-0" onClick={playPrevious} type="button">
                 <SkipBack className="h-3.5 w-3.5" />
               </button>
-              <button className="glass-button h-10 w-10 rounded-full p-0" onClick={togglePlayback} type="button">
+              <button className="glass-button h-9 w-9 rounded-full p-0" onClick={togglePlayback} type="button">
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
-              <button className="glass-button-muted h-9 w-9 rounded-full p-0" onClick={playNext} type="button">
+              <button className="glass-button-muted h-8 w-8 rounded-full p-0" onClick={playNext} type="button">
                 <SkipForward className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -163,7 +163,7 @@ export function MusicPlayer() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-center gap-3">
-              <div className="relative h-16 w-16 overflow-hidden rounded-[22px] bg-white/20 sm:h-20 sm:w-20">
+              <div className="relative h-16 w-16 overflow-hidden rounded-[22px] bg-[rgba(255,255,255,0.08)] sm:h-20 sm:w-20">
                 {renderArtwork()}
               </div>
 
@@ -193,7 +193,7 @@ export function MusicPlayer() {
               </div>
               <input
                 aria-label="Track progress"
-                className="h-2 w-full cursor-pointer appearance-none rounded-full border border-white/25 accent-[rgb(var(--accent-rgb))]"
+                className="h-2 w-full cursor-pointer appearance-none rounded-full border border-white/18 accent-[rgb(var(--accent-rgb))]"
                 disabled={duration <= 0}
                 max={Math.max(duration, 1)}
                 min={0}

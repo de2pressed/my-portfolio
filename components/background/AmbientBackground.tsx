@@ -43,7 +43,22 @@ export function AmbientBackground() {
 
     let animationFrame = 0;
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const blobCount = mediaQuery.matches ? 3 : 5;
+    const blobCount = mediaQuery.matches ? 8 : 12;
+    const fallbackPalette = palette.length > 0 ? palette : ["#e8bc8a"];
+
+    type BlobConfig = {
+      angle: number;
+      radiusX: number;
+      radiusY: number;
+      size: number;
+      speed: number;
+      color: string;
+      phase: number;
+      drift: number;
+      offsetX: number;
+      offsetY: number;
+      kind: "orbit" | "drift" | "cross";
+    };
 
     const resize = () => {
       const ratio = Math.min(window.devicePixelRatio || 1, 1.8);
@@ -56,40 +71,70 @@ export function AmbientBackground() {
 
     resize();
 
-    const blobs = Array.from({ length: blobCount }, (_, index) => ({
-      angle: index * 1.35,
-      radius: 140 + index * 38,
-      size: 160 + index * 44,
-      speed: 0.0009 + index * 0.00024,
-      color: palette[index % palette.length] ?? "#e8bc8a",
-    }));
+    const blobs: BlobConfig[] = Array.from({ length: blobCount }, (_, index) => {
+      const isSmall = mediaQuery.matches ? index % 4 === 0 || index % 5 === 1 : index % 3 === 0;
+      const size = isSmall ? 60 + (index % 4) * 10 : 108 + (index % 5) * (mediaQuery.matches ? 12 : 18);
+
+      return {
+        angle: index * 0.78 + (isSmall ? 0.35 : 0.12),
+        radiusX: (mediaQuery.matches ? 54 : 92) + (index % 4) * (mediaQuery.matches ? 16 : 28) + (isSmall ? 12 : 0),
+        radiusY: (mediaQuery.matches ? 32 : 52) + (index % 5) * (mediaQuery.matches ? 10 : 18),
+        size,
+        speed: (isSmall ? 0.0016 : 0.00066) + (index % 5) * (isSmall ? 0.00024 : 0.00012),
+        color: fallbackPalette[index % fallbackPalette.length] ?? "#e8bc8a",
+        phase: index * 0.83,
+        drift: isSmall ? 0.5 + (index % 3) * 0.12 : 0.24 + (index % 4) * 0.06,
+        offsetX: (index % 4 - 1.5) * (mediaQuery.matches ? 20 : 36),
+        offsetY: ((index % 3) - 1) * (mediaQuery.matches ? 10 : 18),
+        kind: index % 3 === 0 ? "cross" : index % 2 === 0 ? "drift" : "orbit",
+      };
+    });
 
     const draw = (time: number) => {
       const level = Math.max(0, Math.min(1, visualLevelRef.current));
-      const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : ["#e8bc8a"];
+      const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
-      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      context.clearRect(0, 0, width, height);
 
-      const gradient = context.createLinearGradient(0, 0, 0, window.innerHeight);
-      gradient.addColorStop(0, `rgba(255,248,240,${0.7 + level * 0.16})`);
-      gradient.addColorStop(0.58, `rgba(249,240,230,${0.82 + level * 0.06})`);
-      gradient.addColorStop(1, `rgba(241,233,224,${0.94 - level * 0.08})`);
+      const gradient = context.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, `rgba(12,12,18,${0.94 - level * 0.06})`);
+      gradient.addColorStop(0.58, `rgba(15,14,22,${0.96 - level * 0.04})`);
+      gradient.addColorStop(1, "rgba(7,7,10,1)");
       context.fillStyle = gradient;
-      context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      context.fillRect(0, 0, width, height);
 
       for (const [index, blob] of blobs.entries()) {
         blob.color = currentPalette[index % currentPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const pulse = 1 + level * 1.05;
-        const x = window.innerWidth / 2 + Math.cos(t + blob.angle) * blob.radius;
-        const y = window.innerHeight / 2 + Math.sin(t * 1.2 + blob.angle) * blob.radius * 0.42;
+        const pulse = 1 + level * (blob.size < 96 ? 0.72 : 1.05);
+        const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
+        let x = width / 2 + blob.offsetX;
+        let y = height / 2 + blob.offsetY;
+
+        if (blob.kind === "cross") {
+          x = width * (0.2 + crossSweep * 0.6) + blob.offsetX * 0.35;
+          y =
+            height * (0.22 + ((Math.cos(t * 0.24 + blob.phase) + 1) / 2) * 0.5) + blob.offsetY * 0.3;
+        } else if (blob.kind === "drift") {
+          x += Math.sin(t * 0.38 + blob.phase) * blob.radiusX * 1.3 + Math.cos(t * 0.17 + blob.phase) * width * 0.04;
+          y += Math.sin(t * 1.08 + blob.angle) * blob.radiusY * 0.8;
+        } else {
+          x += Math.cos(t + blob.angle) * blob.radiusX;
+          y += Math.sin(t * 1.15 + blob.angle) * blob.radiusY;
+        }
+
+        x += Math.sin(t * 0.24 + blob.phase) * blob.radiusX * blob.drift * 0.15;
+        y += Math.cos(t * 0.19 + blob.phase) * blob.radiusY * 0.12;
+
         const radius = blob.size * pulse;
-        const blur = 12 + level * 24;
+        const blur = blob.size < 96 ? 8 + level * 16 : 12 + level * 22;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, 0.18 + level * 0.34));
-        radial.addColorStop(0.55, hexToRgba(blob.color, 0.1 + level * 0.18));
+        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.24 + level * 0.28 : 0.16 + level * 0.32));
+        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.1 + level * 0.12 : 0.08 + level * 0.14));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.filter = `blur(${blur}px)`;
