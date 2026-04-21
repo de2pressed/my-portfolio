@@ -1,0 +1,19 @@
+.wrapper {
+  position: fixed;
+  left: 0.95rem;
+  bottom: 0.8rem;
+  z-index: var(--z-ui);
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--glass-bg) 86%, transparent);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  pointer-events: none;
+  user-select: none;
+}

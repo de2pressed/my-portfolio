@@ -1,0 +1,38 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1200" rx="160" fill="#EEF5FF"/>
+  <g filter="url(#blurA)">
+    <circle cx="318" cy="360" r="244" fill="#F4C57A"/>
+    <circle cx="792" cy="382" r="258" fill="#92B8FF"/>
+    <circle cx="610" cy="786" r="286" fill="#F4AFC8"/>
+  </g>
+  <g filter="url(#glass)">
+    <path d="M254 320C254 260.353 302.353 212 362 212H838C897.647 212 946 260.353 946 320V852C946 911.647 897.647 960 838 960H362C302.353 960 254 911.647 254 852V320Z" fill="url(#panel)" fill-opacity="0.68"/>
+    <path d="M282 284C282 256.386 304.386 234 332 234H868C895.614 234 918 256.386 918 284V420C918 447.614 895.614 470 868 470H332C304.386 470 282 447.614 282 420V284Z" fill="white" fill-opacity="0.22"/>
+    <path d="M322 558C322 535.909 339.909 518 362 518H838C860.091 518 878 535.909 878 558V824C878 846.091 860.091 864 838 864H362C339.909 864 322 846.091 322 824V558Z" fill="#0C111B" fill-opacity="0.16"/>
+  </g>
+  <path d="M338 320L864 852" stroke="white" stroke-opacity="0.38" stroke-width="14" stroke-linecap="round"/>
+  <path d="M856 322L346 848" stroke="white" stroke-opacity="0.22" stroke-width="10" stroke-linecap="round"/>
+  <defs>
+    <filter id="blurA" x="-46" y="-6" width="1214" height="1118" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="60" result="effect1_foregroundBlur_1_1"/>
+    </filter>
+    <filter id="glass" x="200" y="158" width="800" height="856" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="18"/>
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_1_1" result="shape"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dx="10" dy="12"/>
+      <feGaussianBlur stdDeviation="14"/>
+      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.14 0 0 0 0 0.18 0 0 0 0 0.28 0 0 0 0.24 0"/>
+      <feBlend mode="normal" in2="shape" result="effect2_innerShadow_1_1"/>
+    </filter>
+    <linearGradient id="panel" x1="286" y1="234" x2="896" y2="938" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.52"/>
+      <stop offset="1" stop-color="#09101A" stop-opacity="0.26"/>
+    </linearGradient>
+  </defs>
+</svg>

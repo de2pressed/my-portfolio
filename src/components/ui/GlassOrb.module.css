@@ -1,0 +1,43 @@
+.wrapper {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+}
+
+.sm {
+  width: 3rem;
+  height: 3rem;
+}
+
+.md {
+  width: 5rem;
+  height: 5rem;
+}
+
+.lg {
+  width: 7rem;
+  height: 7rem;
+}
+
+.core {
+  width: 60%;
+  height: 60%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, var(--ambient-accent), transparent 70%),
+    radial-gradient(circle, var(--ambient-primary), transparent 80%);
+  animation: pulse-glow 4s var(--ease-glass) infinite;
+}
+
+.label {
+  position: absolute;
+  bottom: calc(-1 * var(--space-lg));
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}

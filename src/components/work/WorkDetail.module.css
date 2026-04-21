@@ -1,0 +1,70 @@
+.wrapper {
+  width: min(78rem, calc(100vw - 2rem));
+  margin: 0 auto;
+  padding: 5rem 0 3rem;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-lg);
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: calc(var(--glass-radius) * 1.15);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(7, 10, 16, 0.12)),
+    color-mix(in srgb, var(--glass-bg) 92%, transparent);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur-heavy);
+}
+
+.back,
+.links a,
+.tags span {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(7, 10, 16, 0.12)),
+    rgba(16, 20, 30, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -12px 18px rgba(0, 0, 0, 0.18);
+}
+
+.summary {
+  max-width: 55rem;
+  font-size: 1.1rem;
+}
+
+.tags,
+.links,
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.cover,
+.gallery img {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: calc(var(--glass-radius) - 0.25rem);
+  object-fit: cover;
+}
+
+.cover {
+  max-height: 28rem;
+}
+
+.gallery img {
+  width: min(24rem, 100%);
+  height: 15rem;
+}
+
+.body {
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+}

@@ -1,0 +1,107 @@
+.wrapper {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 36rem);
+  gap: var(--space-xl);
+  align-items: end;
+  padding: clamp(2.25rem, 6vw, 4rem) clamp(1.25rem, 3vw, 1.75rem);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--glass-radius) * 1.35);
+  background:
+    radial-gradient(circle at 15% 18%, color-mix(in srgb, var(--ambient-primary) 14%, transparent), transparent 24%),
+    radial-gradient(circle at 82% 28%, color-mix(in srgb, var(--ambient-secondary) 10%, transparent), transparent 22%),
+    linear-gradient(180deg, rgba(12, 15, 22, 0.7), rgba(9, 11, 16, 0.84)),
+    color-mix(in srgb, var(--glass-bg) 76%, transparent);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur-heavy);
+}
+
+.wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 16%),
+    linear-gradient(120deg, transparent 0 45%, rgba(255, 255, 255, 0.04) 45.5% 46.5%, transparent 47% 100%);
+  opacity: 0.8;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.aside {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--space-md);
+  justify-items: end;
+}
+
+.playerDock {
+  width: min(100%, 38rem);
+  min-height: 1px;
+  margin-inline-start: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(7, 10, 16, 0.18)),
+    rgba(16, 20, 29, 0.66);
+  color: var(--text-primary);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -12px 18px rgba(0, 0, 0, 0.2),
+    0 12px 18px rgba(0, 0, 0, 0.18);
+  transition:
+    transform var(--duration-fast) var(--ease-glass),
+    box-shadow var(--duration-fast) var(--ease-glass);
+}
+
+.links a:hover {
+  transform: translateY(-1px);
+}
+
+.links a:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 10px 16px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 920px) {
+  .wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .aside,
+  .links {
+    justify-items: start;
+    justify-content: flex-start;
+  }
+
+  .playerDock {
+    width: 100%;
+  }
+}
