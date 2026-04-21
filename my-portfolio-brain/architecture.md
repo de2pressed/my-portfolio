@@ -81,6 +81,7 @@ Those variables are consumed by:
 If extraction fails, the theme falls back to a default palette.
 The background canvas also reads the palette and the music visual level so it can amplify the atmosphere when playback energy rises.
 The glass system now uses a darker base, lower-opacity fill, and stronger backdrop blur so the surfaces read as premium glass instead of opaque panels.
+Text selection and focus accents are also derived from the active theme accent so browser defaults do not leak through.
 
 ## Interaction Layer
 

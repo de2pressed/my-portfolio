@@ -14,6 +14,7 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Lowered glass opacity across shared tokens and key surfaces so the background shows through more clearly in the dark theme.
 - Shifted the ambient mood toward a deeper magenta-violet glow so the page reads closer to the intended dark-mode reference.
 - Fixed the theme context so extracted palettes no longer force a warm canvas and dark text; the page now keeps a dark background with light text while still using the palette for accents.
+- Styled text selection to use the theme accent instead of the browser default blue.
 - Increased ambient background density with more particles, smaller fast movers, and more varied orbital paths.
 - Removed redundant chip labels and implementation-flavored copy from the loading, cookie, and footer surfaces.
 - Tuned public and admin-facing glass surfaces so they feel darker, lighter, and more consistent with the new theme.

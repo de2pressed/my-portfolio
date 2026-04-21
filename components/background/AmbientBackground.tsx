@@ -98,10 +98,11 @@ export function AmbientBackground() {
 
       context.clearRect(0, 0, width, height);
 
-      const gradient = context.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, `rgba(12,12,18,${0.94 - level * 0.06})`);
-      gradient.addColorStop(0.58, `rgba(15,14,22,${0.96 - level * 0.04})`);
-      gradient.addColorStop(1, "rgba(7,7,10,1)");
+      const gradient = context.createRadialGradient(width * 0.5, height * 0.34, 0, width * 0.5, height * 0.34, Math.max(width, height) * 0.82);
+      gradient.addColorStop(0, `rgba(42,10,42,${0.7 - level * 0.1})`);
+      gradient.addColorStop(0.22, `rgba(18,8,22,${0.86 - level * 0.05})`);
+      gradient.addColorStop(0.58, `rgba(7,7,11,${0.96 - level * 0.02})`);
+      gradient.addColorStop(1, "rgba(2,2,4,1)");
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
 
@@ -157,5 +158,5 @@ export function AmbientBackground() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 h-full w-full opacity-90" aria-hidden="true" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 h-full w-full opacity-100" aria-hidden="true" />;
 }

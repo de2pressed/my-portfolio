@@ -11,7 +11,7 @@ body {
   overflow-x: hidden;
   background-color: rgb(var(--canvas-rgb));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.008), transparent 18%),
     var(--ambient-gradient);
   color: rgb(var(--ink-rgb));
   font-family: var(--font-body), sans-serif;
@@ -26,8 +26,8 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.08), transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(var(--teal-rgb), 0.05), transparent 28%);
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.05), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(var(--teal-rgb), 0.03), transparent 28%);
   content: "";
   pointer-events: none;
 }
@@ -36,17 +36,37 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: -1;
-  opacity: 0.12;
+  opacity: 0.05;
   background-image:
-    linear-gradient(transparent 96%, rgba(255, 255, 255, 0.05) 100%),
-    linear-gradient(90deg, transparent 96%, rgba(255, 255, 255, 0.04) 100%);
+    linear-gradient(transparent 96%, rgba(255, 255, 255, 0.03) 100%),
+    linear-gradient(90deg, transparent 96%, rgba(255, 255, 255, 0.025) 100%);
   background-size: 28px 28px;
   content: "";
   pointer-events: none;
 }
 
 ::selection {
-  background: rgba(var(--accent-rgb), 0.24);
+  background: rgba(var(--accent-rgb), 0.42);
+  color: rgb(255, 248, 244);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: rgba(var(--accent-rgb), 0.42);
+  color: rgb(255, 248, 244);
+  text-shadow: none;
+}
+
+input::selection,
+textarea::selection {
+  background: rgba(var(--accent-rgb), 0.42);
+  color: rgb(255, 248, 244);
+}
+
+input::-moz-selection,
+textarea::-moz-selection {
+  background: rgba(var(--accent-rgb), 0.42);
+  color: rgb(255, 248, 244);
 }
 
 * {
