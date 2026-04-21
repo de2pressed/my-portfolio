@@ -69,6 +69,7 @@ Important behavior:
 `context/ThemeContext.tsx` extracts a color palette from the current thumbnail.
 
 The extracted palette is written to CSS custom properties on `document.documentElement`.
+The theme context keeps the core canvas dark and the ink light so extracted colors only steer accents, glows, and ambient surfaces.
 
 Those variables are consumed by:
 

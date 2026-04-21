@@ -31,8 +31,8 @@ function hexToRgb(hex: string) {
 function applyPalette(palette: string[]) {
   const root = document.documentElement;
   const [warm, accent, lavender, teal] = palette;
-  const ink = "#241d18";
-  const canvas = "#f7efe6";
+  const ink = "#f8f2ea";
+  const canvas = "#07070a";
 
   root.style.setProperty("--warm-rgb", hexToRgb(warm ?? "#e8bc8a"));
   root.style.setProperty("--accent-rgb", hexToRgb(accent ?? "#de8a75"));

@@ -43,7 +43,6 @@ body::after {
   background-size: 28px 28px;
   content: "";
   pointer-events: none;
-  mix-blend-mode: soft-light;
 }
 
 ::selection {
