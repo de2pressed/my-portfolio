@@ -106,6 +106,7 @@ export function YouTubeEngine() {
   const playbackRetryTimerRef = useRef<number | null>(null);
   const playlistFallbackAttemptedRef = useRef(false);
   const defaultFallbackAttemptedRef = useRef(false);
+  const smoothedEnergyRef = useRef(0.08);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -138,24 +139,23 @@ export function YouTubeEngine() {
         return 0.08;
       }
 
-      // Dramatic bass pulse (slow, heavy)
-      const bassPulse = Math.pow(Math.sin(currentTime * 2.5), 2) * 0.35;
+      // Dramatic bass pulse (slow, heavy) - increased multiplier
+      const bassPulse = Math.pow(Math.sin(currentTime * 3.0), 2) * 0.45;
       
-      // Fast mid-range shimmer
-      const midShimmer = Math.abs(Math.sin(currentTime * 6.0)) * 0.2;
+      // Fast mid-range shimmer - increased multiplier
+      const midShimmer = Math.abs(Math.sin(currentTime * 8.0)) * 0.28;
       
-      // High-frequency sparkle
-      const highSpark = Math.abs(Math.cos(currentTime * 12.0 + 1.5)) * 0.15;
+      // High-frequency sparkle - increased multiplier
+      const highSpark = Math.abs(Math.cos(currentTime * 16.0 + 1.5)) * 0.22;
       
-      // Aggressive volume scaling (volume has major impact)
-      const volumeScale = Math.pow(currentVolume / 100, 1.5) * 0.4;
+      // Aggressive volume scaling - increased impact
+      const volumeScale = Math.pow(currentVolume / 100, 1.8) * 0.5;
       
       // Tempo burst for dynamic feel
-      const tempoBurst = Math.min(0.3, deltaTime * 1.2);
+      const tempoBurst = Math.min(0.35, deltaTime * 1.5);
       
       // Combine for dramatic energy range (0.1 to 1.0)
       const energy = Math.min(1.0, 0.1 + bassPulse + midShimmer + highSpark + volumeScale + tempoBurst);
-      console.log("[YouTubeEngine] deriveEnergy:", { currentTime, isPlaying, currentVolume, deltaTime, energy, bassPulse, midShimmer, volumeScale });
       return energy;
     }
 
@@ -611,7 +611,13 @@ export function YouTubeEngine() {
             const deltaTime = Math.max(0, snapshot.currentTime - previousTimeRef.current);
             previousTimeRef.current = snapshot.currentTime;
             const isPlaying = state === window.YT?.PlayerState.PLAYING;
-            console.log("[YouTubeEngine] Poll loop executing:", { state, isPlaying, currentTime: snapshot.currentTime, deltaTime, volume: volumeRef.current });
+            const targetEnergy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
+            
+            // Smooth interpolation: move 15% toward target each poll cycle
+            const smoothingFactor = 0.15;
+            smoothedEnergyRef.current = smoothedEnergyRef.current + (targetEnergy - smoothedEnergyRef.current) * smoothingFactor;
+            
+            console.log("[YouTubeEngine] Poll loop executing:", { state, isPlaying, currentTime: snapshot.currentTime, deltaTime, volume: volumeRef.current, targetEnergy, smoothedEnergy: smoothedEnergyRef.current });
             syncTrack({
               title: snapshot.title ?? undefined,
               videoId: snapshot.videoId,
@@ -619,9 +625,7 @@ export function YouTubeEngine() {
               currentTime: snapshot.currentTime,
               duration: snapshot.duration,
             });
-            const energy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
-            console.log("[YouTubeEngine] Calling setVisualLevel with energy:", energy);
-            setVisualLevel(energy);
+            setVisualLevel(smoothedEnergyRef.current);
           } catch (error) {
             console.warn("YouTube poll loop failed.", error);
           }

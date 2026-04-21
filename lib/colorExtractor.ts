@@ -18,13 +18,21 @@ function quantizeChannel(value: number) {
 function quantize(values: Uint8ClampedArray) {
   const buckets = new Map<string, { count: number; brightness: number }>();
 
-  for (let index = 0; index < values.length; index += 16) {
+  // Sample every 4th pixel instead of every 16th for more accurate color capture
+  for (let index = 0; index < values.length; index += 4) {
     const r = values[index] ?? 0;
     const g = values[index + 1] ?? 0;
     const b = values[index + 2] ?? 0;
     const alpha = values[index + 3] ?? 0;
 
-    if (alpha < 180) {
+    // Skip transparent or semi-transparent pixels
+    if (alpha < 200) {
+      continue;
+    }
+
+    // Skip very dark pixels (likely shadows/background)
+    const brightness = luminance(r, g, b);
+    if (brightness < 20) {
       continue;
     }
 
@@ -33,26 +41,28 @@ function quantize(values: Uint8ClampedArray) {
     const quantizedBlue = quantizeChannel(b);
     const key = `${quantizedRed}-${quantizedGreen}-${quantizedBlue}`;
     const current = buckets.get(key);
-    const bucketBrightness = luminance(quantizedRed, quantizedGreen, quantizedBlue);
 
     buckets.set(key, {
       count: (current?.count ?? 0) + 1,
-      brightness: bucketBrightness,
+      brightness,
     });
   }
 
-  return [...buckets.entries()]
+  const sorted = [...buckets.entries()]
     .sort((a, b) => b[1].count - a[1].count)
     .map(([key, value]) => ({
       key,
       brightness: value.brightness,
     }))
-    .filter((entry) => entry.brightness >= 28)
+    .filter((entry) => entry.brightness >= 25)
     .slice(0, 5)
     .map(({ key }) => {
       const [r, g, b] = key.split("-").map((value) => Number(value));
       return rgbToHex(r, g, b);
     });
+
+  console.log("[colorExtractor] Extracted palette:", sorted);
+  return sorted;
 }
 
 export async function extractPaletteFromImage(url: string) {
@@ -71,8 +81,8 @@ export async function extractPaletteFromImage(url: string) {
     });
 
     const canvas = document.createElement("canvas");
-    canvas.width = 72;
-    canvas.height = 72;
+    canvas.width = 128;
+    canvas.height = 128;
     const context = canvas.getContext("2d", { willReadFrequently: true });
 
     if (!context) {
