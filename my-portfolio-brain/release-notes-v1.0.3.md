@@ -20,6 +20,14 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Tuned public and admin-facing glass surfaces so they feel darker, lighter, and more consistent with the new theme.
 - Bumped the site version to `v1.0.3`.
 
+## Follow-Up Fixes
+
+- Tightened the root canvas and ambient fill to an almost-black base so the page no longer reads as grey-washed.
+- Reduced the custom cursor size so it matches the reference screenshots more closely.
+- Increased selection contrast so drag-selected text is clearly visible in the dark theme.
+- Guarded music URL refreshes so the current soundtrack title is not overwritten by an unchanged settings response.
+- Triggered playback from the cookie decision action so the first accepted visit can start audio without requiring a reload.
+
 ## Files To Know
 
 - `components/music/YouTubeEngine.tsx`

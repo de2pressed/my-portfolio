@@ -24,13 +24,13 @@
 ## Context Layer
 
 - `context/CookieContext.tsx` - consent and analytics opt-in
-- `context/MusicContext.tsx` - playback state, track metadata, controls
-- `context/ThemeContext.tsx` - palette extraction and CSS variable updates
+- `context/MusicContext.tsx` - playback state, track metadata, controls, and first-play queuing
+- `context/ThemeContext.tsx` - palette extraction, near-black canvas defaults, and CSS variable updates
 
 ## Layout And Shell
 
 - `components/layout/AppProviders.tsx` - provider composition
-- `components/layout/ExperienceShell.tsx` - loading, consent, reveal, and shell orchestration
+- `components/layout/ExperienceShell.tsx` - loading, consent, first-gesture playback, reveal, and shell orchestration
 - `components/layout/Header.tsx` - public site header
 - `components/layout/Footer.tsx` - footer takeover and music-driven end of page
 - `components/layout/PageTransition.tsx` - page motion wrapper
@@ -38,8 +38,8 @@
 ## UI And Loading
 
 - `components/loading/LoadingScreen.tsx` - initial loading surface and handoff animation
-- `components/loading/CookieConsent.tsx` - consent overlay and reveal animation
-- `components/ui/GlassCursor.tsx` - custom pointer treatment for fine pointer devices
+- `components/loading/CookieConsent.tsx` - consent overlay and reveal animation that also serves as a playback gesture
+- `components/ui/GlassCursor.tsx` - smaller custom pointer treatment for fine pointer devices
 - `components/ui/VersionBadge.tsx` - displayed version marker
 
 ## Hooks
@@ -48,7 +48,7 @@
 
 ## Music System
 
-- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API, uses muted autoplay, and registers controls
+- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API, uses muted autoplay, syncs metadata, and registers controls
 - `components/music/MusicPlayer.tsx` - floating playback widget with seek, volume, and minimize mode
 
 ## Public Sections
@@ -86,8 +86,8 @@
 
 ## Styling
 
-- `styles/design-tokens.css` - CSS variables and token definitions
-- `styles/globals.css` - base styles, glass UI classes, and global behavior
+- `styles/design-tokens.css` - CSS variables and token definitions for the near-black glass theme
+- `styles/globals.css` - base styles, glass UI classes, selection accents, and global behavior
 
 ## Supabase
 

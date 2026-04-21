@@ -20,7 +20,7 @@ import { useMusic } from "@/context/MusicContext";
 export function ExperienceShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const { consent, hydrated, setConsent, storageAvailable } = useCookie();
-  const { engineStatus } = useMusic();
+  const { engineStatus, play } = useMusic();
   const [phase, setPhase] = useState<"loading" | "handoff" | "cookie" | "none">("loading");
   const [revealed, setRevealed] = useState(false);
 
@@ -75,6 +75,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
 
   function handleDecision(decision: "accepted" | "rejected") {
     setConsent(decision);
+    play();
     setPhase("none");
     window.setTimeout(() => setRevealed(true), 160);
   }

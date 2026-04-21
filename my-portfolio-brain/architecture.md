@@ -70,6 +70,7 @@ Important behavior:
 
 The extracted palette is written to CSS custom properties on `document.documentElement`.
 The theme context keeps the core canvas dark and the ink light so extracted colors only steer accents, glows, and ambient surfaces.
+The latest pass pushes the canvas closer to near-black, removes the grey wash from the ambient layers, and keeps glass surfaces more transparent so the content reads against a cleaner dark field.
 
 Those variables are consumed by:
 
@@ -91,6 +92,7 @@ The interaction layer includes:
 - `components/ui/GlassCursor.tsx` for custom cursor behavior on fine pointers
 
 The header now uses intersection observers to keep the active section highlighted. The cursor is a topmost pointer arrow that changes size and emphasis on interactive targets such as links and buttons.
+The cursor was recently reduced in size so it feels lighter and closer to the reference treatment.
 
 ## Consent And Analytics
 
@@ -106,6 +108,8 @@ The public page sends:
 - session end
 
 These events are collected through `app/api/analytics/route.ts`.
+
+The cookie decision handler also serves as the first reliable user gesture for playback. On the first visit, accepting or rejecting the consent sheet now kicks the hidden YouTube player so the soundtrack can start without a page reload.
 
 ## Admin System
 

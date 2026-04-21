@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
-const DEFAULT_SIZE = 26;
-const HOVER_SIZE = 32;
-const TIP_OFFSET_X = 2;
-const TIP_OFFSET_Y = 1;
+const DEFAULT_SIZE = 18;
+const HOVER_SIZE = 24;
+const TIP_OFFSET_X = 1.2;
+const TIP_OFFSET_Y = 0.8;
 
 export function GlassCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
@@ -38,8 +38,8 @@ export function GlassCursor() {
       cursorRef.current.style.height = `${size}px`;
       cursorRef.current.style.opacity = "1";
       cursorRef.current.style.filter = interactive.current
-        ? "drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.3)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6))"
-        : "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))";
+        ? "drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.26)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65))"
+        : "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.42))";
     };
 
     const updatePosition = (event: PointerEvent) => {

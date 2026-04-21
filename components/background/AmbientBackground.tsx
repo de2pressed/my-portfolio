@@ -44,7 +44,7 @@ export function AmbientBackground() {
     let animationFrame = 0;
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const blobCount = mediaQuery.matches ? 8 : 12;
-    const fallbackPalette = palette.length > 0 ? palette : ["#b93ca7", "#7b5fd1", "#f0dcff"];
+    const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
 
     type BlobConfig = {
       angle: number;
@@ -98,11 +98,18 @@ export function AmbientBackground() {
 
       context.clearRect(0, 0, width, height);
 
-      const gradient = context.createRadialGradient(width * 0.5, height * 0.34, 0, width * 0.5, height * 0.34, Math.max(width, height) * 0.82);
-      gradient.addColorStop(0, `rgba(42,10,42,${0.7 - level * 0.1})`);
-      gradient.addColorStop(0.22, `rgba(18,8,22,${0.86 - level * 0.05})`);
-      gradient.addColorStop(0.58, `rgba(7,7,11,${0.96 - level * 0.02})`);
-      gradient.addColorStop(1, "rgba(2,2,4,1)");
+      const gradient = context.createRadialGradient(
+        width * 0.5,
+        height * 0.34,
+        0,
+        width * 0.5,
+        height * 0.34,
+        Math.max(width, height) * 0.68,
+      );
+      gradient.addColorStop(0, `rgba(76,16,64,${0.62 - level * 0.08})`);
+      gradient.addColorStop(0.16, `rgba(20,6,24,${0.9 - level * 0.05})`);
+      gradient.addColorStop(0.42, `rgba(5,5,8,${0.98 - level * 0.02})`);
+      gradient.addColorStop(1, "rgba(0,0,0,1)");
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
 
@@ -131,11 +138,11 @@ export function AmbientBackground() {
         y += Math.cos(t * 0.19 + blob.phase) * blob.radiusY * 0.12;
 
         const radius = blob.size * pulse;
-        const blur = blob.size < 96 ? 8 + level * 16 : 12 + level * 22;
+        const blur = blob.size < 96 ? 6 + level * 12 : 10 + level * 16;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.24 + level * 0.28 : 0.16 + level * 0.32));
-        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.1 + level * 0.12 : 0.08 + level * 0.14));
+        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.18 + level * 0.22 : 0.12 + level * 0.24));
+        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.075 + level * 0.08 : 0.06 + level * 0.1));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.filter = `blur(${blur}px)`;

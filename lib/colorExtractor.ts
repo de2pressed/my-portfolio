@@ -1,4 +1,4 @@
-const FALLBACK_COLORS = ["#e8bc8a", "#de8a75", "#bdadc9", "#2e7a73", "#f4ece4"];
+const FALLBACK_COLORS = ["#151019", "#b93ca7", "#7a57e8", "#271d31", "#f2e8f6"];
 
 function rgbToHex(r: number, g: number, b: number) {
   return `#${[r, g, b]

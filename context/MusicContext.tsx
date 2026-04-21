@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, type PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  type PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useResolvedYouTubeThumbnail } from "@/hooks/useResolvedYouTubeThumbnail";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
@@ -78,6 +86,18 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [controls, setControls] = useState<PlayerControls | null>(null);
   const thumbnail = useResolvedYouTubeThumbnail(source.videoId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
+  const controlsRef = useRef<PlayerControls | null>(null);
+  const pendingPlayRef = useRef(false);
+  const musicUrlRef = useRef(musicUrl);
+
+  useEffect(() => {
+    controlsRef.current = controls;
+
+    if (controls && pendingPlayRef.current) {
+      controls.play();
+      pendingPlayRef.current = false;
+    }
+  }, [controls]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +108,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
           cache: "no-store",
         });
         const payload = (await response.json()) as { value?: string };
-        if (!cancelled && payload.value) {
+        if (!cancelled && payload.value && payload.value !== musicUrlRef.current) {
+          musicUrlRef.current = payload.value;
           setMusicUrl(payload.value);
           setSource(parseYouTubeSource(payload.value));
           setTitle("Loading soundtrack...");
@@ -105,13 +126,14 @@ export function MusicProvider({ children }: PropsWithChildren) {
     const handleMusicUrlUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<string>;
       const nextUrl = customEvent.detail;
-      if (typeof nextUrl === "string" && nextUrl) {
+      if (typeof nextUrl === "string" && nextUrl && nextUrl !== musicUrlRef.current) {
+        musicUrlRef.current = nextUrl;
         setMusicUrl(nextUrl);
         setSource(parseYouTubeSource(nextUrl));
         setTitle("Loading soundtrack...");
         setCurrentTime(0);
         setDuration(0);
-        controls?.load(nextUrl);
+        controlsRef.current?.load(nextUrl);
       }
     };
 
@@ -121,7 +143,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
       cancelled = true;
       window.removeEventListener("portfolio:music-url-updated", handleMusicUrlUpdate);
     };
-  }, [controls]);
+  }, []);
 
   useEffect(() => {
     if (thumbnail) {
@@ -195,53 +217,64 @@ export function MusicProvider({ children }: PropsWithChildren) {
 
   const setVolume = useCallback((value: number) => {
     setVolumeState(value);
-    controls?.setVolume(value);
-  }, [controls]);
+    controlsRef.current?.setVolume(value);
+  }, []);
 
   const seekTo = useCallback((seconds: number) => {
     const nextSeconds = Math.max(0, duration > 0 ? Math.min(duration, seconds) : seconds);
     setCurrentTime(nextSeconds);
-    controls?.seekTo(nextSeconds);
-  }, [controls, duration]);
+    controlsRef.current?.seekTo(nextSeconds);
+  }, [duration]);
 
   const togglePlayback = useCallback(() => {
-    controls?.toggle();
-  }, [controls]);
+    controlsRef.current?.toggle();
+  }, []);
 
   const playNext = useCallback(() => {
-    controls?.next();
-  }, [controls]);
+    controlsRef.current?.next();
+  }, []);
 
   const playPrevious = useCallback(() => {
-    controls?.previous();
-  }, [controls]);
+    controlsRef.current?.previous();
+  }, []);
 
   const play = useCallback(() => {
-    controls?.play();
-  }, [controls]);
+    if (controlsRef.current) {
+      controlsRef.current.play();
+      return;
+    }
+
+    pendingPlayRef.current = true;
+  }, []);
 
   const pause = useCallback(() => {
-    controls?.pause();
-  }, [controls]);
+    controlsRef.current?.pause();
+    pendingPlayRef.current = false;
+  }, []);
 
   const mute = useCallback(() => {
     setIsMuted(true);
-    controls?.mute(true);
-  }, [controls]);
+    controlsRef.current?.mute(true);
+  }, []);
 
   const unmute = useCallback(() => {
     setIsMuted(false);
-    controls?.mute(false);
-  }, [controls]);
+    controlsRef.current?.mute(false);
+  }, []);
 
   const loadMusicUrl = useCallback((url: string) => {
+    if (url === musicUrlRef.current) {
+      return;
+    }
+
+    musicUrlRef.current = url;
     setMusicUrl(url);
     setSource(parseYouTubeSource(url));
     setTitle("Loading soundtrack...");
     setCurrentTime(0);
     setDuration(0);
-    controls?.load(url);
-  }, [controls]);
+    controlsRef.current?.load(url);
+  }, []);
 
   return (
     <MusicContext.Provider
