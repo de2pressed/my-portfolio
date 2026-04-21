@@ -71,8 +71,9 @@ export function AmbientBackground() {
       context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       const gradient = context.createLinearGradient(0, 0, 0, window.innerHeight);
-      gradient.addColorStop(0, `rgba(255,248,240,${0.78 + level * 0.08})`);
-      gradient.addColorStop(1, `rgba(241,233,224,${0.9 - level * 0.06})`);
+      gradient.addColorStop(0, `rgba(255,248,240,${0.7 + level * 0.16})`);
+      gradient.addColorStop(0.58, `rgba(249,240,230,${0.82 + level * 0.06})`);
+      gradient.addColorStop(1, `rgba(241,233,224,${0.94 - level * 0.08})`);
       context.fillStyle = gradient;
       context.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -80,15 +81,15 @@ export function AmbientBackground() {
         blob.color = currentPalette[index % currentPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const pulse = 1 + level * 0.78;
+        const pulse = 1 + level * 1.05;
         const x = window.innerWidth / 2 + Math.cos(t + blob.angle) * blob.radius;
         const y = window.innerHeight / 2 + Math.sin(t * 1.2 + blob.angle) * blob.radius * 0.42;
         const radius = blob.size * pulse;
-        const blur = 10 + level * 16;
+        const blur = 12 + level * 24;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, 0.16 + level * 0.26));
-        radial.addColorStop(0.55, hexToRgba(blob.color, 0.08 + level * 0.12));
+        radial.addColorStop(0, hexToRgba(blob.color, 0.18 + level * 0.34));
+        radial.addColorStop(0.55, hexToRgba(blob.color, 0.1 + level * 0.18));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.filter = `blur(${blur}px)`;

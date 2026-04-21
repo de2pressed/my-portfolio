@@ -1,0 +1,13 @@
+
+Changelog-3
+Music player should scale on each window size, music should not pause when tabs are switched, on big windows, scrolling all the way down does not merge the music player fully into the footer.
+Background does not sync with music, it feels very un-synced
+The default cursor shows up when hovering over a button.
+Every glass element needs to be more frosted glass-ish.
+Loading screen does not scale well on all windows sizes, also the loading texts could use more animation.
+Website layout feels very ai sloppish.
+A minimize button on the music player that switches the music player to a smaller version with only essential controls and the album cover spinning like a disc.
+Remove slop text like the loading page gibberish, use logical text.
+Animations should be more refined and theme matching.
+Music is not autoplaying when website loads.
+The animation of the music player switching from corner to footer does not look smooth at all, its just a fade animation, the animation should be something that looks like the music players transforms into the footer.

@@ -4,13 +4,14 @@ This folder is the handoff pack for the portfolio project. It is written so anot
 
 Start here, then read the linked docs in order:
 
-1. [Release notes v1.0.1](./release-notes-v1.0.1.md)
-2. [Project overview](./project-overview.md)
-3. [Architecture](./architecture.md)
-4. [Data model](./data-model.md)
-5. [Routes and flows](./routes-and-flows.md)
-6. [File map](./file-map.md)
-7. [Working guide](./working-guide.md)
+1. [Release notes v1.0.2](./release-notes-v1.0.2.md)
+2. [Release notes v1.0.1](./release-notes-v1.0.1.md)
+3. [Project overview](./project-overview.md)
+4. [Architecture](./architecture.md)
+5. [Data model](./data-model.md)
+6. [Routes and flows](./routes-and-flows.md)
+7. [File map](./file-map.md)
+8. [Working guide](./working-guide.md)
 
 ## One-Screen Summary
 
@@ -18,7 +19,7 @@ Start here, then read the linked docs in order:
 - Public content is rendered from a portfolio data layer that can read from Supabase or fall back to local seeded data.
 - The public site includes a music engine driven by the YouTube IFrame API, a palette derived from the current track thumbnail, cookie consent, analytics tracking, and a footer music takeover.
 - Admin pages let you edit content, manage collections, moderate reviews, update the music URL, and inspect analytics.
-- Current release: `v1.0.1`
+- Current release: `v1.0.2`
 - The repo already includes fixes for the important runtime issues noted in the changelog:
   - `/admin` now redirects to `/admin/login`
   - `/login` now redirects to `/admin/login`

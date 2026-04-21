@@ -58,7 +58,7 @@ export function AdminLoginForm() {
 
       <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-8 pt-20 lg:grid-cols-[1.05fr_0.95fr]">
         <motion.aside
-          className="relative overflow-hidden rounded-[44px] border border-white/28 bg-[rgba(255,255,255,0.16)] p-8 shadow-[0_30px_100px_rgba(52,36,22,0.16)] backdrop-blur-2xl md:p-10"
+          className="relative overflow-hidden rounded-[44px] border border-white/34 bg-[rgba(255,255,255,0.22)] p-8 shadow-[0_30px_100px_rgba(52,36,22,0.16)] backdrop-blur-2xl md:p-10"
           initial={{ opacity: 0, x: -64, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -84,7 +84,7 @@ export function AdminLoginForm() {
                 "Supabase-backed edits",
               ].map((line) => (
                 <div
-                  className="flex items-center gap-3 rounded-[22px] border border-white/24 bg-white/16 px-4 py-3 text-sm text-ink/72"
+                  className="flex items-center gap-3 rounded-[22px] border border-white/28 bg-white/22 px-4 py-3 text-sm text-ink/72"
                   key={line}
                 >
                   <Lock className="h-4 w-4 text-ink/58" />
@@ -96,7 +96,7 @@ export function AdminLoginForm() {
         </motion.aside>
 
         <motion.section
-          className={`glass-panel relative overflow-hidden rounded-[44px] border border-white/30 bg-white/18 p-6 shadow-[0_34px_120px_rgba(52,36,22,0.2)] backdrop-blur-2xl md:p-8 ${
+          className={`glass-panel relative overflow-hidden rounded-[44px] border border-white/34 bg-white/22 p-6 shadow-[0_34px_120px_rgba(52,36,22,0.2)] backdrop-blur-2xl md:p-8 ${
             errorPulse ? "border-rose-300/45 ring-1 ring-rose-300/20" : ""
           }`}
           animate={errorPulse ? { x: [0, -16, 12, -10, 6, 0] } : { x: 0 }}
@@ -109,7 +109,7 @@ export function AdminLoginForm() {
                 className={`flex h-14 w-14 items-center justify-center rounded-[18px] border ${
                   errorPulse
                     ? "border-rose-300/50 bg-rose-100/24 text-rose-950"
-                    : "border-white/30 bg-white/22 text-ink"
+                    : "border-white/34 bg-white/28 text-ink"
                 }`}
               >
                 <Shield className="h-6 w-6" />
@@ -124,7 +124,7 @@ export function AdminLoginForm() {
               className={`mt-5 rounded-[22px] border px-4 py-4 text-sm leading-7 ${
                 errorPulse
                   ? "border-rose-300/40 bg-rose-100/24 text-rose-950"
-                  : "border-white/28 bg-white/18 text-ink/72"
+                  : "border-white/32 bg-white/22 text-ink/72"
               }`}
             >
               Sign in with the admin account connected to Supabase Auth. In local preview mode, the
@@ -142,7 +142,7 @@ export function AdminLoginForm() {
                 className={`w-full rounded-[20px] border px-4 py-3 text-sm outline-none transition-colors placeholder:text-ink/42 ${
                   errorPulse
                     ? "border-rose-300/50 bg-rose-50/24 text-ink"
-                    : "border-white/28 bg-white/22 text-ink"
+                    : "border-white/34 bg-white/26 text-ink"
                 }`}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Email"
@@ -154,7 +154,7 @@ export function AdminLoginForm() {
                 className={`w-full rounded-[20px] border px-4 py-3 text-sm outline-none transition-colors placeholder:text-ink/42 ${
                   errorPulse
                     ? "border-rose-300/50 bg-rose-50/24 text-ink"
-                    : "border-white/28 bg-white/22 text-ink"
+                    : "border-white/34 bg-white/26 text-ink"
                 }`}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Password"

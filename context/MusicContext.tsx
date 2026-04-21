@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  type PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
 
 import { useResolvedYouTubeThumbnail } from "@/hooks/useResolvedYouTubeThumbnail";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
@@ -51,6 +44,7 @@ type MusicContextValue = {
     isPlaying?: boolean;
     currentTime?: number;
     duration?: number;
+    isMuted?: boolean;
   }) => void;
   setVisualLevel: (value: number) => void;
   setVolume: (value: number) => void;
@@ -138,17 +132,6 @@ export function MusicProvider({ children }: PropsWithChildren) {
     resetPalette();
   }, [resetPalette, setPaletteFromThumbnail, thumbnail]);
 
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === "hidden") {
-        controls?.pause();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [controls]);
-
   const registerControls = useCallback((nextControls: PlayerControls) => {
     setControls(nextControls);
   }, []);
@@ -159,6 +142,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
     isPlaying?: boolean;
     currentTime?: number;
     duration?: number;
+    isMuted?: boolean;
   }) => {
     if (payload.title) {
       setTitle(payload.title);
@@ -182,6 +166,10 @@ export function MusicProvider({ children }: PropsWithChildren) {
     if (typeof payload.duration === "number" && Number.isFinite(payload.duration)) {
       setDuration(Math.max(0, payload.duration));
     }
+
+    if (typeof payload.isMuted === "boolean") {
+      setIsMuted(payload.isMuted);
+    }
   }, []);
 
   const setPlayerReady = useCallback((ready: boolean) => {
@@ -195,6 +183,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
     setEngineStatus("error");
     setErrorMessage(message);
     setIsPlaying(false);
+    setIsMuted(false);
     setCurrentTime(0);
     setDuration(0);
     resetPalette();

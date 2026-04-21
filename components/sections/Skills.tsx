@@ -28,9 +28,10 @@ export function Skills({ skills }: SkillsProps) {
               className="section-card"
               initial={{ opacity: 0, y: 30 }}
               key={category}
-              transition={{ duration: 0.75, delay: index * 0.08 }}
+              transition={{ type: "spring", stiffness: 100, damping: 19, delay: index * 0.08 }}
               viewport={{ once: true, amount: 0.25 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4, scale: 1.01 }}
             >
               <p className="text-xs uppercase tracking-[0.26em] text-ink/52">{category}</p>
               <div className="mt-5 flex flex-wrap gap-3">
@@ -39,7 +40,7 @@ export function Skills({ skills }: SkillsProps) {
                     className="glass-chip"
                     initial={{ opacity: 0, scale: 0.9, y: 10 }}
                     key={skill.id}
-                    transition={{ duration: 0.35, delay: itemIndex * 0.03 }}
+                    transition={{ type: "spring", stiffness: 140, damping: 18, delay: itemIndex * 0.035 }}
                     viewport={{ once: true }}
                     whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   >

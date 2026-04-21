@@ -61,7 +61,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/30 bg-white/18 px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-7xl rounded-full border border-white/34 bg-white/24 px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
@@ -105,7 +105,7 @@ export function Header({ name }: HeaderProps) {
       <AnimatePresence>
         {open ? (
           <motion.div
-            className="fixed inset-0 z-[31] bg-[rgba(247,239,230,0.5)] px-4 pt-24 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-[31] bg-[rgba(247,239,230,0.62)] px-4 pt-24 backdrop-blur-xl md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -34,12 +34,16 @@ export function Footer({ name, email, note }: FooterProps) {
         return;
       }
 
-      const rect = ref.current.getBoundingClientRect();
-      const progress = Math.max(0, Math.min(1, 1 - rect.top / (window.innerHeight * 0.92)));
+      const footerTop = ref.current.getBoundingClientRect().top + window.scrollY;
+      const viewportBottom = window.scrollY + window.innerHeight;
+      const start = footerTop - window.innerHeight;
+      const end = Math.max(start + 1, document.documentElement.scrollHeight - 40);
+      const progress = Math.max(0, Math.min(1, (viewportBottom - start) / (end - start)));
       setFooterTakeover(progress);
     };
 
     const handleScroll = () => {
+      window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(updateProgress);
     };
 
@@ -77,16 +81,17 @@ export function Footer({ name, email, note }: FooterProps) {
           </div>
 
           <motion.div
-            className="relative overflow-hidden rounded-[30px] border border-white/28 bg-white/18 p-4 shadow-[0_24px_90px_rgba(52,38,22,0.16)] backdrop-blur-2xl"
+            className="relative overflow-hidden rounded-[30px] border border-white/32 bg-white/22 p-4 shadow-[0_24px_90px_rgba(52,38,22,0.16)] backdrop-blur-2xl"
             animate={{
-              opacity: Math.min(1, Math.max(0, (footerTakeover - 0.38) * 2.5)),
-              y: 22 - footerTakeover * 24,
-              scale: 0.94 + footerTakeover * 0.08,
+              opacity: Math.min(1, Math.max(0, (footerTakeover - 0.6) * 2.5)),
+              y: 28 - footerTakeover * 34,
+              scale: 0.9 + footerTakeover * 0.1,
+              rotate: footerTakeover * 0.8,
             }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
-              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-white/18">
+              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-white/22">
                 {thumbnail ? (
                   <Image
                     alt={title}
@@ -102,7 +107,7 @@ export function Footer({ name, email, note }: FooterProps) {
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(22,16,12,0.48))]" />
               </div>
 
-              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-white/14 p-5">
+              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-white/18 p-5">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-ink/56">Immersive music zone</p>
                   <h3 className="mt-2 text-2xl font-semibold text-ink">{title}</h3>

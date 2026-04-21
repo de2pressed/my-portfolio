@@ -55,6 +55,7 @@ export function YouTubeEngine() {
   const sourceRef = useRef(source.rawUrl);
   const volumeRef = useRef(volume);
   const previousTimeRef = useRef(0);
+  const autoplayUnmutePendingRef = useRef(false);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -79,13 +80,15 @@ export function YouTubeEngine() {
         return 0.06;
       }
 
-      const base = Math.abs(Math.sin(currentTime * 1.45)) * 0.23;
-      const shimmer = Math.abs(Math.cos(currentTime * 0.72 + 0.3)) * 0.17;
-      const detail = Math.abs(Math.sin(currentTime * 2.9 + 1.2)) * 0.12;
-      const texture = Math.abs(Math.cos(currentTime * 4.2 - 0.6)) * 0.09;
-      const tempoBurst = Math.min(0.18, Math.max(0, deltaTime * 0.24));
-      const volumeFactor = (currentVolume / 100) * 0.2;
-      return Math.min(1, 0.1 + base + shimmer + detail + texture + tempoBurst + volumeFactor);
+      const base = Math.abs(Math.sin(currentTime * 1.52)) * 0.24;
+      const shimmer = Math.abs(Math.cos(currentTime * 0.78 + 0.42)) * 0.2;
+      const detail = Math.abs(Math.sin(currentTime * 3.12 + 1.08)) * 0.16;
+      const texture = Math.abs(Math.cos(currentTime * 4.56 - 0.74)) * 0.12;
+      const spark = Math.abs(Math.sin(currentTime * 6.9 + 0.18)) * 0.1;
+      const counterpoint = Math.abs(Math.cos(currentTime * 8.2 + 1.4)) * 0.08;
+      const tempoBurst = Math.min(0.28, Math.max(0, deltaTime * 0.42));
+      const volumeFactor = (currentVolume / 100) * 0.22;
+      return Math.min(0.94, 0.1 + base + shimmer + detail + texture + spark + counterpoint + tempoBurst + volumeFactor);
     }
 
     function applySource(player: YT.Player, rawUrl: string) {
@@ -148,12 +151,15 @@ export function YouTubeEngine() {
               markResolved();
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
+              autoplayUnmutePendingRef.current = true;
+              player.mute();
               const videoData = (player as ExtendedPlayer).getVideoData();
               syncTrack({
                 title: videoData.title || "Untitled soundtrack",
                 videoId: videoData.video_id || null,
                 currentTime: player.getCurrentTime(),
                 duration: player.getDuration(),
+                isMuted: true,
               });
               player.setVolume(volumeRef.current);
               player.playVideo();
@@ -188,10 +194,18 @@ export function YouTubeEngine() {
             },
             onStateChange: (event) => {
               const playing = event.data === window.YT?.PlayerState.PLAYING;
+              if (playing && autoplayUnmutePendingRef.current && playerRef.current) {
+                playerRef.current.unMute();
+                playerRef.current.setVolume(volumeRef.current);
+                autoplayUnmutePendingRef.current = false;
+                syncTrack({ isMuted: false });
+              }
+
               syncTrack({ isPlaying: playing });
             },
             onError: () => {
               markResolved();
+              autoplayUnmutePendingRef.current = false;
               setPlayerError("Music unavailable");
             },
           },
@@ -223,6 +237,7 @@ export function YouTubeEngine() {
       } catch (error) {
         console.warn("YouTube IFrame API failed to initialize.", error);
         markResolved();
+        autoplayUnmutePendingRef.current = false;
         setPlayerError("Music unavailable");
       }
     }

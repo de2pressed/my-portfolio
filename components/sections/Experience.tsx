@@ -24,9 +24,10 @@ export function Experience({ experience }: ExperienceProps) {
               className="section-card"
               initial={{ opacity: 0, y: 28 }}
               key={entry.id}
-              transition={{ duration: 0.75, delay: index * 0.08 }}
+              transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.09 }}
               viewport={{ once: true, amount: 0.25 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4, scale: 1.01 }}
             >
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <div>

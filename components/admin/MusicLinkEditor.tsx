@@ -14,7 +14,7 @@ function getSetting(settings: SettingEntry[], key: string, fallback = "") {
 
 export function MusicLinkEditor({ settings }: MusicLinkEditorProps) {
   const [musicUrl, setMusicUrl] = useState(getSetting(settings, "music_url"));
-  const [version, setVersion] = useState(getSetting(settings, "site_version", "v1.0.1"));
+  const [version, setVersion] = useState(getSetting(settings, "site_version", "v1.0.2"));
   const [status, setStatus] = useState<string | null>(null);
 
   async function saveSetting(key: string, value: string) {
@@ -63,13 +63,13 @@ export function MusicLinkEditor({ settings }: MusicLinkEditorProps) {
 
       <div className="grid gap-4">
         <input
-          className="w-full rounded-[20px] border border-white/26 bg-white/22 px-4 py-3 text-sm"
+          className="w-full rounded-[20px] border border-white/34 bg-[rgba(255,255,255,0.28)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.38)] focus:bg-[rgba(255,255,255,0.36)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
           onChange={(event) => setMusicUrl(event.target.value)}
           placeholder="YouTube video or playlist URL"
           value={musicUrl}
         />
         <input
-          className="w-full rounded-[20px] border border-white/26 bg-white/22 px-4 py-3 text-sm"
+          className="w-full rounded-[20px] border border-white/34 bg-[rgba(255,255,255,0.28)] px-4 py-3 text-sm text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-ink/40 focus:border-[rgba(var(--accent-rgb),0.38)] focus:bg-[rgba(255,255,255,0.36)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
           onChange={(event) => setVersion(event.target.value)}
           placeholder="Site version"
           value={version}

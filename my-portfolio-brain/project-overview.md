@@ -1,6 +1,6 @@
 # Project Overview
 
-Current release: `v1.0.1`
+Current release: `v1.0.2`
 
 ## What This Project Is
 

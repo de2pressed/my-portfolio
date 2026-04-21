@@ -22,7 +22,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
           <motion.p
             className="glass-chip w-fit"
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.7 }}
+            transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.8 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}
           >
@@ -36,9 +36,10 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
                 initial={{ opacity: 0, y: 60, rotateX: -80 }}
                 key={word}
                 transition={{
-                  duration: 0.9,
+                  type: "spring",
+                  stiffness: 110,
+                  damping: 18,
                   delay: index * 0.12,
-                  ease: [0.22, 1, 0.36, 1],
                 }}
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
@@ -51,7 +52,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
           <motion.p
             className="max-w-2xl text-xl leading-8 text-ink/78 md:text-2xl"
             initial={{ opacity: 0, y: 28 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.35 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}
           >
@@ -61,7 +62,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
           <motion.p
             className="max-w-2xl text-sm leading-8 text-ink/70 md:text-base"
             initial={{ opacity: 0, y: 28 }}
-            transition={{ duration: 0.8, delay: 0.55 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.48 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}
           >
@@ -71,7 +72,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
           <motion.div
             className="flex flex-wrap gap-3"
             initial={{ opacity: 0, y: 28 }}
-            transition={{ duration: 0.8, delay: 0.65 }}
+            transition={{ type: "spring", stiffness: 95, damping: 20, delay: 0.56 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}
           >
@@ -90,9 +91,10 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
         <motion.div
           className="section-card relative overflow-hidden"
           initial={{ opacity: 0, x: 40 }}
-          transition={{ duration: 0.95, delay: 0.45 }}
+          transition={{ type: "spring", stiffness: 92, damping: 18, delay: 0.38 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, x: 0 }}
+          whileHover={{ y: -6, rotateX: -2, scale: 1.01 }}
         >
           <div className="space-y-4">
             <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Current focus</p>

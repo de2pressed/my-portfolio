@@ -57,9 +57,11 @@ Important behavior:
 
 - track data is synced from the player
 - current volume is stored in state and also mirrored in a ref for the player effect
+- autoplay starts muted, then unmutes after the player enters `PLAYING`
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the footer takeover grows as the user scrolls toward the footer
+- the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
 - if a thumbnail is not available in higher quality, the resolver falls back through `maxresdefault`, `sddefault`, and `hqdefault`
 
 ## Theme Pipeline
@@ -77,6 +79,7 @@ Those variables are consumed by:
 
 If extraction fails, the theme falls back to a default palette.
 The background canvas also reads the palette and the music visual level so it can amplify the atmosphere when playback energy rises.
+The glass system now uses a stronger frosted fill and more visible edge highlight so the surfaces read as real glass instead of a faint blur.
 
 ## Interaction Layer
 

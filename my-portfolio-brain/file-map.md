@@ -47,8 +47,8 @@
 
 ## Music System
 
-- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API and registers controls
-- `components/music/MusicPlayer.tsx` - floating playback widget
+- `components/music/YouTubeEngine.tsx` - boots the YouTube IFrame API, uses muted autoplay, and registers controls
+- `components/music/MusicPlayer.tsx` - floating playback widget with seek, volume, and minimize mode
 
 ## Public Sections
 

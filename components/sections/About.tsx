@@ -19,9 +19,10 @@ export function About({ summary, education }: AboutProps) {
       <motion.div
         className="section-card"
         initial={{ opacity: 0, y: 36 }}
-        transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ type: "spring", stiffness: 100, damping: 20, mass: 0.9 }}
         viewport={{ once: true, amount: 0.3 }}
         whileInView={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -4, scale: 1.01 }}
       >
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <div>

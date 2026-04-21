@@ -24,9 +24,9 @@ export function Projects({ projects }: ProjectsProps) {
               className="section-card flex h-full flex-col justify-between"
               initial={{ opacity: 0, y: 32 }}
               key={project.id}
-              transition={{ duration: 0.8, delay: index * 0.09 }}
+              transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.09 }}
               viewport={{ once: true, amount: 0.25 }}
-              whileHover={{ rotateX: -4, rotateY: 4, y: -8 }}
+              whileHover={{ rotateX: -3, rotateY: 3, y: -6, scale: 1.01 }}
               whileInView={{ opacity: 1, y: 0 }}
             >
               <div>
