@@ -221,14 +221,18 @@ export function AmbientBackground() {
     });
 
     const draw = (time: number) => {
-      const level = Math.max(0, Math.min(1, energyRef.current));
+      const baseLevel = Math.max(0, Math.min(1, energyRef.current));
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
       const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
+      // Convert time from ms to seconds for frequency calculations
+      const t = time / 1000;
+
       context.clearRect(0, 0, width, height);
 
+      // Background gradient reacts subtly to energy
       const gradient = context.createRadialGradient(
         width * 0.5,
         height * 0.34,
@@ -237,18 +241,21 @@ export function AmbientBackground() {
         height * 0.34,
         Math.max(width, height) * 0.68,
       );
-      gradient.addColorStop(0, `rgba(76,16,64,${0.58 - level * 0.07})`);
-      gradient.addColorStop(0.16, `rgba(20,6,24,${0.88 - level * 0.04})`);
-      gradient.addColorStop(0.42, `rgba(5,5,8,${0.97 - level * 0.02})`);
+      gradient.addColorStop(0, `rgba(76,16,64,${0.58 - baseLevel * 0.07})`);
+      gradient.addColorStop(0.16, `rgba(20,6,24,${0.88 - baseLevel * 0.04})`);
+      gradient.addColorStop(0.42, `rgba(5,5,8,${0.97 - baseLevel * 0.02})`);
       gradient.addColorStop(1, "rgba(0,0,0,1)");
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
 
+      // Glow points pulse with bass frequency
+      const bassPulse = Math.pow(Math.abs(Math.sin(t * 3.14)), 2);
+      const glowIntensity = baseLevel * (0.3 + bassPulse * 0.7);
       const glowPoints = [
-        { x: width * 0.08, y: height * 0.1, opacity: 0.14 + level * 0.1, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
-        { x: width * 0.92, y: height * 0.12, opacity: 0.13 + level * 0.09, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
-        { x: width * 0.08, y: height * 0.86, opacity: 0.12 + level * 0.08, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
-        { x: width * 0.92, y: height * 0.84, opacity: 0.13 + level * 0.09, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
+        { x: width * 0.08, y: height * 0.1, opacity: 0.14 + glowIntensity * 0.28, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
+        { x: width * 0.92, y: height * 0.12, opacity: 0.13 + glowIntensity * 0.24, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
+        { x: width * 0.08, y: height * 0.86, opacity: 0.12 + glowIntensity * 0.22, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
+        { x: width * 0.92, y: height * 0.84, opacity: 0.13 + glowIntensity * 0.24, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
       ];
 
       for (const point of glowPoints) {
@@ -265,40 +272,75 @@ export function AmbientBackground() {
       for (const [index, blob] of blobs.entries()) {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
-        const t = time * blob.speed;
-        const rawPulse = 1 + level * (blob.size < 96 ? 1.2 : 1.5);
-        const pulse = Math.min(blob.size < 96 ? 2.0 : 2.3, Math.max(1.0, rawPulse));
-        const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
+        const blobTime = t * blob.speed * 1000;
+        const phaseOffset = blob.phase;
+
+        // Per-blob visualizer frequencies — each blob has its own rhythm
+        // Bass: ~2 Hz — heavy slow pulse
+        const bass = Math.pow(Math.abs(Math.sin(t * 6.28 + phaseOffset)), 3);
+        // Mid: ~5 Hz — rhythmic groove
+        const mid = Math.pow(Math.abs(Math.sin(t * 15.7 + phaseOffset * 1.3)), 2);
+        // High: ~10 Hz — rapid shimmer
+        const high = Math.pow(Math.abs(Math.cos(t * 31.4 + phaseOffset * 0.7)), 2);
+        // Texture: ~20 Hz — fine detail
+        const texture = Math.abs(Math.sin(t * 62.8 + phaseOffset * 2.1));
+
+        // Weight each band differently per blob for organic feel
+        const bassWeight = 0.45 - (index % 3) * 0.08;
+        const midWeight = 0.3 - (index % 4) * 0.04;
+        const highWeight = 0.2 - (index % 5) * 0.02;
+        const textureWeight = 0.1;
+
+        // Combined visualizer signal (0 to 1) — this is the "beat" the blob follows
+        const visualizerSignal = Math.min(1, bass * bassWeight + mid * midWeight + high * highWeight + texture * textureWeight);
+
+        // Scale visualizer by baseLevel so it only activates when music is playing
+        // When music is off (baseLevel ~0.04), visualizerSignal is suppressed to near zero
+        // When music is on (baseLevel ~0.5-0.85), visualizerSignal creates dramatic oscillation
+        const effectiveLevel = baseLevel * (0.15 + visualizerSignal * 0.85);
+
+        // Pulse: blob size oscillates between 1.0 (rest) and up to 2.5 (peak)
+        const rawPulse = 1 + effectiveLevel * (blob.size < 96 ? 1.3 : 1.6);
+        const pulse = Math.min(blob.size < 96 ? 2.3 : 2.6, Math.max(1.0, rawPulse));
+
+        // Position movement also reacts to visualizer
+        const crossSweep = (Math.sin(blobTime * 0.32 + phaseOffset) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
 
+        // Add energy-driven jitter for more life
+        const jitterX = effectiveLevel * Math.sin(t * 8.0 + phaseOffset * 3.0) * 12;
+        const jitterY = effectiveLevel * Math.cos(t * 6.5 + phaseOffset * 2.5) * 8;
+
         if (blob.kind === "cross") {
-          x += (crossSweep - 0.5) * width * 0.28 + Math.sin(t * 0.2 + blob.phase) * blob.orbitX * 0.18;
+          x += (crossSweep - 0.5) * width * 0.28 + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18;
           y +=
-            (Math.cos(t * 0.24 + blob.phase) - 0.5) * height * 0.18 +
-            Math.sin(t * 0.26 + blob.phase) * blob.orbitY * 0.16;
+            (Math.cos(blobTime * 0.24 + phaseOffset) - 0.5) * height * 0.18 +
+            Math.sin(blobTime * 0.26 + phaseOffset) * blob.orbitY * 0.16;
         } else if (blob.kind === "drift") {
-          x += Math.sin(t * 0.38 + blob.phase) * blob.orbitX * 1.1 + Math.cos(t * 0.17 + blob.phase) * width * 0.032;
-          y += Math.sin(t * 1.08 + blob.phase) * blob.orbitY * 0.78;
+          x += Math.sin(blobTime * 0.38 + phaseOffset) * blob.orbitX * 1.1 + Math.cos(blobTime * 0.17 + phaseOffset) * width * 0.032;
+          y += Math.sin(blobTime * 1.08 + phaseOffset) * blob.orbitY * 0.78;
         } else {
-          x += Math.cos(t + blob.phase) * blob.orbitX;
-          y += Math.sin(t * 1.15 + blob.phase) * blob.orbitY;
+          x += Math.cos(blobTime + phaseOffset) * blob.orbitX;
+          y += Math.sin(blobTime * 1.15 + phaseOffset) * blob.orbitY;
         }
 
-        x += Math.sin(t * 0.24 + blob.phase) * blob.orbitX * blob.drift * 0.15;
-        y += Math.cos(t * 0.19 + blob.phase) * blob.orbitY * 0.12;
+        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 + jitterX;
+        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 + jitterY;
 
         const radius = blob.size * pulse;
         const largeBlob = blob.size >= 96;
-        const blur = largeBlob ? 22 - level * 18 : 16 - level * 12;
+        const blur = largeBlob ? 22 - effectiveLevel * 18 : 16 - effectiveLevel * 12;
 
+        // Opacity also oscillates with the visualizer for breathing effect
+        const opacityPulse = 0.5 + visualizerSignal * 0.5;
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, largeBlob ? 0.32 + level * 0.48 : 0.26 + level * 0.42));
-        radial.addColorStop(0.55, hexToRgba(blob.color, largeBlob ? 0.16 + level * 0.20 : 0.12 + level * 0.16));
+        radial.addColorStop(0, hexToRgba(blob.color, (largeBlob ? 0.32 : 0.26) + effectiveLevel * opacityPulse * 0.52));
+        radial.addColorStop(0.55, hexToRgba(blob.color, (largeBlob ? 0.16 : 0.12) + effectiveLevel * opacityPulse * 0.22));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.26 + level * 0.34}) contrast(${1.08 + level * 0.08}) blur(${blur}px)`;
+        context.filter = `saturate(${1.26 + effectiveLevel * 0.34}) contrast(${1.08 + effectiveLevel * 0.08}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);

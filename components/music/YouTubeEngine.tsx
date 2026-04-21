@@ -137,51 +137,23 @@ export function YouTubeEngine() {
       deltaTime: number,
     ) {
       if (!isPlaying) {
-        return 0.06;
+        return 0.04;
       }
 
-      // Much faster oscillations for visualizer-like continuous reaction
-      // Bass: heavy slow pulse - beats ~2x per second
-      const bassPulse = Math.pow(Math.abs(Math.sin(currentTime * 12.5)), 3) * 0.45;
+      // Simple intensity based on volume - visualizer oscillations happen in the canvas at 60fps
+      const volumeIntensity = Math.pow(currentVolume / 100, 1.2) * 0.7;
       
-      // Mid: rhythmic groove - ~5 beats per second  
-      const midGroove = Math.pow(Math.abs(Math.sin(currentTime * 31.4 + 1.1)), 2) * 0.35;
+      // Slight boost from playback activity (seeking, track changes)
+      const activityBump = Math.min(0.15, deltaTime * 1.5);
       
-      // High: rapid shimmer - ~10 beats per second
-      const highSpark = Math.pow(Math.abs(Math.cos(currentTime * 62.8 + 2.7)), 2) * 0.25;
+      // Base energy when playing at all
+      const baseEnergy = 0.15;
       
-      // Ultra-high: fine texture - ~20 beats per second
-      const texture = Math.abs(Math.sin(currentTime * 125.6 + 4.2)) * 0.15;
+      const rawEnergy = Math.min(1.0, baseEnergy + volumeIntensity + activityBump);
       
-      // Volume scaling - makes the overall intensity responsive to volume
-      const volumeScale = Math.pow(currentVolume / 100, 1.2) * 0.3;
-      
-      // Beat-drop simulation using time modulo to create sudden peaks
-      const beatCycle = currentTime % 4; // 4-second cycles
-      const beatDrop = beatCycle < 0.3 ? Math.pow(1 - beatCycle / 0.3, 2) * 0.35 : 0;
-      
-      // Tempo burst from actual playback speed changes
-      const tempoBurst = Math.min(0.25, deltaTime * 2.0);
-      
-      // Combine all components with complex interference patterns
-      const interference = Math.sin(currentTime * 7.3) * Math.cos(currentTime * 11.7) * 0.2;
-      
-      // Raw energy with wide dynamic range
-      const rawEnergy = Math.min(1.0, 
-        0.08 + 
-        bassPulse + 
-        midGroove + 
-        highSpark + 
-        texture + 
-        volumeScale + 
-        beatDrop + 
-        tempoBurst + 
-        interference
-      );
-      
-      // Very light smoothing - just 2 samples to prevent stutter, not to flatten
+      // Light smoothing to prevent jitter
       energyHistoryRef.current.push(rawEnergy);
-      if (energyHistoryRef.current.length > 2) {
+      if (energyHistoryRef.current.length > 3) {
         energyHistoryRef.current.shift();
       }
       const averagedEnergy = energyHistoryRef.current.reduce((sum, val) => sum + val, 0) / energyHistoryRef.current.length;
@@ -642,8 +614,8 @@ export function YouTubeEngine() {
             const isPlaying = state === window.YT?.PlayerState.PLAYING;
             const targetEnergy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
             
-            // Fast interpolation for visualizer-like immediate reaction
-            const smoothingFactor = 0.6;
+            // Smooth interpolation for stable energy tracking
+            const smoothingFactor = 0.15;
             smoothedEnergyRef.current = smoothedEnergyRef.current + (targetEnergy - smoothedEnergyRef.current) * smoothingFactor;
             
             syncTrack({
