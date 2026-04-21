@@ -282,7 +282,6 @@ export function AmbientBackground() {
         // This makes the visualizer feel like it's following the song's structure
         // instead of repeating one pace forever
         const sectionPhase = Math.floor(t / 8);
-        const sectionBlend = (t % 8) / 8; // smooth transition within section
         // Pseudo-random per-section modifier using prime multiplication
         const sectionSeed = (sectionPhase * 7 + index * 13) % 17 / 17;
 
