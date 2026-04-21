@@ -46,6 +46,24 @@ export function ExperienceShell({ children }: PropsWithChildren) {
     return () => window.clearTimeout(timer);
   }, [consent, hydrated, isPublicRoute, musicReady]);
 
+  // Hard safety timeout: guarantee the loading screen always dismisses,
+  // even if the music engine and cookie context both fail to report readiness.
+  useEffect(() => {
+    if (phase === "none") {
+      return;
+    }
+
+    const hardTimeout = window.setTimeout(() => {
+      if (phase === "loading" || phase === "handoff") {
+        console.warn("Hard timeout reached — forcing site reveal.");
+        setPhase("none");
+        window.setTimeout(() => setRevealed(true), 140);
+      }
+    }, 12000);
+
+    return () => window.clearTimeout(hardTimeout);
+  }, [phase]);
+
   useEffect(() => {
     if (phase !== "cookie") {
       return;

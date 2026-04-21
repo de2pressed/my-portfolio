@@ -57,6 +57,11 @@ export function YouTubeEngine() {
   useEffect(() => {
     let cancelled = false;
     let pollInterval = 0;
+    let resolved = false;
+
+    function markResolved() {
+      resolved = true;
+    }
 
     function deriveEnergy(currentTime: number, isPlaying: boolean, currentVolume: number) {
       if (!isPlaying) {
@@ -85,6 +90,17 @@ export function YouTubeEngine() {
         player.loadVideoById(parsed.videoId);
       }
     }
+
+    // Safety timeout: if the YouTube player never fires onReady or onError
+    // (ad blockers, network issues, autoplay restrictions, etc.), force the
+    // engine to "ready" so the loading screen doesn't block the site forever.
+    const safetyTimeout = window.setTimeout(() => {
+      if (!cancelled && !resolved) {
+        console.warn("YouTube engine timed out — proceeding without music.");
+        setPlayerReady(true);
+        markResolved();
+      }
+    }, 8000);
 
     async function boot() {
       try {
@@ -116,6 +132,7 @@ export function YouTubeEngine() {
                 return;
               }
 
+              markResolved();
               playerRef.current = player;
               player.setVolume(volume);
               player.playVideo();
@@ -152,6 +169,7 @@ export function YouTubeEngine() {
               syncTrack({ isPlaying: playing });
             },
             onError: () => {
+              markResolved();
               setPlayerError("Music unavailable");
             },
           },
@@ -175,6 +193,7 @@ export function YouTubeEngine() {
         }, 400);
       } catch (error) {
         console.warn("YouTube IFrame API failed to initialize.", error);
+        markResolved();
         setPlayerError("Music unavailable");
       }
     }
@@ -183,6 +202,7 @@ export function YouTubeEngine() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(safetyTimeout);
       if (pollInterval) {
         window.clearInterval(pollInterval);
       }
