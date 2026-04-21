@@ -275,77 +275,68 @@ export function AmbientBackground() {
         const blobTime = t * blob.speed * 1000;
         const phaseOffset = blob.phase;
 
-        // Each blob is assigned a PRIMARY frequency band role
-        // This makes different blobs represent different song components
+        // Each blob represents a different frequency band of the song
         const bandRole = index % 4; // 0=bass, 1=mid, 2=high, 3=texture
 
-        // Time-drifting base frequencies — these slowly shift over the song duration
-        // so the visualizer evolves and doesn't repeat the same pace forever
-        const drift = Math.sin(t * 0.13 + phaseOffset * 0.5) * 0.3; // slow drift over ~48 seconds
-        const drift2 = Math.cos(t * 0.09 + phaseOffset * 0.3) * 0.2;
+        // Song-section variation: every ~8 seconds the pattern shifts
+        // This makes the visualizer feel like it's following the song's structure
+        // instead of repeating one pace forever
+        const sectionPhase = Math.floor(t / 8);
+        const sectionBlend = (t % 8) / 8; // smooth transition within section
+        // Pseudo-random per-section modifier using prime multiplication
+        const sectionSeed = (sectionPhase * 7 + index * 13) % 17 / 17;
 
-        // Per-band frequencies that drift over time
-        const bassFreq = 2.0 + drift;           // ~1.7-2.3 Hz — heavy slow pulse
-        const midFreq = 4.5 + drift2 * 2;       // ~4.1-4.9 Hz — rhythmic groove
-        const highFreq = 9.0 + drift * 3;       // ~8.1-9.9 Hz — rapid shimmer
-        const textureFreq = 18.0 + drift2 * 4;  // ~17.2-18.8 Hz — fine detail
+        // Base frequencies — MUCH slower for smooth breathing, not flashing
+        // Bass: ~0.5 Hz (one pulse every 2 seconds)
+        // Mid: ~1.2 Hz (gentle sway)
+        // High: ~2.5 Hz (subtle shimmer)
+        // Texture: ~4 Hz (fine ripple)
+        const sectionDrift = Math.sin(sectionSeed * Math.PI * 2) * 0.15;
+        const bassFreq = 0.5 + sectionDrift;
+        const midFreq = 1.2 + sectionDrift * 0.8;
+        const highFreq = 2.5 + sectionDrift * 0.5;
+        const textureFreq = 4.0 + sectionDrift * 0.3;
 
-        // Compute all bands but weight them by the blob's assigned role
-        const bass = Math.pow(Math.abs(Math.sin(t * bassFreq * Math.PI * 2 + phaseOffset)), 3);
-        const mid = Math.pow(Math.abs(Math.sin(t * midFreq * Math.PI * 2 + phaseOffset * 1.3)), 2);
-        const high = Math.pow(Math.abs(Math.cos(t * highFreq * Math.PI * 2 + phaseOffset * 0.7)), 2);
-        const texture = Math.abs(Math.sin(t * textureFreq * Math.PI * 2 + phaseOffset * 2.1));
+        // Compute each band as a smooth oscillation
+        const bass = Math.pow(Math.abs(Math.sin(t * bassFreq * Math.PI + phaseOffset)), 2);
+        const mid = Math.pow(Math.abs(Math.sin(t * midFreq * Math.PI + phaseOffset * 1.3)), 1.5);
+        const high = Math.abs(Math.cos(t * highFreq * Math.PI + phaseOffset * 0.7));
+        const texture = Math.abs(Math.sin(t * textureFreq * Math.PI + phaseOffset * 2.1)) * 0.6;
 
-        // Role-dominant weighting: the blob's assigned band gets 70% weight, others share 30%
-        let primaryWeight: number;
+        // Role-dominant weighting: blob's assigned band is primary
         let primarySignal: number;
         switch (bandRole) {
-          case 0: // BASS blob — big slow pulses, represents kick/bass
-            primaryWeight = 0.7;
-            primarySignal = bass;
-            break;
-          case 1: // MID blob — rhythmic groove, represents vocals/melody
-            primaryWeight = 0.65;
-            primarySignal = mid;
-            break;
-          case 2: // HIGH blob — rapid shimmer, represents hi-hats/snares
-            primaryWeight = 0.6;
-            primarySignal = high;
-            break;
-          default: // TEXTURE blob — fine detail, represents atmosphere/reverb
-            primaryWeight = 0.55;
-            primarySignal = texture;
-            break;
+          case 0: primarySignal = bass; break;
+          case 1: primarySignal = mid; break;
+          case 2: primarySignal = high; break;
+          default: primarySignal = texture; break;
         }
 
-        // Secondary bands fill in the remaining weight
-        const secondaryWeight = (1 - primaryWeight) / 3;
-        const visualizerSignal = Math.min(1,
-          primarySignal * primaryWeight +
-          bass * secondaryWeight +
-          mid * secondaryWeight +
-          high * secondaryWeight +
-          texture * secondaryWeight
-        );
+        // The blob's assigned band drives 50%, baseLevel drives 30%, other bands share 20%
+        // This means the music's volume/playback state is the MAIN driver,
+        // oscillations just add texture on top
+        const otherBandsAvg = (bass + mid + high + texture - primarySignal) / 3;
+        const visualizerSignal = primarySignal * 0.5 + otherBandsAvg * 0.2;
 
-        // Scale visualizer by baseLevel so it only activates when music is playing
-        const effectiveLevel = baseLevel * (0.15 + visualizerSignal * 0.85);
+        // baseLevel (from music context) is the primary visual driver
+        // visualizerSignal modulates it — when signal is high, effect is stronger
+        const effectiveLevel = baseLevel * (0.4 + visualizerSignal * 0.6);
 
-        // Bass blobs pulse bigger, texture blobs pulse smaller
-        const rolePulseScale = bandRole === 0 ? 1.8 : bandRole === 1 ? 1.4 : bandRole === 2 ? 1.0 : 0.7;
-        const rawPulse = 1 + effectiveLevel * (blob.size < 96 ? rolePulseScale * 0.7 : rolePulseScale);
-        const pulseCap = 1 + rolePulseScale * 1.6;
-        const pulse = Math.min(pulseCap, Math.max(1.0, rawPulse));
+        // Gentle pulse scale — blobs breathe, they don't flash
+        // Bass blobs breathe wider, texture blobs breathe subtler
+        const roleScale = bandRole === 0 ? 0.6 : bandRole === 1 ? 0.45 : bandRole === 2 ? 0.3 : 0.2;
+        const rawPulse = 1 + effectiveLevel * roleScale;
+        const pulse = Math.min(1 + roleScale * 1.2, Math.max(1.0, rawPulse));
 
-        // Position movement also reacts to visualizer
+        // Position movement
         const crossSweep = (Math.sin(blobTime * 0.32 + phaseOffset) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
 
-        // Energy-driven jitter — bass blobs jitter more, texture blobs jitter less
-        const jitterScale = bandRole === 0 ? 18 : bandRole === 1 ? 12 : bandRole === 2 ? 8 : 5;
-        const jitterX = effectiveLevel * Math.sin(t * (4 + bandRole * 2) + phaseOffset * 3.0) * jitterScale;
-        const jitterY = effectiveLevel * Math.cos(t * (3 + bandRole * 1.5) + phaseOffset * 2.5) * jitterScale * 0.7;
+        // Gentle energy-driven sway — not jittery, more like breathing movement
+        const swayScale = bandRole === 0 ? 10 : bandRole === 1 ? 7 : bandRole === 2 ? 4 : 2;
+        const swayX = effectiveLevel * Math.sin(t * (1.5 + bandRole * 0.3) + phaseOffset * 3.0) * swayScale;
+        const swayY = effectiveLevel * Math.cos(t * (1.2 + bandRole * 0.2) + phaseOffset * 2.5) * swayScale * 0.7;
 
         if (blob.kind === "cross") {
           x += (crossSweep - 0.5) * width * 0.28 + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18;
@@ -360,22 +351,22 @@ export function AmbientBackground() {
           y += Math.sin(blobTime * 1.15 + phaseOffset) * blob.orbitY;
         }
 
-        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 + jitterX;
-        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 + jitterY;
+        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 + swayX;
+        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 + swayY;
 
         const radius = blob.size * pulse;
         const largeBlob = blob.size >= 96;
-        const blur = largeBlob ? 22 - effectiveLevel * 18 : 16 - effectiveLevel * 12;
+        const blur = largeBlob ? 22 - effectiveLevel * 14 : 16 - effectiveLevel * 8;
 
-        // Opacity also oscillates with the visualizer for breathing effect
-        const opacityPulse = 0.5 + visualizerSignal * 0.5;
+        // Opacity breathes gently with the visualizer
+        const opacityBreath = 0.6 + visualizerSignal * 0.4;
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, (largeBlob ? 0.32 : 0.26) + effectiveLevel * opacityPulse * 0.52));
-        radial.addColorStop(0.55, hexToRgba(blob.color, (largeBlob ? 0.16 : 0.12) + effectiveLevel * opacityPulse * 0.22));
+        radial.addColorStop(0, hexToRgba(blob.color, (largeBlob ? 0.28 : 0.22) + effectiveLevel * opacityBreath * 0.42));
+        radial.addColorStop(0.55, hexToRgba(blob.color, (largeBlob ? 0.12 : 0.08) + effectiveLevel * opacityBreath * 0.18));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.26 + effectiveLevel * 0.34}) contrast(${1.08 + effectiveLevel * 0.08}) blur(${blur}px)`;
+        context.filter = `saturate(${1.18 + effectiveLevel * 0.22}) contrast(${1.04 + effectiveLevel * 0.06}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
