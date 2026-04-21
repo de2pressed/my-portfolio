@@ -160,7 +160,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
   }, []);
 
   const syncTrack = useCallback((payload: {
-    title?: string;
+    title?: string | null;
     videoId?: string | null;
     isPlaying?: boolean;
     currentTime?: number;

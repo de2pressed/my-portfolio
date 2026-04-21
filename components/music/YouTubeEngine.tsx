@@ -157,9 +157,7 @@ export function YouTubeEngine() {
 
       const videoIdFromPlaylist = playlistIndex >= 0 ? playlist[playlistIndex] ?? null : null;
       const videoIdFromUrl = extractYouTubeVideoId(videoUrl);
-      const title =
-        videoData?.title?.trim() ||
-        (playlistIndex >= 0 ? `Playlist track ${playlistIndex + 1}` : source.playlistId ? "Playlist soundtrack" : "Untitled soundtrack");
+      const title = videoData?.title?.trim() || null;
       const videoId = videoData?.video_id || videoIdFromPlaylist || videoIdFromUrl || source.videoId || null;
 
       return {
@@ -243,6 +241,7 @@ export function YouTubeEngine() {
 
     function startPlayback(player: ExtendedPlayer) {
       let attempts = 0;
+      let longRetryQueued = false;
 
       const attempt = () => {
         if (cancelled || !playerRef.current) {
@@ -252,6 +251,10 @@ export function YouTubeEngine() {
         try {
           const state = player.getPlayerState();
           if (state === window.YT?.PlayerState.PLAYING) {
+            if (playbackRetryTimerRef.current !== null) {
+              window.clearTimeout(playbackRetryTimerRef.current);
+              playbackRetryTimerRef.current = null;
+            }
             return;
           }
 
@@ -260,6 +263,12 @@ export function YouTubeEngine() {
 
           if (attempts < 6 && !cancelled) {
             playbackRetryTimerRef.current = window.setTimeout(attempt, 220);
+            return;
+          }
+
+          if (!longRetryQueued && !cancelled) {
+            longRetryQueued = true;
+            playbackRetryTimerRef.current = window.setTimeout(attempt, 3000);
           }
         } catch (error) {
           console.warn("YouTube playback bootstrap failed.", error);
@@ -294,7 +303,7 @@ export function YouTubeEngine() {
         const player = new api.Player(hostRef.current, {
           height: "200",
           width: "200",
-          videoId: source.videoId ?? undefined,
+          videoId: source.playlistId ? undefined : source.videoId ?? undefined,
           playerVars: {
             autoplay: 1,
             controls: 0,
@@ -318,13 +327,35 @@ export function YouTubeEngine() {
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
               const activePlayer = player as ExtendedPlayer;
+              const shouldRestoreAudio = () =>
+                autoplayUnmutePendingRef.current || activePlayer.isMuted() || activePlayer.getVolume() === 0;
+
+              if (source.playlistId) {
+                disableShuffle(activePlayer);
+              }
+
+              autoplayUnmutePendingRef.current = true;
+
+              try {
+                player.setVolume(0);
+                player.mute();
+              } catch (error) {
+                console.warn("YouTube mute bootstrap failed.", error);
+              }
+
               registerControls({
-                play: () => player.playVideo(),
+                play: () => {
+                  if (shouldRestoreAudio()) {
+                    restoreAudio(activePlayer);
+                  }
+
+                  player.playVideo();
+                },
                 pause: () => player.pauseVideo(),
                 toggle: () => {
                   const state = player.getPlayerState();
                   if (state === window.YT?.PlayerState.PLAYING) {
-                    if (activePlayer.isMuted() || activePlayer.getVolume() === 0 || autoplayUnmutePendingRef.current) {
+                    if (shouldRestoreAudio()) {
                       restoreAudio(activePlayer);
                       return;
                     }
@@ -333,7 +364,10 @@ export function YouTubeEngine() {
                     return;
                   }
 
-                  restoreAudio(activePlayer);
+                  if (shouldRestoreAudio()) {
+                    restoreAudio(activePlayer);
+                  }
+
                   player.playVideo();
                 },
                 next: () => movePlaylist(activePlayer, 1),
@@ -352,22 +386,10 @@ export function YouTubeEngine() {
 
               setPlayerReady(true);
 
-              if (source.playlistId) {
-                disableShuffle(activePlayer);
-              }
-              autoplayUnmutePendingRef.current = true;
-
-              try {
-                player.setVolume(0);
-                player.mute();
-              } catch (error) {
-                console.warn("YouTube mute bootstrap failed.", error);
-              }
-
               const snapshot = readCurrentTrack(activePlayer);
 
               syncTrack({
-                title: snapshot.title,
+                title: snapshot.title ?? undefined,
                 videoId: snapshot.videoId,
                 currentTime: snapshot.currentTime,
                 duration: snapshot.duration,
@@ -410,16 +432,13 @@ export function YouTubeEngine() {
                 }
 
                 if (playing && autoplayUnmutePendingRef.current && playerRef.current) {
-                  playerRef.current.unMute();
-                  playerRef.current.setVolume(volumeRef.current);
-                  autoplayUnmutePendingRef.current = false;
-                  syncTrack({ isMuted: false });
+                  restoreAudio(playerRef.current as ExtendedPlayer);
                 }
 
                 if (event.data === window.YT?.PlayerState.PLAYING || event.data === window.YT?.PlayerState.BUFFERING) {
                   const snapshot = readCurrentTrack(player);
                   syncTrack({
-                    title: snapshot.title,
+                    title: snapshot.title ?? undefined,
                     videoId: snapshot.videoId,
                     currentTime: snapshot.currentTime,
                     duration: snapshot.duration,
@@ -461,7 +480,7 @@ export function YouTubeEngine() {
             const deltaTime = Math.max(0, snapshot.currentTime - previousTimeRef.current);
             previousTimeRef.current = snapshot.currentTime;
             syncTrack({
-              title: snapshot.title,
+              title: snapshot.title ?? undefined,
               videoId: snapshot.videoId,
               isPlaying: state === window.YT?.PlayerState.PLAYING,
               currentTime: snapshot.currentTime,

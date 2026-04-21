@@ -113,14 +113,14 @@ function boostCanvasColor(hex: string) {
 
 export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const visualLevel = useMusicFrequency();
+  const { energy } = useMusicFrequency();
   const { palette } = useThemeColors();
-  const visualLevelRef = useRef(visualLevel);
+  const energyRef = useRef(energy);
   const paletteRef = useRef(palette);
 
   useEffect(() => {
-    visualLevelRef.current = visualLevel;
-  }, [visualLevel]);
+    energyRef.current = energy;
+  }, [energy]);
 
   useEffect(() => {
     paletteRef.current = palette;
@@ -220,7 +220,7 @@ export function AmbientBackground() {
     });
 
     const draw = (time: number) => {
-      const level = Math.max(0, Math.min(1, visualLevelRef.current));
+      const level = Math.max(0, Math.min(1, energyRef.current));
       const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
       const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
@@ -244,10 +244,10 @@ export function AmbientBackground() {
       context.fillRect(0, 0, width, height);
 
       const glowPoints = [
-        { x: width * 0.08, y: height * 0.1, opacity: 0.1, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
-        { x: width * 0.92, y: height * 0.12, opacity: 0.09, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
-        { x: width * 0.08, y: height * 0.86, opacity: 0.08, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
-        { x: width * 0.92, y: height * 0.84, opacity: 0.09, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
+        { x: width * 0.08, y: height * 0.1, opacity: 0.14 + level * 0.1, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
+        { x: width * 0.92, y: height * 0.12, opacity: 0.13 + level * 0.09, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
+        { x: width * 0.08, y: height * 0.86, opacity: 0.12 + level * 0.08, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
+        { x: width * 0.92, y: height * 0.84, opacity: 0.13 + level * 0.09, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
       ];
 
       for (const point of glowPoints) {
@@ -265,7 +265,7 @@ export function AmbientBackground() {
         blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
 
         const t = time * blob.speed;
-        const pulse = 1 + level * (blob.size < 96 ? 0.72 : 1.05);
+        const pulse = 1 + level * (blob.size < 96 ? 0.9 : 1.18);
         const crossSweep = (Math.sin(t * 0.32 + blob.phase) + 1) / 2;
         let x = width * blob.anchorX;
         let y = height * blob.anchorY;
@@ -287,15 +287,16 @@ export function AmbientBackground() {
         y += Math.cos(t * 0.19 + blob.phase) * blob.orbitY * 0.12;
 
         const radius = blob.size * pulse;
-        const blur = blob.size < 96 ? 7 + level * 13 : 11 + level * 17;
+        const largeBlob = blob.size >= 96;
+        const blur = largeBlob ? 22 - level * 16 : 16 - level * 9;
 
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, blob.size < 96 ? 0.25 + level * 0.2 : 0.18 + level * 0.22));
-        radial.addColorStop(0.55, hexToRgba(blob.color, blob.size < 96 ? 0.1 + level * 0.08 : 0.08 + level * 0.1));
+        radial.addColorStop(0, hexToRgba(blob.color, largeBlob ? 0.28 + level * 0.44 : 0.22 + level * 0.38));
+        radial.addColorStop(0.55, hexToRgba(blob.color, largeBlob ? 0.12 + level * 0.16 : 0.08 + level * 0.12));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.18 + level * 0.28}) contrast(${1.04 + level * 0.06}) blur(${blur}px)`;
+        context.filter = `saturate(${1.26 + level * 0.34}) contrast(${1.08 + level * 0.08}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);

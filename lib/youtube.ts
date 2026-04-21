@@ -70,8 +70,8 @@ export function parseYouTubeSource(rawUrl: string): ParsedYouTubeSource {
 
   try {
     const url = new URL(normalized);
-    const videoId = extractYouTubeVideoId(normalized);
     const playlistId = url.searchParams.get("list");
+    const videoId = playlistId ? null : extractYouTubeVideoId(normalized);
 
     return {
       rawUrl: normalized,

@@ -60,10 +60,14 @@ Important behavior:
 - current volume is stored in state and also mirrored in a ref for the player effect
 - autoplay starts muted, then unmutes after the player enters `PLAYING`
 - the player retries startup a few times on boot so muted autoplay has a chance to settle on the first visit
+- playlist sources are loaded without a conflicting constructor `videoId` so YouTube can initialize the queue in order
+- the boot path restores audio before the first explicit play gesture when autoplay is still pending
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
+- thumbnail extraction now uses a same-origin proxy so the browser can read YouTube pixels and extract palette colors reliably
 - the footer takeover grows as the user scrolls toward the footer
 - the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
+- the minimized disc now carries a waveform ring that responds to the shared music energy level
 - if a thumbnail is not available in higher quality, the resolver falls back through `maxresdefault`, `sddefault`, and `hqdefault`
 
 ## Theme Pipeline
@@ -75,6 +79,9 @@ The theme context keeps the core canvas dark and the ink light so extracted colo
 The latest pass pushes the canvas closer to near-black, removes the grey wash from the ambient layers, and keeps glass surfaces more transparent so the content reads against a cleaner dark field.
 The ambient canvas now places glow anchors across the corners and edges too, instead of clustering the motion around the middle.
 The ambient particles also use a boosted rendition of the thumbnail palette so their color energy reads closer to the artwork instead of flattening into the dark background.
+- palette extraction now quantizes in 16-step buckets and rejects very dark swatches so thumbnail color reads survive the sampling pass
+- the ambient canvas uses wider blob opacities and a tighter blur falloff so the motion reads brighter instead of washed out
+- the review section and cursor now reuse the active accent color so the music palette affects more than just the background
 
 Those variables are consumed by:
 
@@ -97,6 +104,11 @@ The interaction layer includes:
 
 The header now uses intersection observers to keep the active section highlighted. The cursor is a topmost pointer arrow that changes size and emphasis on interactive targets such as links and buttons.
 The cursor was recently reduced in size so it feels lighter and closer to the reference treatment.
+- the header now includes a scroll progress ring that fills from the top of the page toward the footer
+- the cursor now emits a small accent-colored trail on fine pointers, but suppresses the trail while hovering interactive targets
+- the hero section applies a lightweight parallax offset so the text column and feature card separate slightly as the page scrolls
+- the review cards carry a subtle palette-driven glow pulse that rises with the music energy
+- the floating music player and footer card now use a single takeover choreography with a shared scroll ramp instead of independent fades
 
 ## Consent And Analytics
 

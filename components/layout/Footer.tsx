@@ -7,6 +7,10 @@ import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
 type FooterProps = {
   name: string;
   email: string;
@@ -25,6 +29,7 @@ export function Footer({ name, email, note }: FooterProps) {
     playNext,
     playPrevious,
   } = useMusic();
+  const cardProgress = clamp((footerTakeover - 0.64) / 0.36, 0, 1);
 
   useEffect(() => {
     let frame = 0;
@@ -82,12 +87,21 @@ export function Footer({ name, email, note }: FooterProps) {
           <motion.div
             className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,10,14,0.4)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.28)] backdrop-blur-2xl"
             animate={{
-              opacity: Math.min(1, Math.max(0, (footerTakeover - 0.6) * 2.5)),
-              y: 28 - footerTakeover * 34,
-              scale: 0.9 + footerTakeover * 0.1,
-              rotate: footerTakeover * 0.8,
+              opacity: cardProgress,
+              y: 22 - cardProgress * 26,
+              scale: 0.88 + cardProgress * 0.12,
+              rotate: 2 - cardProgress * 2,
+              boxShadow: `0 24px 90px rgba(5,5,8,${0.28 + cardProgress * 0.08}), 0 0 0 1px rgba(var(--accent-rgb), ${
+                0.1 + cardProgress * 0.04
+              }), 0 0 ${28 + cardProgress * 14}px rgba(var(--accent-rgb), ${0.05 + cardProgress * 0.08})`,
             }}
-            transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              opacity: { duration: 0.18, ease: "easeOut" },
+              y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },
+              scale: { type: "spring", stiffness: 240, damping: 24, mass: 0.9 },
+              rotate: { type: "spring", stiffness: 260, damping: 24, mass: 0.8 },
+              boxShadow: { duration: 0.22, ease: "easeOut" },
+            }}
           >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
               <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)]">

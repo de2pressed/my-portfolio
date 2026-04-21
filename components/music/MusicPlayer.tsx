@@ -15,12 +15,21 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useMusic } from "@/context/MusicContext";
+import { useMusicFrequency } from "@/hooks/useMusicFrequency";
 import { cn } from "@/lib/utils";
 
 const MINIMIZED_KEY = "portfolio-music-player-minimized";
+const WAVEFORM_BAR_COUNT = 48;
+const WAVEFORM_CENTER = 54;
+const WAVEFORM_RING_RADIUS = 40;
+const WAVEFORM_PHASES = Array.from({ length: WAVEFORM_BAR_COUNT }, (_, index) => (index / WAVEFORM_BAR_COUNT) * Math.PI * 2);
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function formatPlaybackTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) {
@@ -66,8 +75,11 @@ export function MusicPlayer() {
     mute,
     unmute,
   } = useMusic();
+  const { energy: musicEnergy } = useMusicFrequency();
   const [isMinimized, setIsMinimized] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const musicEnergyRef = useRef(musicEnergy);
+  const waveformBarRefs = useRef<(SVGLineElement | null)[]>([]);
 
   useEffect(() => {
     const storedPreference = readStoredPreference();
@@ -89,8 +101,53 @@ export function MusicPlayer() {
     }
   }, [hydrated, isMinimized]);
 
+  useEffect(() => {
+    musicEnergyRef.current = musicEnergy;
+  }, [musicEnergy]);
+
+  useEffect(() => {
+    if (!isMinimized) {
+      return;
+    }
+
+    let frame = 0;
+    let displayEnergy = musicEnergyRef.current;
+
+    const tick = (time: number) => {
+      const targetEnergy = clamp(musicEnergyRef.current, 0, 1);
+      displayEnergy += (targetEnergy - displayEnergy) * (targetEnergy > displayEnergy ? 0.16 : 0.08);
+
+      for (let index = 0; index < WAVEFORM_BAR_COUNT; index += 1) {
+        const bar = waveformBarRefs.current[index];
+        if (!bar) {
+          continue;
+        }
+
+        const phase = WAVEFORM_PHASES[index] ?? 0;
+        const shimmer = (Math.sin(time * 0.0026 + phase * 1.9) + 1) / 2;
+        const ripple = (Math.cos(time * 0.0018 - phase * 0.75) + 1) / 2;
+        const height = 2 + displayEnergy * 12 + shimmer * (displayEnergy * 8 + 2) + ripple * displayEnergy * 4;
+        const alpha = clamp(0.18 + displayEnergy * 0.5 + shimmer * 0.16 + ripple * 0.08, 0.12, 0.96);
+
+        bar.setAttribute("y1", String(WAVEFORM_CENTER - WAVEFORM_RING_RADIUS));
+        bar.setAttribute("y2", String(WAVEFORM_CENTER - WAVEFORM_RING_RADIUS - height));
+        bar.setAttribute("stroke", `rgba(var(--accent-rgb), ${alpha.toFixed(3)})`);
+      }
+
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [isMinimized]);
+
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
-  const takeoverFade = Math.min(1, Math.max(0, (footerTakeover - 0.12) / 0.6));
+  const takeoverFade = clamp((footerTakeover - 0.52) / 0.26, 0, 1);
+  const takeoverDepth = footerTakeover * footerTakeover;
+  const takeoverBlur = takeoverFade * 8;
 
   const renderArtwork = () =>
     thumbnail ? (
@@ -106,15 +163,16 @@ export function MusicPlayer() {
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4",
-        footerTakeover > 0.84 && "pointer-events-none",
+        footerTakeover > 0.72 && "pointer-events-none",
       )}
       layout
       animate={{
         opacity: 1 - takeoverFade,
-        x: footerTakeover * (isMinimized ? -28 : -40),
-        y: footerTakeover * (isMinimized ? 240 : 320),
-        scale: isMinimized ? 0.94 + footerTakeover * 0.06 : 1 + footerTakeover * 0.14,
-        rotate: footerTakeover * -2,
+        x: footerTakeover * (isMinimized ? -22 : -34),
+        y: takeoverDepth * (isMinimized ? 360 : 480),
+        scale: 1 + takeoverDepth * 0.24,
+        rotate: takeoverDepth * -3,
+        filter: `blur(${takeoverBlur}px)`,
       }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
     >
@@ -144,6 +202,30 @@ export function MusicPlayer() {
                 animationPlayState: isPlaying ? "running" : "paused",
               }}
             >
+              <div className="absolute inset-[-14px] pointer-events-none">
+                <svg aria-hidden="true" className="h-full w-full overflow-visible" viewBox="0 0 108 108">
+                  {Array.from({ length: WAVEFORM_BAR_COUNT }, (_, index) => {
+                    const angle = (index / WAVEFORM_BAR_COUNT) * 360;
+
+                    return (
+                      <line
+                        key={angle}
+                        ref={(node) => {
+                          waveformBarRefs.current[index] = node;
+                        }}
+                        stroke="rgba(var(--accent-rgb), 0.28)"
+                        strokeLinecap="round"
+                        strokeWidth="1.8"
+                        transform={`rotate(${angle} ${WAVEFORM_CENTER} ${WAVEFORM_CENTER})`}
+                        x1={WAVEFORM_CENTER}
+                        x2={WAVEFORM_CENTER}
+                        y1={WAVEFORM_CENTER - WAVEFORM_RING_RADIUS}
+                        y2={WAVEFORM_CENTER - WAVEFORM_RING_RADIUS - 2}
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
               <div className="absolute inset-2 overflow-hidden rounded-full">{renderArtwork()}</div>
               <div className="absolute inset-[2px] rounded-full border border-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]" />
               <div className="absolute inset-[38%] rounded-full bg-[rgba(255,255,255,0.12)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]" />

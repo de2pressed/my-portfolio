@@ -1,8 +1,9 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type CSSProperties, type FormEvent, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
+import { useMusicFrequency } from "@/hooks/useMusicFrequency";
 import type { ReviewEntry } from "@/lib/types";
 
 type ReviewsProps = {
@@ -27,6 +28,35 @@ export function Reviews({ reviews }: ReviewsProps) {
   const [status, setStatus] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const { energy } = useMusicFrequency();
+  const energyRef = useRef(energy);
+  const glowAlphaRef = useRef(0);
+
+  useEffect(() => {
+    energyRef.current = energy;
+  }, [energy]);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const tick = () => {
+      const target = Math.pow(Math.max(0, Math.min(1, energyRef.current)), 1.4) * 0.28;
+      glowAlphaRef.current += (target - glowAlphaRef.current) * 0.08;
+
+      if (sectionRef.current) {
+        sectionRef.current.style.setProperty("--review-glow-alpha", glowAlphaRef.current.toFixed(4));
+      }
+
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -63,7 +93,13 @@ export function Reviews({ reviews }: ReviewsProps) {
   }
 
   return (
-    <section className="section-wrap pb-6" data-section="reviews" id="reviews">
+    <section
+      ref={sectionRef}
+      className="section-wrap pb-6"
+      data-section="reviews"
+      id="reviews"
+      style={{ "--review-glow-alpha": "0" } as CSSProperties}
+    >
       <div className="space-y-6">
         <div>
           <p className="section-kicker">Reviews</p>
@@ -83,6 +119,10 @@ export function Reviews({ reviews }: ReviewsProps) {
                     className="section-card h-full"
                     initial={{ opacity: 0, y: 24 }}
                     key={review.id}
+                    style={{
+                      boxShadow:
+                        "0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 0 28px rgba(var(--accent-rgb), var(--review-glow-alpha))",
+                    }}
                     transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.06 }}
                     viewport={{ once: true }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -116,6 +156,10 @@ export function Reviews({ reviews }: ReviewsProps) {
             className="section-card space-y-4"
             initial={{ opacity: 0, y: 28 }}
             onSubmit={handleSubmit}
+            style={{
+              boxShadow:
+                "0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 0 28px rgba(var(--accent-rgb), var(--review-glow-alpha))",
+            }}
             transition={{ type: "spring", stiffness: 96, damping: 18 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}

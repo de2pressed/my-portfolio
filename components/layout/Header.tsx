@@ -2,7 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,43 @@ type HeaderProps = {
 export function Header({ name }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+  const ringRef = useRef<SVGCircleElement | null>(null);
+
+  useEffect(() => {
+    const circle = ringRef.current;
+    if (!circle) {
+      return;
+    }
+
+    const radius = 10.5;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference}`;
+
+    let frame = 0;
+
+    const updateProgress = () => {
+      const documentHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      const maxScroll = Math.max(1, documentHeight - viewportHeight);
+      const progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+      circle.style.strokeDashoffset = `${circumference * (1 - progress)}`;
+    };
+
+    const schedule = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
 
   useEffect(() => {
     const sections = navItems
@@ -68,8 +105,35 @@ export function Header({ name }: HeaderProps) {
             onClick={() => navigateTo("hero")}
             type="button"
           >
-            <span className="block text-[10px] uppercase tracking-[0.28em] text-ink/50">Jayant Kumar</span>
-            <span className="font-heading text-sm font-semibold text-ink sm:text-base">{name}</span>
+            <span className="flex items-center gap-3">
+              <span className="hidden h-7 w-7 shrink-0 items-center justify-center md:inline-flex">
+                <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 28 28">
+                  <circle
+                    cx="14"
+                    cy="14"
+                    fill="none"
+                    r="10.5"
+                    stroke="rgba(255,255,255,0.18)"
+                    strokeWidth="2.2"
+                  />
+                  <circle
+                    ref={ringRef}
+                    cx="14"
+                    cy="14"
+                    fill="none"
+                    r="10.5"
+                    stroke="rgb(var(--accent-rgb))"
+                    strokeLinecap="round"
+                    strokeWidth="2.2"
+                    transform="rotate(-90 14 14)"
+                  />
+                </svg>
+              </span>
+              <span className="text-left">
+                <span className="block text-[10px] uppercase tracking-[0.28em] text-ink/50">Jayant Kumar</span>
+                <span className="font-heading text-sm font-semibold text-ink sm:text-base">{name}</span>
+              </span>
+            </span>
           </button>
 
           <nav className="hidden items-center gap-2 md:flex">

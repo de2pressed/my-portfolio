@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowDownRight, MapPin, Mail, Phone } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 type HeroProps = {
   name: string;
@@ -13,12 +14,59 @@ type HeroProps = {
 };
 
 export function Hero({ name, tagline, intro, location, email, phone }: HeroProps) {
+  const heroRef = useRef<HTMLElement | null>(null);
+  const textLayerRef = useRef<HTMLDivElement | null>(null);
+  const cardLayerRef = useRef<HTMLDivElement | null>(null);
   const words = name.split(" ");
 
+  useEffect(() => {
+    let frame = 0;
+
+    const updateParallax = () => {
+      const hero = heroRef.current;
+      const textLayer = textLayerRef.current;
+      const cardLayer = cardLayerRef.current;
+
+      if (!hero || !textLayer || !cardLayer) {
+        return;
+      }
+
+      const rect = hero.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        textLayer.style.transform = "translate3d(0, 0, 0)";
+        cardLayer.style.transform = "translate3d(0, 0, 0)";
+        return;
+      }
+
+      const mobileScale = window.matchMedia("(max-width: 768px)").matches ? 0.5 : 1;
+      const heroOffset = Math.max(0, Math.min(hero.offsetHeight, window.scrollY - hero.offsetTop));
+      const textOffset = heroOffset * 0.2 * mobileScale;
+      const cardOffset = -heroOffset * 0.15 * mobileScale;
+
+      textLayer.style.transform = `translate3d(0, ${textOffset}px, 0)`;
+      cardLayer.style.transform = `translate3d(0, ${cardOffset}px, 0)`;
+    };
+
+    const schedule = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateParallax);
+    };
+
+    updateParallax();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+
   return (
-    <section className="section-wrap flex min-h-screen items-center pt-32" data-section="hero" id="hero">
+    <section ref={heroRef} className="section-wrap flex min-h-screen items-center pt-32" data-section="hero" id="hero">
       <div className="grid w-full gap-10 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
-        <div className="space-y-6">
+        <div ref={textLayerRef} className="space-y-6 will-change-transform" style={{ transform: "translate3d(0, 0, 0)" }}>
           <motion.p
             className="glass-chip w-fit"
             initial={{ opacity: 0, y: 20 }}
@@ -88,30 +136,32 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
           </motion.div>
         </div>
 
-        <motion.div
-          className="section-card relative overflow-hidden"
-          initial={{ opacity: 0, x: 40 }}
-          transition={{ type: "spring", stiffness: 92, damping: 18, delay: 0.38 }}
-          viewport={{ once: true }}
-          whileInView={{ opacity: 1, x: 0 }}
-          whileHover={{ y: -6, rotateX: -2, scale: 1.01 }}
-        >
-          <div className="space-y-4">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Current focus</p>
-            <p className="text-3xl font-semibold text-ink">Building deployment systems that feel deliberate.</p>
-            <p className="text-sm leading-7 text-ink/68">
-              CI/CD, container security, observability, AWS-hosted delivery pipelines, and interfaces with enough
-              mood to feel personal instead of generic.
-            </p>
-            <button
-              className="glass-button mt-4"
-              onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
-              type="button"
-            >
-              Explore the portfolio <ArrowDownRight className="ml-2 h-4 w-4" />
-            </button>
-          </div>
-        </motion.div>
+        <div ref={cardLayerRef} className="will-change-transform" style={{ transform: "translate3d(0, 0, 0)" }}>
+          <motion.div
+            className="section-card relative overflow-hidden"
+            initial={{ opacity: 0, x: 40 }}
+            transition={{ type: "spring", stiffness: 92, damping: 18, delay: 0.38 }}
+            viewport={{ once: true }}
+            whileInView={{ opacity: 1, x: 0 }}
+            whileHover={{ y: -6, rotateX: -2, scale: 1.01 }}
+          >
+            <div className="space-y-4">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Current focus</p>
+              <p className="text-3xl font-semibold text-ink">Building deployment systems that feel deliberate.</p>
+              <p className="text-sm leading-7 text-ink/68">
+                CI/CD, container security, observability, AWS-hosted delivery pipelines, and interfaces with enough
+                mood to feel personal instead of generic.
+              </p>
+              <button
+                className="glass-button mt-4"
+                onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
+                type="button"
+              >
+                Explore the portfolio <ArrowDownRight className="ml-2 h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

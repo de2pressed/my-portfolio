@@ -34,20 +34,34 @@ This release closes the remaining runtime gaps from the changelog audit and push
 - Boosted the ambient particle palette so the canvas colors hold closer to the thumbnail's saturation and read less washed out in motion.
 - Normalized the remaining admin panel form and error text to the light ink palette so dark browser defaults do not leak through.
 
+## Changelog-5 Execution
+
+- Fixed YouTube playlist parsing so playlist URLs no longer pass a conflicting `videoId` into the initial player boot.
+- Hardened the music bootstrap path so autoplay recovery restores audio before the first explicit play gesture and the loading title only clears when real metadata exists.
+- Added a same-origin YouTube thumbnail proxy and tightened palette extraction so the ambient colors track the actual thumbnail instead of collapsing into dark swatches.
+- Increased ambient blob opacity and reduced blur more aggressively so the background reads brighter and more vibrant during playback.
+- Reworked the floating player to footer takeover into a single choreographed motion, with a later fade window for the player and a spring-like arrival for the footer card.
+- Added a fine-pointer cursor trail, a header scroll progress ring, a minimized-player waveform ring, hero parallax depth, and palette-reactive review card glow.
+
 ## Files To Know
 
 - `components/music/YouTubeEngine.tsx`
 - `components/ui/GlassCursor.tsx`
 - `components/music/MusicPlayer.tsx`
 - `components/background/AmbientBackground.tsx`
+- `components/layout/Header.tsx`
+- `components/layout/Footer.tsx`
+- `components/sections/Hero.tsx`
+- `components/sections/Reviews.tsx`
+- `hooks/useMusicFrequency.ts`
+- `lib/colorExtractor.ts`
+- `lib/youtube.ts`
+- `app/api/youtube-thumbnail/route.ts`
 - `styles/design-tokens.css`
 - `styles/globals.css`
 - `components/loading/LoadingScreen.tsx`
 - `components/loading/CookieConsent.tsx`
-- `components/layout/Header.tsx`
-- `components/layout/Footer.tsx`
 - `components/sections/About.tsx`
-- `components/sections/Reviews.tsx`
 - `components/admin/AdminLoginForm.tsx`
 - `components/admin/MusicLinkEditor.tsx`
 

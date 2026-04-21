@@ -1,4 +1,5 @@
 const FALLBACK_COLORS = ["#151019", "#b93ca7", "#7a57e8", "#271d31", "#f2e8f6"];
+const FALLBACK_SUPPLEMENT = [FALLBACK_COLORS[2], FALLBACK_COLORS[4], FALLBACK_COLORS[1]];
 
 function rgbToHex(r: number, g: number, b: number) {
   return `#${[r, g, b]
@@ -6,8 +7,16 @@ function rgbToHex(r: number, g: number, b: number) {
     .join("")}`;
 }
 
+function luminance(red: number, green: number, blue: number) {
+  return 0.299 * red + 0.587 * green + 0.114 * blue;
+}
+
+function quantizeChannel(value: number) {
+  return Math.min(255, Math.round(value / 16) * 16);
+}
+
 function quantize(values: Uint8ClampedArray) {
-  const buckets = new Map<string, number>();
+  const buckets = new Map<string, { count: number; brightness: number }>();
 
   for (let index = 0; index < values.length; index += 16) {
     const r = values[index] ?? 0;
@@ -19,14 +28,28 @@ function quantize(values: Uint8ClampedArray) {
       continue;
     }
 
-    const key = `${Math.round(r / 32) * 32}-${Math.round(g / 32) * 32}-${Math.round(b / 32) * 32}`;
-    buckets.set(key, (buckets.get(key) ?? 0) + 1);
+    const quantizedRed = quantizeChannel(r);
+    const quantizedGreen = quantizeChannel(g);
+    const quantizedBlue = quantizeChannel(b);
+    const key = `${quantizedRed}-${quantizedGreen}-${quantizedBlue}`;
+    const current = buckets.get(key);
+    const bucketBrightness = luminance(quantizedRed, quantizedGreen, quantizedBlue);
+
+    buckets.set(key, {
+      count: (current?.count ?? 0) + 1,
+      brightness: bucketBrightness,
+    });
   }
 
   return [...buckets.entries()]
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([key, value]) => ({
+      key,
+      brightness: value.brightness,
+    }))
+    .filter((entry) => entry.brightness >= 28)
     .slice(0, 5)
-    .map(([key]) => {
+    .map(({ key }) => {
       const [r, g, b] = key.split("-").map((value) => Number(value));
       return rgbToHex(r, g, b);
     });
@@ -59,7 +82,22 @@ export async function extractPaletteFromImage(url: string) {
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
     const palette = quantize(data);
-    return palette.length > 0 ? palette : FALLBACK_COLORS;
+    if (palette.length >= 2) {
+      return palette;
+    }
+
+    const supplemented = [...palette];
+    for (const color of FALLBACK_SUPPLEMENT) {
+      if (supplemented.length >= 5) {
+        break;
+      }
+
+      if (!supplemented.includes(color)) {
+        supplemented.push(color);
+      }
+    }
+
+    return supplemented.length > 0 ? supplemented : FALLBACK_COLORS;
   } catch (error) {
     console.warn("Falling back to the base palette because thumbnail extraction failed.", error);
     return FALLBACK_COLORS;
