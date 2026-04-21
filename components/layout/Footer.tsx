@@ -108,7 +108,7 @@ export function Footer({ name, email, note }: FooterProps) {
                 {thumbnail ? (
                   <Image
                     alt={title}
-                    className="object-cover"
+                    className="object-cover object-[50%_42%] scale-[1.06]"
                     fill
                     sizes="(max-width: 768px) 100vw, 420px"
                     src={thumbnail}
@@ -117,7 +117,6 @@ export function Footer({ name, email, note }: FooterProps) {
                 ) : (
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(var(--accent-rgb),0.32),rgba(var(--lavender-rgb),0.14))]" />
                 )}
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(22,16,12,0.48))]" />
               </div>
 
               <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(10,10,14,0.32)] p-5">

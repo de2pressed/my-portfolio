@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
+import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
 import { extractYouTubeVideoId, parseYouTubeSource } from "@/lib/youtube";
 
 declare global {
@@ -63,6 +64,7 @@ export function YouTubeEngine() {
   const {
     source,
     registerControls,
+    loadMusicUrl,
     setPlayerReady,
     setPlayerError,
     syncTrack,
@@ -77,6 +79,7 @@ export function YouTubeEngine() {
   const autoplayUnmutePendingRef = useRef(false);
   const playbackRetryTimerRef = useRef<number | null>(null);
   const playlistFallbackAttemptedRef = useRef(false);
+  const defaultFallbackAttemptedRef = useRef(false);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -201,6 +204,22 @@ export function YouTubeEngine() {
         return;
       }
 
+      if (source.playlistId) {
+        player.loadPlaylist({
+          list: source.playlistId,
+          listType: "playlist",
+        });
+        disableShuffle(player);
+
+        if (step > 0) {
+          startPlayback(player);
+        } else {
+          player.seekTo(0, true);
+        }
+
+        return;
+      }
+
       if (step > 0) {
         player.nextVideo();
       } else {
@@ -302,6 +321,7 @@ export function YouTubeEngine() {
         }
 
         playlistFallbackAttemptedRef.current = false;
+        defaultFallbackAttemptedRef.current = false;
 
         const player = new api.Player(hostRef.current, {
           height: "200",
@@ -335,6 +355,14 @@ export function YouTubeEngine() {
 
               if (source.playlistId) {
                 disableShuffle(activePlayer);
+
+                if (readPlaylist(activePlayer).length === 0) {
+                  player.loadPlaylist({
+                    list: source.playlistId,
+                    listType: "playlist",
+                  });
+                  disableShuffle(activePlayer);
+                }
               }
 
               autoplayUnmutePendingRef.current = true;
@@ -422,6 +450,16 @@ export function YouTubeEngine() {
                   }
 
                   if (playlistIndex === -1) {
+                    if (source.playlistId) {
+                      player.loadPlaylist({
+                        list: source.playlistId,
+                        listType: "playlist",
+                      });
+                      disableShuffle(player);
+                      startPlayback(player);
+                      return;
+                    }
+
                     previousTimeRef.current = 0;
                     syncTrack({
                       isPlaying: true,
@@ -482,6 +520,16 @@ export function YouTubeEngine() {
                 }
               }
 
+              if (source.rawUrl !== DEFAULT_MUSIC_URL && !defaultFallbackAttemptedRef.current) {
+                defaultFallbackAttemptedRef.current = true;
+                try {
+                  loadMusicUrl(DEFAULT_MUSIC_URL);
+                  return;
+                } catch (error) {
+                  console.warn("YouTube default-track fallback failed.", error);
+                }
+              }
+
               setPlayerError("Music unavailable");
             },
           },
@@ -535,7 +583,16 @@ export function YouTubeEngine() {
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [registerControls, setPlayerError, setPlayerReady, setVisualLevel, source.playlistId, source.rawUrl, syncTrack]);
+  }, [
+    loadMusicUrl,
+    registerControls,
+    setPlayerError,
+    setPlayerReady,
+    setVisualLevel,
+    source.playlistId,
+    source.rawUrl,
+    syncTrack,
+  ]);
 
   useEffect(() => {
     if (!playerRef.current || sourceRef.current === source.rawUrl) {

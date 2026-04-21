@@ -151,7 +151,14 @@ export function MusicPlayer() {
 
   const renderArtwork = () =>
     thumbnail ? (
-      <Image alt={title} fill className="object-cover" sizes="96px" src={thumbnail} unoptimized />
+      <Image
+        alt={title}
+        fill
+        className="object-cover object-[50%_42%] scale-[1.06]"
+        sizes="96px"
+        src={thumbnail}
+        unoptimized
+      />
     ) : (
       <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(var(--accent-rgb),0.34),rgba(var(--lavender-rgb),0.12))]" />
     );

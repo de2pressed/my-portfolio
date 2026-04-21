@@ -63,11 +63,14 @@ Important behavior:
 - playlist sources are loaded without a conflicting constructor `videoId` so YouTube can initialize the queue in order
 - the boot path restores audio before the first explicit play gesture when autoplay is still pending
 - if a playlist boot fails, the engine falls back to the track's video ID so the player does not get stuck in a hard unavailable state
+- if YouTube exposes no playlist queue on first load, the engine explicitly reloads the playlist so next/previous navigation has a real queue to work with
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the music context seeds thumbnail extraction from the raw music URL when the parsed playlist source does not carry a video ID
 - the Supabase seed mirrors the default soundtrack URL so a reset does not reintroduce the old radio mix
+- the default soundtrack now points at the provided `cxKs2b5lRsA` playlist URL so local fallback and Supabase seed stay in sync
 - thumbnail extraction now uses a same-origin proxy so the browser can read YouTube pixels and extract palette colors reliably
+- the footer and compact player now crop the thumbnail more tightly and avoid a brown wash overlay so the album art reads cleaner
 - the footer takeover grows as the user scrolls toward the footer
 - the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
 - the minimized disc now carries a waveform ring that responds to the shared music energy level

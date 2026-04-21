@@ -12,7 +12,7 @@ import type {
 const now = "2026-04-21T00:00:00.000Z";
 
 export const DEFAULT_MUSIC_URL =
-  "https://www.youtube.com/watch?v=ZAz3rnLGthg";
+  "https://www.youtube.com/watch?v=cxKs2b5lRsA&list=PLszOYbYuCZu74Y2HQh8m14HzSXAnMMwHt";
 
 export const DEFAULT_SITE_VERSION = "v1.0.3";
 
