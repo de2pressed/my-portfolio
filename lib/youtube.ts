@@ -10,6 +10,15 @@ function normalizeSource(rawUrl: string) {
   return rawUrl.trim();
 }
 
+function buildThumbnailProxyUrl(videoId: string, quality: YouTubeThumbnailQuality) {
+  const params = new URLSearchParams({
+    videoId,
+    quality,
+  });
+
+  return `/api/youtube-thumbnail?${params.toString()}`;
+}
+
 function extractVideoIdFromPathname(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
 
@@ -83,7 +92,7 @@ export function getYouTubeThumbnail(videoId: string | null) {
     return "";
   }
 
-  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  return buildThumbnailProxyUrl(videoId, "hqdefault");
 }
 
 export function getYouTubeThumbnailCandidates(videoId: string | null): string[] {
@@ -91,7 +100,7 @@ export function getYouTubeThumbnailCandidates(videoId: string | null): string[] 
     return [];
   }
 
-  return ["maxresdefault", "sddefault", "hqdefault"].map(
-    (quality) => `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`,
+  return (["maxresdefault", "sddefault", "hqdefault"] as YouTubeThumbnailQuality[]).map(
+    (quality) => buildThumbnailProxyUrl(videoId, quality),
   );
 }
