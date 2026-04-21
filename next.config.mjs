@@ -1,13 +1,23 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: process.cwd(),
   images: {
     remotePatterns: [
-      { hostname: 'i.ytimg.com' },
-      { hostname: 'img.youtube.com' },
-      { hostname: 'images.unsplash.com' },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
     ],
   },
+  outputFileTracingRoot: rootDir,
 };
 
 export default nextConfig;

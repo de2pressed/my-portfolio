@@ -18,56 +18,7 @@
     "afterFiles": [],
     "fallback": []
   },
-  "dynamicRoutes": [
-    {
-      "page": "/api/experience/[id]",
-      "regex": "^/api/experience/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/experience/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/api/reviews/[id]",
-      "regex": "^/api/reviews/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/reviews/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/api/skills/[id]",
-      "regex": "^/api/skills/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/skills/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/api/tracks/[id]",
-      "regex": "^/api/tracks/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/tracks/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/api/works/[id]",
-      "regex": "^/api/works/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/works/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/works/[slug]",
-      "regex": "^/works/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPslug": "nxtPslug"
-      },
-      "namedRegex": "^/works/(?<nxtPslug>[^/]+?)(?:/)?$"
-    }
-  ],
+  "dynamicRoutes": [],
   "staticRoutes": [
     {
       "page": "/",
@@ -82,16 +33,16 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
-      "page": "/admin",
-      "regex": "^/admin(?:/)?$",
+      "page": "/admin/login",
+      "regex": "^/admin/login(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/admin(?:/)?$"
+      "namedRegex": "^/admin/login(?:/)?$"
     },
     {
-      "page": "/admin-login",
-      "regex": "^/admin\\-login(?:/)?$",
+      "page": "/admin/panel",
+      "regex": "^/admin/panel(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/admin\\-login(?:/)?$"
+      "namedRegex": "^/admin/panel(?:/)?$"
     }
   ],
   "dataRoutes": [],

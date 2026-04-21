@@ -1,0 +1,37 @@
+Aim: to make a portfolio website, with my art style, that's dynamic and update-able.
+
+Concept: a website where i can display my work, projects, skills and basic portfolio stuff, since i keep doing projects very often, the aim is to have the website be easily editable, instead of me having to write code everytime i need to edit the website’s text and since i have an exquisite taste in what i create, the website will have a very dynamic design language, which will transform through the years, but for the first view on the website, i aim to design the website to my current art style.
+
+The project is already connected to a supabase project and vercel project too, so work according to that
+
+Features:
+The website must have music, music is art, art is music. Music player in a bottom corner, very cliche, very niche and matching the website theme and background, with every essential control, polished to the max. The music will be played through youtube, with a powered by youtube text somewhere in the corner of the music player. The music should load in the loading screen itself, there should be no delay in the music playing after the loading animation. The music will be played through a youtube video link or a playlist link, the link input box should be in the admin panel. The music player should have the thumbnail of the youtube music playing with no black edges, perfect fitting.
+A shortcut for admin login, invisible to the normal user, when i type de2pressed on the keyboard on the normal website, it leads me to a highly dynamic, theme matched login page only for me, the admin, the manager of the project, normal users may be able to find it but to theme it must be like a wall, they can never access.
+After the admin login, it should lead me to an admin control panel of the website, where i can edit information/details about me/the website, such as skills, experiences, projects and stuff.
+A review section for the normal users, at the very end of the website, just above the footer, they can access a review of the site section, where it asks for their emails before writing a review. Reviews should be delete-able by the admin panel.
+A stat page in the admin panel that tells me the website stats, such as visits, avg stay on website time, pages explored and everything, ofc there wont be any user details but i’d know its different users through cookies and data collection.
+Before being able to view the website, a loading screen that comes up even when reloading the website, separate from the transition animation, the loading screen should be highly conflicted with my art style, and following the loading screen, only for users using the website for the first time, a cookie message, which should only appear sole for the first visit, and only after the loading screen and before the website is viewable by the user, nothing of the website should be viewable by the user without accepting or rejecting cookies, and cookies disclaimer should mention that cookies are purely to improve the website experience through data collection.
+A special animation that only occurs once, when transitioning for the first time from the loading screen to the cookie dialog, only once when the cookie dialog is shown, never again for the same user, it should be different from the animation of the loading screen loading the website without the cookie dialog in middle (for users who’ve been through the cookies dialog”.
+The transition effect, I'm a fan of animations, and I love animations that the users want more, just switching pages to view it, that's what I want from my page transition animation.
+A custom glass cursor, that’s frosted glass and overrides the default cursor perfectly.
+The footer must be an immersive experience, as the user scrolls down to the footer, the music player takes over the footer, giving a never before experience to the user, very immersive, very smooth.
+The Header must be something that soothes the eyes, sticks to the top and doesn't hurt people on mobile.
+The background should be dynamically reacting to the music playing. Not too loudly, just there.
+A version number in the bottom left, that tells which version is the app on
+
+
+Colors: The color palette should be something bright, that matches with every color, feels like home to the human eye, something they could stare at for hours. The color palette should also be affected by the thumbnail of the music that’s playing, like an ambient theatre, immersive.
+
+Art style: Currently the art style i like and follow is a very dynamic glassmorphism style with polished and a feature rich experience, optimized for both mobile and pc. 
+I aim for the background to be something very creative and dynamic, and music will define the pace of the whole website. It's something close to me, every project I make, there’s always hands from outside, but this is me, only me.
+To me this project is something very personal, people believe ai kills art, but i believe ai’s given fingers to the artist with no fingers. 
+To me abstract animations speak a language, colors that people don't usually like paired with one another, these things, i love.
+
+Theme: skeuomorphism, glassmorphism.
+
+Content: ill be sharing my base resume as placeholder data for developing the site, and a
+ youtube link: “https://www.youtube.com/watch?v=ZAz3rnLGthg&list=RDZAz3rnLGthg”
+
+
+
+
