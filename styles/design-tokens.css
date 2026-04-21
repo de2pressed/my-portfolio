@@ -11,8 +11,8 @@
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.1) inset,
     0 28px 90px rgba(2, 2, 4, 0.58);
-  --glass-fill: linear-gradient(135deg, rgba(11, 11, 15, 0.58), rgba(6, 6, 8, 0.26));
-  --glass-strong: linear-gradient(145deg, rgba(16, 16, 21, 0.66), rgba(8, 8, 11, 0.34));
+  --glass-fill: linear-gradient(135deg, rgba(11, 11, 15, 0.22), rgba(6, 6, 8, 0.08));
+  --glass-strong: linear-gradient(145deg, rgba(16, 16, 21, 0.28), rgba(8, 8, 11, 0.14));
   --panel-edge: linear-gradient(120deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.015));
   --ambient-gradient:
     radial-gradient(circle at 50% 32%, rgba(var(--accent-rgb), 0.24), transparent 14%),
