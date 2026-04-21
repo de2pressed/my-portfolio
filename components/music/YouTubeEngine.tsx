@@ -138,15 +138,22 @@ export function YouTubeEngine() {
         return 0.06;
       }
 
-      const base = Math.abs(Math.sin(currentTime * 1.52)) * 0.24;
-      const shimmer = Math.abs(Math.cos(currentTime * 0.78 + 0.42)) * 0.2;
-      const detail = Math.abs(Math.sin(currentTime * 3.12 + 1.08)) * 0.16;
-      const texture = Math.abs(Math.cos(currentTime * 4.56 - 0.74)) * 0.12;
-      const spark = Math.abs(Math.sin(currentTime * 6.9 + 0.18)) * 0.1;
-      const counterpoint = Math.abs(Math.cos(currentTime * 8.2 + 1.4)) * 0.08;
-      const tempoBurst = Math.min(0.28, Math.max(0, deltaTime * 0.42));
-      const volumeFactor = (currentVolume / 100) * 0.22;
-      const energy = Math.min(0.94, 0.1 + base + shimmer + detail + texture + spark + counterpoint + tempoBurst + volumeFactor);
+      // Use faster, more varied frequencies for more precise pulsing
+      const base = Math.abs(Math.sin(currentTime * 3.5)) * 0.18;
+      const bass = Math.abs(Math.sin(currentTime * 2.2)) * 0.15;
+      const mid = Math.abs(Math.cos(currentTime * 5.8 + 0.3)) * 0.12;
+      const high = Math.abs(Math.sin(currentTime * 8.4 + 0.7)) * 0.1;
+      const shimmer = Math.abs(Math.cos(currentTime * 12.6 + 1.2)) * 0.08;
+      const spark = Math.abs(Math.sin(currentTime * 18.2 + 0.5)) * 0.06;
+      
+      // Stronger response to volume changes
+      const volumeFactor = (currentVolume / 100) * 0.35;
+      
+      // Add tempo burst based on time delta between polls (indicates playback speed)
+      const tempoBurst = Math.min(0.25, Math.max(0, deltaTime * 0.8));
+      
+      // Combine all factors with stronger base response
+      const energy = Math.min(0.96, 0.15 + base + bass + mid + high + shimmer + spark + tempoBurst + volumeFactor);
       console.log("[YouTubeEngine] deriveEnergy:", { currentTime, isPlaying, currentVolume, deltaTime, energy });
       return energy;
     }
