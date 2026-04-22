@@ -161,10 +161,6 @@ export function AmbientBackground() {
       const songDur = durationRef.current || 180; // default 3 min
       const songProgress = songT / songDur; // 0..1 across the whole song
 
-      // Chorus detection: boost signals during typical chorus sections (0.25-0.4, 0.65-0.8)
-      const isChorus = (songProgress >= 0.25 && songProgress <= 0.4) || (songProgress >= 0.65 && songProgress <= 0.8);
-      const chorusBoost = isChorus ? 1.3 : 1.0;
-
       // Idle animation: when paused, use gentle sine wave from wall-clock time
       const isIdle = baseLevel === 0;
       const idleSignal = isIdle ? 0.4 + 0.15 * Math.sin(t * 0.5) : 0;
@@ -188,9 +184,9 @@ export function AmbientBackground() {
 
         switch (bandRole) {
           case 0: {
-            // BASS — heavy, sustained low-frequency pulses (0.5-1.0 Hz)
+            // BASS — heavy, sustained low-frequency pulses (1.0-2.0 Hz, increased for responsiveness)
             // Uses asymmetric power curve: slow rise, quick fall for kick-drum feel
-            const bassFreq = 0.8 + structureDrift * 0.3;
+            const bassFreq = 1.6 + structureDrift * 0.5;
             const rawBass = Math.sin(bandT * bassFreq * Math.PI * 2 + phaseOffset);
             // Asymmetric: positive values sustain (power 0.4), negative values decay quickly (power 4)
             bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.4) : Math.pow(Math.abs(rawBass), 4) * 0.1;
@@ -199,8 +195,8 @@ export function AmbientBackground() {
             break;
           }
           case 1: {
-            // VOCALS — mid-high frequency (3.5 Hz) with asymmetric sustain for vocal-like behavior
-            const vocalFreq = 3.5 + structureDrift * 0.4;
+            // VOCALS — mid-high frequency (5.0 Hz, increased for responsiveness) with asymmetric sustain
+            const vocalFreq = 5.0 + structureDrift * 0.6;
             const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
             // Asymmetric: positive values sustain (power 0.5), negative values decay (power 2)
             bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.5) : Math.pow(Math.abs(rawVocal), 2) * 0.2;
@@ -209,11 +205,11 @@ export function AmbientBackground() {
             break;
           }
           case 2: {
-            // SYNTH — continuous ambient variation from summed high frequencies (8-16 Hz)
+            // SYNTH — continuous ambient variation from summed high frequencies (12-24 Hz, increased)
             // Sum of 3 sines at different frequencies for complex, non-periodic appearance
-            const t1 = Math.sin(bandT * 8.0 * Math.PI * 2 + phaseOffset);
-            const t2 = Math.sin(bandT * 12.0 * Math.PI * 2 + phaseOffset * 1.3);
-            const t3 = Math.sin(bandT * 16.0 * Math.PI * 2 + phaseOffset * 0.7);
+            const t1 = Math.sin(bandT * 12.0 * Math.PI * 2 + phaseOffset);
+            const t2 = Math.sin(bandT * 18.0 * Math.PI * 2 + phaseOffset * 1.3);
+            const t3 = Math.sin(bandT * 24.0 * Math.PI * 2 + phaseOffset * 0.7);
             const combined = (t1 + t2 + t3) / 3;
             // Apply structure drift for subtle song-structure variation
             const driftMod = 1 + structureDrift2 * 0.5;
@@ -223,9 +219,9 @@ export function AmbientBackground() {
             break;
           }
           case 3: {
-            // BEAT — amplitude-modulated sine for rhythmic variation (1.5-2.5 Hz)
+            // BEAT — amplitude-modulated sine for rhythmic variation (3.0-4.0 Hz, increased)
             // Creates "beating" pattern: sine wave modulated by another sine
-            const beatFreq = 2.0 + structureDrift * 0.5;
+            const beatFreq = 3.5 + structureDrift * 0.8;
             const modFreq = beatFreq * 0.5;
             const carrier = Math.sin(bandT * beatFreq * Math.PI * 2 + phaseOffset);
             const modulator = 0.5 + 0.5 * Math.sin(bandT * modFreq * Math.PI * 2 + phaseOffset * 0.7);
@@ -236,16 +232,13 @@ export function AmbientBackground() {
           }
         }
 
-        // Apply EMA smoothing to reduce flicker
-        const alpha = 0.3; // Smoothing factor
+        // Apply EMA smoothing for responsive reactions
+        const alpha = 0.7; // Higher alpha for faster response
         const smoothed = alpha * bandSignal + (1 - alpha) * smoothedSignalsRef.current[bandRole];
         smoothedSignalsRef.current[bandRole] = smoothed;
         bandSignal = smoothed;
 
-        // Apply chorus boost for song structure sync
-        bandSignal *= chorusBoost;
-
-        const effectiveLevel = isIdle ? idleSignal : baseLevel * (0.3 + bandSignal * 0.7);
+        const effectiveLevel = isIdle ? idleSignal : baseLevel * (0.2 + bandSignal * 0.8);
 
         // Update gradient position based on movement pattern
         let x = width * gradient.anchorX;
