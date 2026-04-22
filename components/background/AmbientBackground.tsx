@@ -169,9 +169,9 @@ export function AmbientBackground() {
         const bandRole = gradient.bandRole;
         const phaseOffset = gradient.phaseOffset;
 
-        // Song-structure drift
-        const structureDrift = Math.sin(songProgress * Math.PI * 4 + phaseOffset) * 0.2;
-        const structureDrift2 = Math.cos(songProgress * Math.PI * 6 + phaseOffset * 0.7) * 0.15;
+        // Song-structure drift (reduced for cleaner reactions)
+        const structureDrift = Math.sin(songProgress * Math.PI * 4 + phaseOffset) * 0.1;
+        const structureDrift2 = Math.cos(songProgress * Math.PI * 6 + phaseOffset * 0.7) * 0.08;
 
         // Per-band staggered time offset
         const bandDelay = bandRole * 0.04;
@@ -184,56 +184,50 @@ export function AmbientBackground() {
 
         switch (bandRole) {
           case 0: {
-            // BASS — heavy, sustained low-frequency pulses (1.0-2.0 Hz, increased for responsiveness)
-            // Uses asymmetric power curve: slow rise, quick fall for kick-drum feel
-            const bassFreq = 1.6 + structureDrift * 0.5;
+            // BASS — kick drum at 128 BPM = 2.13 Hz, more pronounced
+            const bassFreq = 2.13 + structureDrift * 0.4;
             const rawBass = Math.sin(bandT * bassFreq * Math.PI * 2 + phaseOffset);
-            // Asymmetric: positive values sustain (power 0.4), negative values decay quickly (power 4)
-            bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.4) : Math.pow(Math.abs(rawBass), 4) * 0.1;
-            radiusScale = 1.8;
-            opacityScale = 0.6;
-            break;
-          }
-          case 1: {
-            // VOCALS — mid-high frequency (5.0 Hz, increased for responsiveness) with asymmetric sustain
-            const vocalFreq = 5.0 + structureDrift * 0.6;
-            const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
-            // Asymmetric: positive values sustain (power 0.5), negative values decay (power 2)
-            bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.5) : Math.pow(Math.abs(rawVocal), 2) * 0.2;
-            radiusScale = 1.0;
+            bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.3) : Math.pow(Math.abs(rawBass), 2.5) * 0.12;
+            radiusScale = 2.2;
             opacityScale = 0.7;
             break;
           }
+          case 1: {
+            // VOCALS — mid-range at 4.27 Hz, more dynamic
+            const vocalFreq = 4.27 + structureDrift * 0.5;
+            const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
+            bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.4) : Math.pow(Math.abs(rawVocal), 1.8) * 0.18;
+            radiusScale = 1.2;
+            opacityScale = 0.8;
+            break;
+          }
           case 2: {
-            // SYNTH — continuous ambient variation from summed high frequencies (12-24 Hz, increased)
-            // Sum of 3 sines at different frequencies for complex, non-periodic appearance
-            const t1 = Math.sin(bandT * 12.0 * Math.PI * 2 + phaseOffset);
-            const t2 = Math.sin(bandT * 18.0 * Math.PI * 2 + phaseOffset * 1.3);
-            const t3 = Math.sin(bandT * 24.0 * Math.PI * 2 + phaseOffset * 0.7);
+            // SYNTH — high frequency leads at 8.5-17 Hz, more visible
+            const t1 = Math.sin(bandT * 8.5 * Math.PI * 2 + phaseOffset);
+            const t2 = Math.sin(bandT * 12.8 * Math.PI * 2 + phaseOffset * 1.3);
+            const t3 = Math.sin(bandT * 17.0 * Math.PI * 2 + phaseOffset * 0.7);
             const combined = (t1 + t2 + t3) / 3;
-            // Apply structure drift for subtle song-structure variation
             const driftMod = 1 + structureDrift2 * 0.5;
-            bandSignal = Math.abs(combined) * driftMod;
-            radiusScale = 0.4;
-            opacityScale = 0.35;
+            bandSignal = Math.abs(combined) * driftMod * 1.2;
+            radiusScale = 0.6;
+            opacityScale = 0.45;
             break;
           }
           case 3: {
-            // BEAT — amplitude-modulated sine for rhythmic variation (3.0-4.0 Hz, increased)
-            // Creates "beating" pattern: sine wave modulated by another sine
-            const beatFreq = 3.5 + structureDrift * 0.8;
-            const modFreq = beatFreq * 0.5;
+            // BEAT — snare at 1.07 Hz, more responsive
+            const beatFreq = 1.07 + structureDrift * 0.3;
+            const modFreq = beatFreq * 0.6;
             const carrier = Math.sin(bandT * beatFreq * Math.PI * 2 + phaseOffset);
             const modulator = 0.5 + 0.5 * Math.sin(bandT * modFreq * Math.PI * 2 + phaseOffset * 0.7);
-            bandSignal = Math.abs(carrier * modulator);
-            radiusScale = 1.2;
-            opacityScale = 0.5;
+            bandSignal = Math.abs(carrier * modulator) * 1.15;
+            radiusScale = 1.5;
+            opacityScale = 0.6;
             break;
           }
         }
 
-        // Apply EMA smoothing for responsive reactions
-        const alpha = 0.7; // Higher alpha for faster response
+        // Apply EMA smoothing for instant response
+        const alpha = 0.8; // Very high alpha for near-instant response
         const smoothed = alpha * bandSignal + (1 - alpha) * smoothedSignalsRef.current[bandRole];
         smoothedSignalsRef.current[bandRole] = smoothed;
         bandSignal = smoothed;
