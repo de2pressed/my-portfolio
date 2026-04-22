@@ -207,8 +207,6 @@ export function AmbientBackground() {
 
     const draw = (time: number) => {
       const baseLevel = Math.max(0, Math.min(1, energyRef.current));
-      const currentPalette = paletteRef.current.length > 0 ? paletteRef.current : fallbackPalette;
-      const vibrantPalette = currentPalette.map(boostCanvasColor);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -234,7 +232,7 @@ export function AmbientBackground() {
       context.fillStyle = "rgba(0, 0, 0, 0.12)";
       context.fillRect(0, 0, width, height);
 
-      for (const [index, particle] of particles.entries()) {
+      for (const particle of particles) {
         const bandRole = particle.bandRole;
         const phaseOffset = particle.phaseOffset;
 
