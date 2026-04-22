@@ -20,6 +20,7 @@ export function GlassCursor() {
   const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100, vx: 0, vy: 0 })));
   const interactive = useRef(false);
   const isPressed = useRef(false);
+  const hasMoved = useRef(false);
   const bindings = useRef(
     new Map<
       Element,
@@ -54,7 +55,7 @@ export function GlassCursor() {
       const size = interactive.current ? HOVER_SIZE : DEFAULT_SIZE;
       cursorRef.current.style.width = `${size}px`;
       cursorRef.current.style.height = `${size}px`;
-      cursorRef.current.style.opacity = "1";
+      cursorRef.current.style.opacity = hasMoved.current ? "1" : "0";
       cursorRef.current.style.filter = interactive.current
         ? "drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.26)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65))"
         : "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.42))";
@@ -65,7 +66,12 @@ export function GlassCursor() {
       const prevY = pointer.current.y;
       pointer.current.x = event.clientX;
       pointer.current.y = event.clientY;
-      
+
+      if (!hasMoved.current) {
+        hasMoved.current = true;
+        syncCursorStyle();
+      }
+
       // Calculate velocity for spring physics
       const dx = pointer.current.x - prevX;
       const dy = pointer.current.y - prevY;
