@@ -418,7 +418,6 @@ export function AmbientBackground() {
         y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 * orbitalDamp + swayY;
 
         const radius = blob.size * pulse;
-        const largeBlob = blob.size >= 96;
         const blur = blurBase - effectiveLevel * blurRange;
 
         // Per-band opacity: each band uses its own base + scale
