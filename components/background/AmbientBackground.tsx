@@ -26,7 +26,7 @@ export function AmbientBackground() {
   const durationRef = useRef(0);
   const songTimeUpdateRef = useRef(0);
   const isPlayingRef = useRef(isPlaying);
-  const smoothedSignalsRef = useRef([0, 0, 0, 0, 0]); // EMA smoothing for 5 bands
+  const smoothedSignalsRef = useRef([0, 0, 0, 0]); // EMA smoothing for 4 bands
 
   useEffect(() => {
     energyRef.current = energy;
@@ -73,7 +73,7 @@ export function AmbientBackground() {
       anchorY: number;
       radius: number;
       color: string;
-      bandRole: number; // 0=bass, 1=mid, 2=high, 3=texture, 4=vocal
+      bandRole: number; // 0=bass, 1=vocals, 2=synth, 3=beat
       phaseOffset: number;
     };
 
@@ -104,7 +104,7 @@ export function AmbientBackground() {
         phaseOffset: 0,
       },
       {
-        // MID — top-right quadrant
+        // VOCALS — top-right quadrant
         x: width * 0.75,
         y: height * 0.25,
         anchorX: 0.75,
@@ -115,7 +115,7 @@ export function AmbientBackground() {
         phaseOffset: 1.5,
       },
       {
-        // HIGH — bottom-left quadrant
+        // SYNTH — bottom-left quadrant
         x: width * 0.25,
         y: height * 0.75,
         anchorX: 0.25,
@@ -126,7 +126,7 @@ export function AmbientBackground() {
         phaseOffset: 3,
       },
       {
-        // TEXTURE — bottom-right quadrant
+        // BEAT — bottom-right quadrant
         x: width * 0.75,
         y: height * 0.75,
         anchorX: 0.75,
@@ -135,17 +135,6 @@ export function AmbientBackground() {
         color: thumbnailColorsRef.current[3],
         bandRole: 3,
         phaseOffset: 4.5,
-      },
-      {
-        // VOCAL — center
-        x: width * 0.5,
-        y: height * 0.5,
-        anchorX: 0.5,
-        anchorY: 0.5,
-        radius: Math.min(width, height) * 0.35,
-        color: thumbnailColorsRef.current[0],
-        bandRole: 4,
-        phaseOffset: 6,
       },
     ];
 
@@ -210,30 +199,17 @@ export function AmbientBackground() {
             break;
           }
           case 1: {
-            // MID — amplitude-modulated sine for rhythmic variation (1.5-2.5 Hz)
-            // Creates "beating" pattern: sine wave modulated by another sine
-            const midFreq = 2.0 + structureDrift * 0.5;
-            const modFreq = midFreq * 0.5;
-            const carrier = Math.sin(bandT * midFreq * Math.PI * 2 + phaseOffset);
-            const modulator = 0.5 + 0.5 * Math.sin(bandT * modFreq * Math.PI * 2 + phaseOffset * 0.7);
-            bandSignal = Math.abs(carrier * modulator);
-            radiusScale = 1.2;
-            opacityScale = 0.5;
+            // VOCALS — mid-high frequency (3.5 Hz) with asymmetric sustain for vocal-like behavior
+            const vocalFreq = 3.5 + structureDrift * 0.4;
+            const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
+            // Asymmetric: positive values sustain (power 0.5), negative values decay (power 2)
+            bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.5) : Math.pow(Math.abs(rawVocal), 2) * 0.2;
+            radiusScale = 1.0;
+            opacityScale = 0.7;
             break;
           }
           case 2: {
-            // HIGH — reduced frequency (2.5 Hz) to eliminate flicker, no noise
-            // Uses moderate frequency with power curve for snare/hi-hat transients
-            const highFreq = 2.5 + structureDrift2 * 0.5;
-            const rawHigh = Math.sin(bandT * highFreq * Math.PI * 2 + phaseOffset);
-            // Moderate power curve for visible but smooth transients
-            bandSignal = Math.pow(Math.abs(rawHigh), 2) * 0.7;
-            radiusScale = 0.6;
-            opacityScale = 0.8;
-            break;
-          }
-          case 3: {
-            // TEXTURE — continuous ambient variation from summed high frequencies (8-16 Hz)
+            // SYNTH — continuous ambient variation from summed high frequencies (8-16 Hz)
             // Sum of 3 sines at different frequencies for complex, non-periodic appearance
             const t1 = Math.sin(bandT * 8.0 * Math.PI * 2 + phaseOffset);
             const t2 = Math.sin(bandT * 12.0 * Math.PI * 2 + phaseOffset * 1.3);
@@ -246,14 +222,16 @@ export function AmbientBackground() {
             opacityScale = 0.35;
             break;
           }
-          case 4: {
-            // VOCAL — mid-high frequency (3.5 Hz) with asymmetric sustain for vocal-like behavior
-            const vocalFreq = 3.5 + structureDrift * 0.4;
-            const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
-            // Asymmetric: positive values sustain (power 0.5), negative values decay (power 2)
-            bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.5) : Math.pow(Math.abs(rawVocal), 2) * 0.2;
-            radiusScale = 1.0;
-            opacityScale = 0.7;
+          case 3: {
+            // BEAT — amplitude-modulated sine for rhythmic variation (1.5-2.5 Hz)
+            // Creates "beating" pattern: sine wave modulated by another sine
+            const beatFreq = 2.0 + structureDrift * 0.5;
+            const modFreq = beatFreq * 0.5;
+            const carrier = Math.sin(bandT * beatFreq * Math.PI * 2 + phaseOffset);
+            const modulator = 0.5 + 0.5 * Math.sin(bandT * modFreq * Math.PI * 2 + phaseOffset * 0.7);
+            bandSignal = Math.abs(carrier * modulator);
+            radiusScale = 1.2;
+            opacityScale = 0.5;
             break;
           }
         }
@@ -281,35 +259,26 @@ export function AmbientBackground() {
           x += Math.cos(angle) * orbitRadius;
           y += Math.sin(angle) * orbitRadius;
         } else if (bandRole === 1) {
-          // MID: drifts horizontally in sine wave
-          const driftAmount = 50 + effectiveLevel * 80;
-          const driftFreq = 0.001;
-          x += Math.sin(t * driftFreq + phaseOffset) * driftAmount;
-        } else if (bandRole === 2) {
-          // HIGH: moves in Lissajous figure (figure-8)
-          const lissajousA = 60 + effectiveLevel * 40;
-          const lissajousB = 40 + effectiveLevel * 30;
-          const lissajousFreqX = 0.002;
-          const lissajousFreqY = 0.003;
-          x += Math.sin(t * lissajousFreqX + phaseOffset) * lissajousA;
-          y += Math.sin(t * lissajousFreqY + phaseOffset * 0.7) * lissajousB;
-        } else if (bandRole === 3) {
-          // TEXTURE: spirals slowly around anchor
-          const spiralRadius = 40 + effectiveLevel * 30;
-          const spiralSpeed = 0.0008;
-          const spiralExpansion = 0.0003;
-          const angle = t * spiralSpeed + phaseOffset;
-          const radius = spiralRadius + Math.sin(t * spiralExpansion) * 20;
-          x += Math.cos(angle) * radius;
-          y += Math.sin(angle) * radius;
-        } else {
-          // VOCAL: gentle breathing/undulating motion (expands and contracts from center)
+          // VOCALS: gentle breathing/undulating motion (expands and contracts from center)
           const breatheRadius = 20 + effectiveLevel * 40;
           const breatheFreq = 0.0012;
           const breatheX = Math.sin(t * breatheFreq + phaseOffset) * breatheRadius;
           const breatheY = Math.cos(t * breatheFreq * 0.8 + phaseOffset * 0.6) * breatheRadius;
           x += breatheX;
           y += breatheY;
+        } else if (bandRole === 2) {
+          // SYNTH: moves in Lissajous figure (figure-8)
+          const lissajousA = 60 + effectiveLevel * 40;
+          const lissajousB = 40 + effectiveLevel * 30;
+          const lissajousFreqX = 0.002;
+          const lissajousFreqY = 0.003;
+          x += Math.sin(t * lissajousFreqX + phaseOffset) * lissajousA;
+          y += Math.sin(t * lissajousFreqY + phaseOffset * 0.7) * lissajousB;
+        } else {
+          // BEAT: drifts horizontally in sine wave
+          const driftAmount = 50 + effectiveLevel * 80;
+          const driftFreq = 0.001;
+          x += Math.sin(t * driftFreq + phaseOffset) * driftAmount;
         }
 
         // Update gradient config

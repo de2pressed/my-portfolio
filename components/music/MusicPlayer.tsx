@@ -329,7 +329,7 @@ export function MusicPlayer() {
                 min={0}
                 onChange={(event) => setVolume(Number(event.target.value))}
                 style={{
-                  background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(var(--glass-border-rgb), 0.3) ${volume}%, rgba(var(--glass-border-rgb), 0.3) 100%)`,
+                  background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(255,255,255,0.22) ${volume}%, rgba(255,255,255,0.22) 100%)`,
                 }}
                 type="range"
                 value={volume}
