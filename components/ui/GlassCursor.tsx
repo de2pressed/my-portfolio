@@ -44,9 +44,7 @@ export function GlassCursor() {
     let frame = 0;
     let lastFrameTime = 0;
     const TARGET_FPS = 60;
-    const THROTTLED_FPS = 30;
     const FRAME_INTERVAL = 1000 / TARGET_FPS;
-    const THROTTLED_INTERVAL = 1000 / THROTTLED_FPS;
 
     const syncCursorStyle = () => {
       if (!cursorRef.current) {
@@ -108,16 +106,14 @@ export function GlassCursor() {
     const tick = (timestamp: number) => {
       const state = pointer.current;
       
-      // Throttle to 30fps when not interacting
-      const targetInterval = interactive.current ? FRAME_INTERVAL : THROTTLED_INTERVAL;
       const elapsed = timestamp - lastFrameTime;
       
-      if (elapsed < targetInterval) {
+      if (elapsed < FRAME_INTERVAL) {
         frame = window.requestAnimationFrame(tick);
         return;
       }
       
-      lastFrameTime = timestamp - (elapsed % targetInterval);
+      lastFrameTime = timestamp - (elapsed % FRAME_INTERVAL);
       
       // Spring physics for main cursor
       const stiffness = 0.24;

@@ -198,7 +198,6 @@ export function AmbientBackground() {
     }
 
     let animationFrame = 0;
-    let frameCount = 0;
     let isTabVisible = true;
 
     type GradientConfig = {
@@ -294,10 +293,6 @@ export function AmbientBackground() {
       // Convert time from ms to seconds for frequency calculations
       const t = time / 1000;
 
-      // Frame skipping: skip Perlin noise calculations every 2 frames when energy is low
-      frameCount++;
-      const shouldCalculateNoise = frameCount % 2 === 0 || baseLevel > 0.3;
-
       context.clearRect(0, 0, width, height);
 
       // Background is now black
@@ -337,7 +332,7 @@ export function AmbientBackground() {
         switch (bandRole) {
           case 0: {
             // BASS — Perlin noise + envelope follower for organic kick drum simulation
-            const noise = shouldCalculateNoise ? perlinNoise(bandT * 0.5, phaseOffset, songProgress * 2) * 0.5 + 0.5 : 0.5;
+            const noise = perlinNoise(bandT * 0.5, phaseOffset, songProgress * 2) * 0.5 + 0.5;
             const bassFreq = 2.13 + structureDrift * 0.4;
             const rawBass = Math.sin(bandT * bassFreq * Math.PI * 2 + phaseOffset) * noise;
             bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.35) : Math.pow(Math.abs(rawBass), 2.2) * 0.1;
@@ -347,7 +342,7 @@ export function AmbientBackground() {
           }
           case 1: {
             // VOCALS — multi-layered modulation with envelope
-            const noise = shouldCalculateNoise ? perlinNoise(bandT * 0.8, phaseOffset * 1.5, songProgress * 3) * 0.4 + 0.6 : 0.6;
+            const noise = perlinNoise(bandT * 0.8, phaseOffset * 1.5, songProgress * 3) * 0.4 + 0.6;
             const vocalFreq = 4.27 + structureDrift * 0.5;
             const carrier = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
             const modulator = 0.5 + 0.5 * Math.sin(bandT * vocalFreq * 0.5 * Math.PI * 2 + phaseOffset * 0.7);
@@ -359,7 +354,7 @@ export function AmbientBackground() {
           }
           case 2: {
             // SYNTH — high frequency with Perlin noise variation
-            const noise = shouldCalculateNoise ? perlinNoise(bandT * 1.2, phaseOffset * 2, songProgress * 4) * 0.3 + 0.7 : 0.7;
+            const noise = perlinNoise(bandT * 1.2, phaseOffset * 2, songProgress * 4) * 0.3 + 0.7;
             const t1 = Math.sin(bandT * 8.5 * Math.PI * 2 + phaseOffset);
             const t2 = Math.sin(bandT * 12.8 * Math.PI * 2 + phaseOffset * 1.3);
             const t3 = Math.sin(bandT * 17.0 * Math.PI * 2 + phaseOffset * 0.7);
@@ -372,7 +367,7 @@ export function AmbientBackground() {
           }
           case 3: {
             // BEAT — amplitude modulation with transient detection
-            const noise = shouldCalculateNoise ? perlinNoise(bandT * 0.3, phaseOffset * 0.5, songProgress * 1.5) * 0.5 + 0.5 : 0.5;
+            const noise = perlinNoise(bandT * 0.3, phaseOffset * 0.5, songProgress * 1.5) * 0.5 + 0.5;
             const beatFreq = 1.07 + structureDrift * 0.3;
             const modFreq = beatFreq * 0.6;
             const carrier = Math.sin(bandT * beatFreq * Math.PI * 2 + phaseOffset);

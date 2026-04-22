@@ -1,14 +1,14 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/admin/login/route": "app/api/admin/login/route.js",
   "/api/admin/logout/route": "app/api/admin/logout/route.js",
   "/api/analytics/route": "app/api/analytics/route.js",
   "/api/content/route": "app/api/content/route.js",
   "/api/reviews/route": "app/api/reviews/route.js",
+  "/api/admin/login/route": "app/api/admin/login/route.js",
   "/api/youtube-thumbnail/route": "app/api/youtube-thumbnail/route.js",
   "/admin/page": "app/admin/page.js",
   "/login/page": "app/login/page.js",
-  "/admin/panel/page": "app/admin/panel/page.js",
   "/admin/login/page": "app/admin/login/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/admin/panel/page": "app/admin/panel/page.js"
 }
