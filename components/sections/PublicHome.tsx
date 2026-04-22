@@ -2,13 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
-import { About } from "@/components/sections/About";
-import { Experience } from "@/components/sections/Experience";
 import { Hero } from "@/components/sections/Hero";
-import { Projects } from "@/components/sections/Projects";
-import { Reviews } from "@/components/sections/Reviews";
-import { Skills } from "@/components/sections/Skills";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { useCookie } from "@/context/CookieContext";
@@ -21,6 +17,27 @@ import {
 } from "@/lib/analytics";
 import type { PortfolioData } from "@/lib/types";
 import { getSiteContentValue } from "@/lib/utils";
+
+// Lazy load below-fold sections for code splitting
+const About = dynamic(() => import("@/components/sections/About").then(mod => ({ default: mod.About })), {
+  loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
+});
+
+const Experience = dynamic(() => import("@/components/sections/Experience").then(mod => ({ default: mod.Experience })), {
+  loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
+});
+
+const Projects = dynamic(() => import("@/components/sections/Projects").then(mod => ({ default: mod.Projects })), {
+  loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
+});
+
+const Reviews = dynamic(() => import("@/components/sections/Reviews").then(mod => ({ default: mod.Reviews })), {
+  loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
+});
+
+const Skills = dynamic(() => import("@/components/sections/Skills").then(mod => ({ default: mod.Skills })), {
+  loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
+});
 
 type PublicHomeProps = {
   data: PortfolioData;

@@ -11,11 +11,15 @@ import "@/styles/globals.css";
 const headingFont = Sora({
   subsets: ["latin"],
   variable: "--font-heading",
+  display: "swap",
+  preload: true,
 });
 
 const bodyFont = Manrope({
   subsets: ["latin"],
   variable: "--font-body",
+  display: "swap",
+  preload: true,
 });
 
 const siteUrl =

@@ -6,8 +6,8 @@ const DEFAULT_SIZE = 18;
 const HOVER_SIZE = 24;
 const TIP_OFFSET_X = 1.2;
 const TIP_OFFSET_Y = 0.8;
-const TRAIL_COUNT = 5;
-const TRAIL_SPEEDS = [0.18, 0.14, 0.1, 0.075, 0.05];
+const TRAIL_COUNT = 3;
+const TRAIL_SPEEDS = [0.18, 0.14, 0.1];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -20,7 +20,6 @@ export function GlassCursor() {
   const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100, vx: 0, vy: 0 })));
   const interactive = useRef(false);
   const isPressed = useRef(false);
-  const rotation = useRef(0);
   const bindings = useRef(
     new Map<
       Element,
@@ -36,7 +35,18 @@ export function GlassCursor() {
       return;
     }
 
+    // Disable on low-end devices
+    const isLowEndDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
+    if (isLowEndDevice) {
+      return;
+    }
+
     let frame = 0;
+    let lastFrameTime = 0;
+    const TARGET_FPS = 60;
+    const THROTTLED_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS;
+    const THROTTLED_INTERVAL = 1000 / THROTTLED_FPS;
 
     const syncCursorStyle = () => {
       if (!cursorRef.current) {
@@ -95,8 +105,19 @@ export function GlassCursor() {
       });
     };
 
-    const tick = () => {
+    const tick = (timestamp: number) => {
       const state = pointer.current;
+      
+      // Throttle to 30fps when not interacting
+      const targetInterval = interactive.current ? FRAME_INTERVAL : THROTTLED_INTERVAL;
+      const elapsed = timestamp - lastFrameTime;
+      
+      if (elapsed < targetInterval) {
+        frame = window.requestAnimationFrame(tick);
+        return;
+      }
+      
+      lastFrameTime = timestamp - (elapsed % targetInterval);
       
       // Spring physics for main cursor
       const stiffness = 0.24;
@@ -110,10 +131,9 @@ export function GlassCursor() {
 
       // Apply press animation
       const pressScale = isPressed.current ? 0.85 : 1;
-      const pressRotation = isPressed.current ? -15 : 0;
 
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0) rotate(${rotation.current + pressRotation}deg) scale(${pressScale})`;
+        cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0) scale(${pressScale})`;
       }
 
       // Spring physics for trail with momentum
@@ -162,7 +182,10 @@ export function GlassCursor() {
     window.addEventListener("pointermove", updatePosition);
     window.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("pointerup", handlePointerUp);
-    frame = window.requestAnimationFrame(tick);
+    frame = window.requestAnimationFrame((timestamp) => {
+      lastFrameTime = timestamp;
+      tick(timestamp);
+    });
 
     const observer = new MutationObserver(bindInteractiveTargets);
     observer.observe(document.body, {
