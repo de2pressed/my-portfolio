@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { useMusicFrequency } from "@/hooks/useMusicFrequency";
+import { GlassHover, BALANCED_CONFIG } from "@/components/ui/GlassHover";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -86,36 +87,28 @@ export function Footer({ name, email, note }: FooterProps) {
             </div>
           </div>
 
-          <motion.div
-            className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,10,14,0.4)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.28)] backdrop-blur-2xl"
-            animate={{
-              opacity: cardProgress,
-              y: 22 - cardProgress * 26,
-              scale: 0.88 + cardProgress * 0.12,
-              rotateX: (2 - cardProgress * 2) * 0.5,
-              rotate: 2 - cardProgress * 2,
-              boxShadow: `0 24px 90px rgba(5,5,8,${0.28 + cardProgress * 0.08}), 0 0 0 1px rgba(var(--accent-rgb), ${
-                0.1 + cardProgress * 0.04
-              }), 0 0 ${28 + cardProgress * 14}px rgba(var(--accent-rgb), ${0.05 + cardProgress * 0.08})`,
-            }}
-            whileHover={{
-              y: 12 - cardProgress * 20,
-              scale: 0.92 + cardProgress * 0.14,
-              rotateX: (1.5 - cardProgress * 1.5) * 0.3,
-              rotate: 1.5 - cardProgress * 1.5,
-              boxShadow: `0 32px 100px rgba(5,5,8,${0.32 + cardProgress * 0.1}), 0 0 0 1px rgba(var(--accent-rgb), ${
-                0.12 + cardProgress * 0.05
-              }), 0 0 ${32 + cardProgress * 18}px rgba(var(--accent-rgb), ${0.08 + cardProgress * 0.1})`,
-            }}
-            transition={{
-              opacity: { duration: 0.18, ease: "easeOut" },
-              y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },
-              scale: { type: "spring", stiffness: 240, damping: 24, mass: 0.9 },
-              rotate: { type: "spring", stiffness: 260, damping: 24, mass: 0.8 },
-              rotateX: { type: "spring", stiffness: 220, damping: 25, mass: 0.85 },
-              boxShadow: { duration: 0.22, ease: "easeOut" },
-            }}
-          >
+          <GlassHover config={BALANCED_CONFIG}>
+            <motion.div
+              className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,10,14,0.4)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.28)] backdrop-blur-2xl"
+              animate={{
+                opacity: cardProgress,
+                y: 22 - cardProgress * 26,
+                scale: 0.88 + cardProgress * 0.12,
+                rotateX: (2 - cardProgress * 2) * 0.5,
+                rotate: 2 - cardProgress * 2,
+                boxShadow: `0 24px 90px rgba(5,5,8,${0.28 + cardProgress * 0.08}), 0 0 0 1px rgba(var(--accent-rgb), ${
+                  0.1 + cardProgress * 0.04
+                }), 0 0 ${28 + cardProgress * 14}px rgba(var(--accent-rgb), ${0.05 + cardProgress * 0.08})`,
+              }}
+              transition={{
+                opacity: { duration: 0.18, ease: "easeOut" },
+                y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },
+                scale: { type: "spring", stiffness: 240, damping: 24, mass: 0.9 },
+                rotate: { type: "spring", stiffness: 260, damping: 24, mass: 0.8 },
+                rotateX: { type: "spring", stiffness: 220, damping: 25, mass: 0.85 },
+                boxShadow: { duration: 0.22, ease: "easeOut" },
+              }}
+            >
             <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
               <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)]">
                 {thumbnail ? (
@@ -172,6 +165,7 @@ export function Footer({ name, email, note }: FooterProps) {
               </div>
             </div>
           </motion.div>
+        </GlassHover>
         </div>
       </section>
     </footer>

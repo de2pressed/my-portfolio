@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { useMusicFrequency } from "@/hooks/useMusicFrequency";
-import { GlassHover } from "@/components/ui/GlassHover";
+import { GlassHover, MINIMAL_CONFIG } from "@/components/ui/GlassHover";
 import { cn } from "@/lib/utils";
 
 const MINIMIZED_KEY = "portfolio-music-player-minimized";
@@ -166,13 +166,16 @@ export function MusicPlayer() {
     );
 
   return (
-    <GlassHover className={cn(
+    <GlassHover 
+      className={cn(
         "fixed bottom-4 right-4 z-40 md:bottom-6 md:right-6",
         isMinimized
           ? "h-[11rem] w-[11rem] sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] sm:max-w-[30rem]",
         footerTakeover > 0.72 && "pointer-events-none",
-      )} intensity={1} maxRotation={12} perspective={500}
+      )} 
+      config={MINIMAL_CONFIG}
+      disabled={footerTakeover > 0.52 && footerTakeover < 0.72}
     >
       <motion.aside
         className={cn(
