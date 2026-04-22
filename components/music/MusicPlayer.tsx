@@ -23,7 +23,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useMusic } from "@/context/MusicContext";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
 import { extractYouTubeVideoId, parseYouTubeSource } from "@/lib/youtube";
-import { useMusicFrequency } from "@/hooks/useMusicFrequency";
 import { cn } from "@/lib/utils";
 
 declare global {
