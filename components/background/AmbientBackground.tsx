@@ -59,7 +59,6 @@ export function AmbientBackground() {
     }
 
     let animationFrame = 0;
-    const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
 
     type GradientConfig = {
       x: number;
@@ -94,7 +93,7 @@ export function AmbientBackground() {
         anchorX: 0.25,
         anchorY: 0.25,
         radius: Math.min(width, height) * 0.4,
-        color: thumbnailColorsRef.current[0] ?? fallbackPalette[0],
+        color: thumbnailColorsRef.current[0],
         bandRole: 0,
         phaseOffset: 0,
       },
@@ -105,7 +104,7 @@ export function AmbientBackground() {
         anchorX: 0.75,
         anchorY: 0.25,
         radius: Math.min(width, height) * 0.35,
-        color: thumbnailColorsRef.current[1] ?? fallbackPalette[1],
+        color: thumbnailColorsRef.current[1],
         bandRole: 1,
         phaseOffset: 1.5,
       },
@@ -116,7 +115,7 @@ export function AmbientBackground() {
         anchorX: 0.25,
         anchorY: 0.75,
         radius: Math.min(width, height) * 0.3,
-        color: thumbnailColorsRef.current[2] ?? fallbackPalette[2],
+        color: thumbnailColorsRef.current[2],
         bandRole: 2,
         phaseOffset: 3,
       },
@@ -127,7 +126,7 @@ export function AmbientBackground() {
         anchorX: 0.75,
         anchorY: 0.75,
         radius: Math.min(width, height) * 0.25,
-        color: thumbnailColorsRef.current[3] ?? fallbackPalette[3],
+        color: thumbnailColorsRef.current[3],
         bandRole: 3,
         phaseOffset: 4.5,
       },
