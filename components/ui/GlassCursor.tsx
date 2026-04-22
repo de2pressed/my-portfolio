@@ -58,17 +58,11 @@ export function GlassCursor() {
       pointer.current.x = event.clientX;
       pointer.current.y = event.clientY;
       
-      // Calculate velocity for rotation
+      // Calculate velocity for spring physics
       const dx = pointer.current.x - prevX;
       const dy = pointer.current.y - prevY;
       pointer.current.vx = dx;
       pointer.current.vy = dy;
-      
-      // Calculate rotation based on movement direction
-      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
-        const targetRotation = Math.atan2(dy, dx) * (180 / Math.PI);
-        rotation.current += (targetRotation - rotation.current) * 0.15;
-      }
     };
 
     const handlePointerDown = () => {
