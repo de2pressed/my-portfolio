@@ -120,6 +120,7 @@ export function AmbientBackground() {
   const paletteRef = useRef(palette);
   const songTimeRef = useRef(0);
   const durationRef = useRef(0);
+  const songTimeUpdateRef = useRef(0); // Track when currentTime was last updated
 
   useEffect(() => {
     energyRef.current = energy;
@@ -131,6 +132,7 @@ export function AmbientBackground() {
 
   useEffect(() => {
     songTimeRef.current = currentTime;
+    songTimeUpdateRef.current = performance.now(); // Record wall clock time of update
   }, [currentTime]);
 
   useEffect(() => {
@@ -277,9 +279,12 @@ export function AmbientBackground() {
         context.restore();
       }
 
-      // Song time drives the visualizer — different song positions = different patterns
+      // Interpolate song time for smooth 60fps progression instead of 400ms jumps
+      // YouTube's getCurrentTime() updates every ~250ms, so we estimate between updates
+      const timeSinceUpdate = (performance.now() - songTimeUpdateRef.current) / 1000;
+      const interpolatedSongTime = Math.max(0, songTimeRef.current + timeSinceUpdate);
       // Subtract 10ms to delay visuals so they align with audio reaching the ears
-      const songT = Math.max(0, songTimeRef.current - 0.01);
+      const songT = Math.max(0, interpolatedSongTime - 0.01);
       const songDur = durationRef.current || 180; // default 3 min
       const songProgress = songT / songDur; // 0..1 across the whole song
 

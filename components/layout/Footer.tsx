@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
+import { useMusicFrequency } from "@/hooks/useMusicFrequency";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -29,6 +30,7 @@ export function Footer({ name, email, note }: FooterProps) {
     playNext,
     playPrevious,
   } = useMusic();
+  const { energy } = useMusicFrequency();
   const cardProgress = clamp((footerTakeover - 0.64) / 0.36, 0, 1);
 
   useEffect(() => {
@@ -143,6 +145,26 @@ export function Footer({ name, email, note }: FooterProps) {
                   <button className="glass-button-muted h-12 w-12 rounded-full p-0" onClick={playNext} type="button">
                     <SkipForward className="h-4 w-4" />
                   </button>
+                </div>
+
+                {/* Visualizer bar */}
+                <div className="flex items-end gap-[3px] h-8">
+                  {Array.from({ length: 24 }).map((_, i) => {
+                    const phase = (i / 24) * Math.PI * 2;
+                    const barEnergy = isPlaying ? energy * (0.3 + Math.sin(phase + performance.now() / 200) * 0.7) : 0.05;
+                    const height = 4 + barEnergy * 28;
+                    return (
+                      <div
+                        key={i}
+                        className="w-1.5 rounded-full bg-gradient-to-t from-[rgba(var(--accent-rgb),0.4)] to-[rgba(var(--teal-rgb),0.6)]"
+                        style={{
+                          height: `${Math.min(32, Math.max(4, height))}px`,
+                          opacity: 0.3 + barEnergy * 0.7,
+                          transition: 'height 0.1s ease-out',
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -601,6 +601,7 @@ export function YouTubeEngine() {
         const player = new api.Player(hostRef.current, playerConfig);
 
         pollInterval = window.setInterval(() => {
+          // Poll at 250ms to match YouTube's getCurrentTime() update rate for better sync
           if (!playerRef.current) {
             return;
           }
@@ -614,8 +615,8 @@ export function YouTubeEngine() {
             const isPlaying = state === window.YT?.PlayerState.PLAYING;
             const targetEnergy = deriveEnergy(snapshot.currentTime, isPlaying, volumeRef.current, deltaTime);
             
-            // Smooth interpolation for stable energy tracking
-            const smoothingFactor = 0.15;
+            // Faster interpolation for better sync — energy now responds in ~0.7s instead of ~1.7s
+            const smoothingFactor = 0.35;
             smoothedEnergyRef.current = smoothedEnergyRef.current + (targetEnergy - smoothedEnergyRef.current) * smoothingFactor;
             
             syncTrack({
@@ -629,7 +630,7 @@ export function YouTubeEngine() {
           } catch (error) {
             console.warn("YouTube poll loop failed.", error);
           }
-        }, 400);
+        }, 250);
       } catch (error) {
         console.warn("YouTube IFrame API failed to initialize.", error);
         markResolved();
