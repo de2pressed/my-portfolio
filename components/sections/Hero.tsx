@@ -148,7 +148,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Current focus</p>
               <p className="text-3xl font-semibold text-ink">Building deployment systems that feel deliberate.</p>
-              <p className="text-sm leading-7 text-ink/68">
+              <p className="max-w-md text-sm leading-7 text-ink/68 sm:max-w-none">
                 CI/CD, container security, observability, AWS-hosted delivery pipelines, and interfaces with enough
                 mood to feel personal instead of generic.
               </p>
