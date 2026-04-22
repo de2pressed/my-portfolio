@@ -1,17 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
-import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 import { useMusic } from "@/context/MusicContext";
-import { useMusicFrequency } from "@/hooks/useMusicFrequency";
-import { GlassHover, BALANCED_CONFIG } from "@/components/ui/GlassHover";
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
 
 type FooterProps = {
   name: string;
@@ -21,18 +12,7 @@ type FooterProps = {
 
 export function Footer({ name, email, note }: FooterProps) {
   const ref = useRef<HTMLElement | null>(null);
-  const {
-    footerTakeover,
-    setFooterTakeover,
-    title,
-    thumbnail,
-    isPlaying,
-    togglePlayback,
-    playNext,
-    playPrevious,
-  } = useMusic();
-  const { energy } = useMusicFrequency();
-  const cardProgress = clamp((footerTakeover - 0.64) / 0.36, 0, 1);
+  const { setFooterTakeover } = useMusic();
 
   useEffect(() => {
     let frame = 0;
@@ -42,26 +22,19 @@ export function Footer({ name, email, note }: FooterProps) {
         return;
       }
 
-      const footerTop = ref.current.getBoundingClientRect().top + window.scrollY;
-      const viewportBottom = window.scrollY + window.innerHeight;
-      const start = footerTop - window.innerHeight;
-      const end = Math.max(start + 1, document.documentElement.scrollHeight - 40);
-      const progress = Math.max(0, Math.min(1, (viewportBottom - start) / (end - start)));
-      setFooterTakeover(progress);
-    };
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollableDistance = documentHeight - windowHeight;
+      const scrollProgress = scrollableDistance > 0 ? window.scrollY / scrollableDistance : 0;
 
-    const handleScroll = () => {
-      window.cancelAnimationFrame(frame);
+      setFooterTakeover(scrollProgress);
       frame = window.requestAnimationFrame(updateProgress);
     };
 
     updateProgress();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", updateProgress);
 
     return () => {
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", updateProgress);
       setFooterTakeover(0);
     };
@@ -74,98 +47,16 @@ export function Footer({ name, email, note }: FooterProps) {
         id="footer"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--teal-rgb),0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(var(--accent-rgb),0.2),transparent_28%)]" />
-        <div className="relative grid gap-8 lg:grid-cols-[1fr_1.25fr] lg:items-end">
-          <div className="space-y-5">
-            <h2 className="text-3xl font-semibold text-ink md:text-5xl">Scroll low enough and the soundtrack takes the room.</h2>
-            <p className="max-w-xl text-sm leading-7 text-ink/72 md:text-base">{note}</p>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-ink/68">
-              <span>{name}</span>
-              <span className="h-1 w-1 rounded-full bg-ink/40" />
-              <a className="underline decoration-white/40 underline-offset-4" href={`mailto:${email}`}>
-                {email}
-              </a>
-            </div>
+        <div className="relative space-y-5">
+          <h2 className="text-3xl font-semibold text-ink md:text-5xl">Scroll low enough and the soundtrack takes the room.</h2>
+          <p className="max-w-xl text-sm leading-7 text-ink/72 md:text-base">{note}</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-ink/68">
+            <span>{name}</span>
+            <span className="h-1 w-1 rounded-full bg-ink/40" />
+            <a className="underline decoration-white/40 underline-offset-4" href={`mailto:${email}`}>
+              {email}
+            </a>
           </div>
-
-          <GlassHover config={BALANCED_CONFIG}>
-            <motion.div
-              className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,10,14,0.4)] p-4 shadow-[0_24px_90px_rgba(5,5,8,0.28)] backdrop-blur-2xl"
-              animate={{
-                opacity: cardProgress,
-                y: 22 - cardProgress * 26,
-                scale: 0.88 + cardProgress * 0.12,
-                rotateX: (2 - cardProgress * 2) * 0.5,
-                rotate: 2 - cardProgress * 2,
-                boxShadow: `0 24px 90px rgba(5,5,8,${0.28 + cardProgress * 0.08}), 0 0 0 1px rgba(var(--accent-rgb), ${
-                  0.1 + cardProgress * 0.04
-                }), 0 0 ${28 + cardProgress * 14}px rgba(var(--accent-rgb), ${0.05 + cardProgress * 0.08})`,
-              }}
-              transition={{
-                opacity: { duration: 0.18, ease: "easeOut" },
-                y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },
-                scale: { type: "spring", stiffness: 240, damping: 24, mass: 0.9 },
-                rotate: { type: "spring", stiffness: 260, damping: 24, mass: 0.8 },
-                rotateX: { type: "spring", stiffness: 220, damping: 25, mass: 0.85 },
-                boxShadow: { duration: 0.22, ease: "easeOut" },
-              }}
-            >
-            <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
-              <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)]">
-                {thumbnail ? (
-                  <Image
-                    alt={title}
-                    className="object-cover object-[50%_42%] scale-[1.06]"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 420px"
-                    src={thumbnail}
-                    unoptimized
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(var(--accent-rgb),0.32),rgba(var(--lavender-rgb),0.14))]" />
-                )}
-              </div>
-
-              <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(10,10,14,0.32)] p-5">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.28em] text-ink/56">Immersive music zone</p>
-                  <h3 className="mt-2 text-2xl font-semibold text-ink">{title}</h3>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button className="glass-button-muted h-12 w-12 rounded-full p-0" onClick={playPrevious} type="button">
-                    <SkipBack className="h-4 w-4" />
-                  </button>
-                  <button className="glass-button h-12 w-12 rounded-full p-0" onClick={togglePlayback} type="button">
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </button>
-                  <button className="glass-button-muted h-12 w-12 rounded-full p-0" onClick={playNext} type="button">
-                    <SkipForward className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* Visualizer bar */}
-                <div className="flex items-end gap-[3px] h-8">
-                  {Array.from({ length: 24 }).map((_, i) => {
-                    const phase = (i / 24) * Math.PI * 2;
-                    const barEnergy = isPlaying ? energy * (0.3 + Math.sin(phase + performance.now() / 200) * 0.7) : 0.05;
-                    const height = 4 + barEnergy * 28;
-                    return (
-                      <div
-                        key={i}
-                        className="w-1.5 rounded-full bg-gradient-to-t from-[rgba(var(--accent-rgb),0.4)] to-[rgba(var(--teal-rgb),0.6)]"
-                        style={{
-                          height: `${Math.min(32, Math.max(4, height))}px`,
-                          opacity: 0.3 + barEnergy * 0.7,
-                          transition: 'height 0.1s ease-out',
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </GlassHover>
         </div>
       </section>
     </footer>

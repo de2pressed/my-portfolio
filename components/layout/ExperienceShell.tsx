@@ -11,7 +11,6 @@ import { CookieConsent } from "@/components/loading/CookieConsent";
 import { LoadingScreen } from "@/components/loading/LoadingScreen";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { YouTubeEngine } from "@/components/music/YouTubeEngine";
 import { GlassCursor } from "@/components/ui/GlassCursor";
 import { VersionBadge } from "@/components/ui/VersionBadge";
 import { useCookie } from "@/context/CookieContext";
@@ -115,7 +114,6 @@ export function ExperienceShell({ children }: PropsWithChildren) {
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
-      <YouTubeEngine />
       <GlassCursor />
 
       <div className={hideContent ? "pointer-events-none opacity-0 transition-opacity duration-700" : "transition-opacity duration-[1200ms] opacity-100"}>

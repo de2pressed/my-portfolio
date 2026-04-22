@@ -1,1 +1,44 @@
-{}
+{
+  "components\\sections\\PublicHome.tsx -> @/components/sections/About": {
+    "id": 1072,
+    "files": [
+      "static/chunks/72.a521350fc9060c11.js"
+    ]
+  },
+  "components\\sections\\PublicHome.tsx -> @/components/sections/Experience": {
+    "id": 397,
+    "files": [
+      "static/chunks/397.b93d6b12a1170cc5.js"
+    ]
+  },
+  "components\\sections\\PublicHome.tsx -> @/components/sections/Projects": {
+    "id": 1879,
+    "files": [
+      "static/chunks/879.9350a3570502b59d.js"
+    ]
+  },
+  "components\\sections\\PublicHome.tsx -> @/components/sections/Reviews": {
+    "id": 3720,
+    "files": [
+      "static/chunks/720.72ed31c15d18836c.js"
+    ]
+  },
+  "components\\sections\\PublicHome.tsx -> @/components/sections/Skills": {
+    "id": 4383,
+    "files": [
+      "static/chunks/383.4a14bbe5ba7b7d30.js"
+    ]
+  },
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 5139,
+    "files": [
+      "static/chunks/139.7a5a8e93a21948c1.js"
+    ]
+  },
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 1646,
+    "files": [
+      "static/chunks/646.f342b7cffc01feb0.js"
+    ]
+  }
+}
