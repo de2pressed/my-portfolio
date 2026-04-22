@@ -242,42 +242,9 @@ export function AmbientBackground() {
 
       context.clearRect(0, 0, width, height);
 
-      // Background gradient reacts subtly to energy
-      const gradient = context.createRadialGradient(
-        width * 0.5,
-        height * 0.34,
-        0,
-        width * 0.5,
-        height * 0.34,
-        Math.max(width, height) * 0.68,
-      );
-      gradient.addColorStop(0, `rgba(76,16,64,${0.58 - baseLevel * 0.07})`);
-      gradient.addColorStop(0.16, `rgba(20,6,24,${0.88 - baseLevel * 0.04})`);
-      gradient.addColorStop(0.42, `rgba(5,5,8,${0.97 - baseLevel * 0.02})`);
-      gradient.addColorStop(1, "rgba(0,0,0,1)");
-      context.fillStyle = gradient;
+      // Background is now black
+      context.fillStyle = "rgba(0,0,0,1)";
       context.fillRect(0, 0, width, height);
-
-      // Glow points pulse with bass frequency
-      const bassPulse = Math.pow(Math.abs(Math.sin(t * 3.14)), 2);
-      const glowIntensity = baseLevel * (0.3 + bassPulse * 0.7);
-      const glowPoints = [
-        { x: width * 0.08, y: height * 0.1, opacity: 0.14 + glowIntensity * 0.28, color: vibrantPalette[0] ?? canvasPalette[0] ?? "#b93ca7" },
-        { x: width * 0.92, y: height * 0.12, opacity: 0.13 + glowIntensity * 0.24, color: vibrantPalette[1] ?? canvasPalette[1] ?? "#7b5fd1" },
-        { x: width * 0.08, y: height * 0.86, opacity: 0.12 + glowIntensity * 0.22, color: vibrantPalette[2] ?? canvasPalette[2] ?? "#2e7a73" },
-        { x: width * 0.92, y: height * 0.84, opacity: 0.13 + glowIntensity * 0.24, color: vibrantPalette[3] ?? canvasPalette[3] ?? "#f0dcff" },
-      ];
-
-      for (const point of glowPoints) {
-        const halo = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, Math.max(width, height) * 0.18);
-        halo.addColorStop(0, hexToRgba(point.color, point.opacity));
-        halo.addColorStop(1, hexToRgba(point.color, 0));
-        context.save();
-        context.globalCompositeOperation = "screen";
-        context.fillStyle = halo;
-        context.fillRect(0, 0, width, height);
-        context.restore();
-      }
 
       // Interpolate song time for smooth 60fps progression instead of 400ms jumps
       // YouTube's getCurrentTime() updates every ~250ms, so we estimate between updates
@@ -421,13 +388,13 @@ export function AmbientBackground() {
         y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 * orbitalDamp + swayY;
 
         const radius = blob.size * pulse;
-        // Enforce minimum blur for soft premium edges — never go below 6px
-        const blur = Math.max(6, blurBase - effectiveLevel * blurRange);
+        // Glassmorphic soft edges — higher minimum blur for dreamy look
+        const blur = Math.max(12, blurBase - effectiveLevel * blurRange);
 
-        // Premium smooth gradient with 5 stops for buttery falloff
-        const coreOpacity = baseOpacity + effectiveLevel * opacityScale;
-        const midOpacity = baseOpacity * 0.6 + effectiveLevel * opacityScale * 0.5;
-        const edgeOpacity = baseOpacity * 0.25 + effectiveLevel * opacityScale * 0.2;
+        // Glassmorphic gradient with reduced opacity for softer look
+        const coreOpacity = (baseOpacity + effectiveLevel * opacityScale) * 0.6;
+        const midOpacity = (baseOpacity * 0.6 + effectiveLevel * opacityScale * 0.5) * 0.5;
+        const edgeOpacity = (baseOpacity * 0.25 + effectiveLevel * opacityScale * 0.2) * 0.4;
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
         radial.addColorStop(0, hexToRgba(blob.color, coreOpacity));
         radial.addColorStop(0.25, hexToRgba(blob.color, coreOpacity * 0.85));
@@ -435,8 +402,8 @@ export function AmbientBackground() {
         radial.addColorStop(0.75, hexToRgba(blob.color, edgeOpacity));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
-        context.globalCompositeOperation = "lighter";
-        context.filter = `saturate(${1.1 + effectiveLevel * saturationBoost}) blur(${blur}px)`;
+        context.globalCompositeOperation = "screen";
+        context.filter = `saturate(${1.05 + effectiveLevel * saturationBoost * 0.5}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
