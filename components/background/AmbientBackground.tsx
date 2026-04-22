@@ -114,13 +114,14 @@ function boostCanvasColor(hex: string) {
 
 export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { energy, currentTime, duration } = useMusicFrequency();
+  const { energy, currentTime, duration, thumbnailColors } = useMusicFrequency();
   const { palette } = useThemeColors();
   const energyRef = useRef(energy);
   const paletteRef = useRef(palette);
+  const thumbnailColorsRef = useRef(thumbnailColors);
   const songTimeRef = useRef(0);
   const durationRef = useRef(0);
-  const songTimeUpdateRef = useRef(0); // Track when currentTime was last updated
+  const songTimeUpdateRef = useRef(0);
 
   useEffect(() => {
     energyRef.current = energy;
@@ -129,6 +130,10 @@ export function AmbientBackground() {
   useEffect(() => {
     paletteRef.current = palette;
   }, [palette]);
+
+  useEffect(() => {
+    thumbnailColorsRef.current = thumbnailColors;
+  }, [thumbnailColors]);
 
   useEffect(() => {
     songTimeRef.current = currentTime;
@@ -152,46 +157,20 @@ export function AmbientBackground() {
 
     let animationFrame = 0;
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const blobCount = mediaQuery.matches ? 7 : 11;
+    const particleCount = mediaQuery.matches ? 250 : 400;
     const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
-    const anchorPositions = mediaQuery.matches
-      ? [
-          { x: 0.06, y: 0.08 },
-          { x: 0.52, y: 0.09 },
-          { x: 0.92, y: 0.14 },
-          { x: 0.16, y: 0.34 },
-          { x: 0.86, y: 0.36 },
-          { x: 0.08, y: 0.82 },
-          { x: 0.66, y: 0.84 },
-        ]
-      : [
-          { x: 0.04, y: 0.08 },
-          { x: 0.22, y: 0.1 },
-          { x: 0.46, y: 0.08 },
-          { x: 0.7, y: 0.1 },
-          { x: 0.92, y: 0.12 },
-          { x: 0.08, y: 0.34 },
-          { x: 0.32, y: 0.26 },
-          { x: 0.82, y: 0.28 },
-          { x: 0.95, y: 0.48 },
-          { x: 0.1, y: 0.82 },
-          { x: 0.36, y: 0.9 },
-          { x: 0.58, y: 0.82 },
-          { x: 0.82, y: 0.88 },
-          { x: 0.94, y: 0.74 },
-        ];
 
-    type BlobConfig = {
-      anchorX: number;
-      anchorY: number;
-      orbitX: number;
-      orbitY: number;
+    type ParticleConfig = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      baseX: number;
+      baseY: number;
       size: number;
-      speed: number;
       color: string;
-      phase: number;
-      drift: number;
-      kind: "orbit" | "drift" | "cross";
+      bandRole: number; // 0=bass, 1=mid, 2=high, 3=texture
+      phaseOffset: number;
     };
 
     const resize = () => {
@@ -205,27 +184,24 @@ export function AmbientBackground() {
 
     resize();
 
-    const blobs: BlobConfig[] = Array.from({ length: blobCount }, (_, index) => {
-      const anchor = anchorPositions[index % anchorPositions.length] ?? { x: 0.5, y: 0.5 };
-      const edgeBoost = anchor.x < 0.16 || anchor.x > 0.84 || anchor.y < 0.16 || anchor.y > 0.84;
-      const isSmall = mediaQuery.matches ? index % 4 === 0 || index % 5 === 1 : index % 3 === 0;
-      const size = isSmall
-        ? 58 + (index % 4) * 10 + (edgeBoost ? 6 : 0)
-        : 108 + (index % 5) * (mediaQuery.matches ? 12 : 18) + (edgeBoost ? 22 : 0);
+    const particles: ParticleConfig[] = Array.from({ length: particleCount }, (_, index) => {
+      const bandRole = index % 4;
+      const colors = thumbnailColorsRef.current.length > 0 ? thumbnailColorsRef.current : fallbackPalette;
+      const size = 1 + Math.random() * 2;
+      const baseX = Math.random() * window.innerWidth;
+      const baseY = Math.random() * window.innerHeight;
 
       return {
-        anchorX: anchor.x,
-        anchorY: anchor.y,
-        orbitX:
-          (mediaQuery.matches ? 40 : 88) + (index % 4) * (mediaQuery.matches ? 12 : 26) + (edgeBoost ? 18 : 0),
-        orbitY:
-          (mediaQuery.matches ? 26 : 58) + (index % 5) * (mediaQuery.matches ? 8 : 16) + (edgeBoost ? 12 : 0),
+        x: baseX,
+        y: baseY,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        baseX,
+        baseY,
         size,
-        speed: (isSmall ? 0.0016 : 0.00066) + (index % 5) * (isSmall ? 0.00024 : 0.00012),
-        color: fallbackPalette[index % fallbackPalette.length] ?? "#e8bc8a",
-        phase: index * 0.83,
-        drift: isSmall ? 0.5 + (index % 3) * 0.12 : 0.24 + (index % 4) * 0.06,
-        kind: index % 3 === 0 ? "cross" : index % 2 === 0 ? "drift" : "orbit",
+        color: colors[index % colors.length] ?? "#b93ca7",
+        bandRole,
+        phaseOffset: index * 0.83,
       };
     });
 
@@ -254,158 +230,126 @@ export function AmbientBackground() {
       const songDur = durationRef.current || 180; // default 3 min
       const songProgress = songT / songDur; // 0..1 across the whole song
 
-      for (const [index, blob] of blobs.entries()) {
-        blob.color = vibrantPalette[index % vibrantPalette.length] ?? blob.color;
+      // Motion trails: semi-transparent clear instead of full clear
+      context.fillStyle = "rgba(0, 0, 0, 0.12)";
+      context.fillRect(0, 0, width, height);
 
-        const blobTime = t * blob.speed * 1000;
-        const phaseOffset = blob.phase;
+      for (const [index, particle] of particles.entries()) {
+        const bandRole = particle.bandRole;
+        const phaseOffset = particle.phaseOffset;
 
-        // Each blob represents ONE distinct frequency band of the song
-        const bandRole = index % 4; // 0=bass, 1=mid, 2=high, 3=texture
-
-        // Song-structure drift: use the song's actual position to shift patterns
+        // Song-structure drift
         const structureDrift = Math.sin(songProgress * Math.PI * 4 + phaseOffset) * 0.2;
         const structureDrift2 = Math.cos(songProgress * Math.PI * 6 + phaseOffset * 0.7) * 0.15;
 
-        // Per-band staggered time offset so bands don't all peak simultaneously
-        // Bass hits first, then mid, then high, then texture — like a real drum hit cascade
-        const bandDelay = bandRole * 0.04; // 0, 40ms, 80ms, 120ms stagger
+        // Per-band staggered time offset
+        const bandDelay = bandRole * 0.04;
         const bandT = Math.max(0, songT - bandDelay);
 
-        // Each band has its OWN distinct frequency, behavior, and PRIMARY VISUAL CHANNEL
-        // Bass = SIZE dominant, Mid = SIZE + OPACITY balanced, High = OPACITY flicker, Texture = OPACITY ripple only
+        // Band-specific signal
         let bandSignal: number;
-        let pulseScale: number;
-        let pulseCap: number;
-        let swayAmount: number;
-        let swayFreq: number;
-        let baseOpacity: number;
-        let opacityScale: number;
-        let blurBase: number;
-        let blurRange: number;
-        let saturationBoost: number;
+        let velocityScale: number;
 
         switch (bandRole) {
           case 0: {
-            // BASS — heavy kick, SIZE is the primary channel
-            // Sharp attack + slow decay, big heave
+            // BASS — pulse outward from center, then drift back
             const freq = 0.7 + structureDrift;
             const rawBass = Math.sin(bandT * freq * Math.PI * 2 + phaseOffset);
             bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.6) : Math.pow(Math.abs(rawBass), 3) * 0.15;
-            pulseScale = 1.3;     // up to 2.3× — SIZE dominant
-            pulseCap = 2.3;
-            swayAmount = 18;      // big positional heave
-            swayFreq = freq;
-            baseOpacity = 0.28;   // lower base opacity
-            opacityScale = 0.35;  // opacity changes LESS — size is the star
-            blurBase = 24;
-            blurRange = 16;       // more blur reduction = sharper at peak
-            saturationBoost = 0.4;
+            velocityScale = 2 + bandSignal * 3;
             break;
           }
           case 1: {
-            // MID — smooth rhythmic pulse, SIZE + OPACITY balanced
+            // MID — orbit in gentle circular patterns
             const freq = 1.5 + structureDrift * 0.7;
             bandSignal = Math.pow(Math.abs(Math.sin(bandT * freq * Math.PI * 2 + phaseOffset * 1.3)), 1.5);
-            pulseScale = 0.75;    // moderate size change
-            pulseCap = 1.8;
-            swayAmount = 12;     // moderate sway
-            swayFreq = freq * 0.8;
-            baseOpacity = 0.26;
-            opacityScale = 0.5;  // balanced opacity change
-            blurBase = 20;
-            blurRange = 12;
-            saturationBoost = 0.3;
+            velocityScale = 0.5 + bandSignal * 1;
             break;
           }
           case 2: {
-            // HIGH — sharp flicker, OPACITY is the primary channel
+            // HIGH — scatter randomly when energy spikes
             const freq = 3.2 + structureDrift2;
             bandSignal = Math.pow(Math.abs(Math.cos(bandT * freq * Math.PI * 2 + phaseOffset * 0.7)), 3);
-            pulseScale = 0.25;   // minimal size change — OPACITY is the star
-            pulseCap = 1.3;
-            swayAmount = 6;      // small jitter
-            swayFreq = freq * 0.6;
-            baseOpacity = 0.2;   // lower base — flickers FROM dim
-            opacityScale = 0.7;  // BIG opacity swings — the main visual
-            blurBase = 14;
-            blurRange = 8;
-            saturationBoost = 0.2;
+            velocityScale = bandSignal > 0.5 ? 4 : 0.5;
             break;
           }
           default: {
-            // TEXTURE — fast fine ripple, OPACITY ONLY — barely any size change
+            // TEXTURE — flow in wave-like patterns
             const freq = 5.5 + structureDrift2 * 0.5;
             bandSignal = Math.abs(Math.sin(bandT * freq * Math.PI * 2 + phaseOffset * 2.1));
-            pulseScale = 0.08;   // almost NO size change
-            pulseCap = 1.1;
-            swayAmount = 3;      // minimal movement
-            swayFreq = freq * 0.4;
-            baseOpacity = 0.18;  // starts dim
-            opacityScale = 0.8;  // OPACITY ripple is the ONLY visual channel
-            blurBase = 10;
-            blurRange = 6;
-            saturationBoost = 0.15;
+            velocityScale = 0.3 + bandSignal * 0.5;
             break;
           }
         }
 
-        // baseLevel gates everything — no reaction when music is off
-        // bandSignal modulates the intensity so each blob "breathes" with its band
         const effectiveLevel = baseLevel * (0.3 + bandSignal * 0.7);
 
-        // Pulse: size oscillation driven by band
-        const rawPulse = 1 + effectiveLevel * pulseScale;
-        const pulse = Math.min(pulseCap, Math.max(1.0, rawPulse));
+        // Update particle position based on band behavior
+        const centerX = width / 2;
+        const centerY = height / 2;
 
-        // Reduce default orbital movement when music is active so visualizer is more visible
-        const orbitalDamp = 1 - baseLevel * 0.6;
-
-        // Position movement
-        const crossSweep = (Math.sin(blobTime * 0.32 + phaseOffset) + 1) / 2;
-        let x = width * blob.anchorX;
-        let y = height * blob.anchorY;
-
-        // Band-specific sway driven by song time
-        const swayX = effectiveLevel * Math.sin(bandT * swayFreq * Math.PI * 2 + phaseOffset * 3.0) * swayAmount;
-        const swayY = effectiveLevel * Math.cos(bandT * swayFreq * Math.PI * 1.6 + phaseOffset * 2.5) * swayAmount * 0.6;
-
-        if (blob.kind === "cross") {
-          x += (crossSweep - 0.5) * width * 0.28 * orbitalDamp + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18 * orbitalDamp;
-          y +=
-            (Math.cos(blobTime * 0.24 + phaseOffset) - 0.5) * height * 0.18 * orbitalDamp +
-            Math.sin(blobTime * 0.26 + phaseOffset) * blob.orbitY * 0.16 * orbitalDamp;
-        } else if (blob.kind === "drift") {
-          x += Math.sin(blobTime * 0.38 + phaseOffset) * blob.orbitX * 1.1 * orbitalDamp + Math.cos(blobTime * 0.17 + phaseOffset) * width * 0.032 * orbitalDamp;
-          y += Math.sin(blobTime * 1.08 + phaseOffset) * blob.orbitY * 0.78 * orbitalDamp;
+        if (bandRole === 0) {
+          // BASS: pulse outward from center
+          const dx = particle.x - centerX;
+          const dy = particle.y - centerY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dirX = dx / (dist || 1);
+          const dirY = dy / (dist || 1);
+          particle.vx += dirX * effectiveLevel * velocityScale * 0.01;
+          particle.vy += dirY * effectiveLevel * velocityScale * 0.01;
+          // Drift back to base
+          particle.vx += (particle.baseX - particle.x) * 0.002;
+          particle.vy += (particle.baseY - particle.y) * 0.002;
+        } else if (bandRole === 1) {
+          // MID: orbit around base point
+          const orbitRadius = 50 + effectiveLevel * 30;
+          const orbitSpeed = 0.001 + effectiveLevel * 0.002;
+          const angle = t * orbitSpeed + phaseOffset;
+          particle.vx += Math.cos(angle) * orbitRadius * 0.01;
+          particle.vy += Math.sin(angle) * orbitRadius * 0.01;
+          // Return to base
+          particle.vx += (particle.baseX - particle.x) * 0.003;
+          particle.vy += (particle.baseY - particle.y) * 0.003;
+        } else if (bandRole === 2) {
+          // HIGH: scatter randomly
+          if (effectiveLevel > 0.4) {
+            particle.vx += (Math.random() - 0.5) * effectiveLevel * 2;
+            particle.vy += (Math.random() - 0.5) * effectiveLevel * 2;
+          }
+          particle.vx += (particle.baseX - particle.x) * 0.005;
+          particle.vy += (particle.baseY - particle.y) * 0.005;
         } else {
-          x += Math.cos(blobTime + phaseOffset) * blob.orbitX * orbitalDamp;
-          y += Math.sin(blobTime * 1.15 + phaseOffset) * blob.orbitY * orbitalDamp;
+          // TEXTURE: wave-like flow
+          const waveFreq = 0.002 + effectiveLevel * 0.001;
+          particle.vx += Math.sin(t * waveFreq + phaseOffset) * 0.5;
+          particle.vy += Math.cos(t * waveFreq * 0.8 + phaseOffset) * 0.5;
+          // Gentle return to base
+          particle.vx += (particle.baseX - particle.x) * 0.001;
+          particle.vy += (particle.baseY - particle.y) * 0.001;
         }
 
-        x += Math.sin(blobTime * 0.24 + phaseOffset) * blob.orbitX * blob.drift * 0.15 * orbitalDamp + swayX;
-        y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 * orbitalDamp + swayY;
+        // Apply velocity with damping
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= 0.95;
+        particle.vy *= 0.95;
 
-        const radius = blob.size * pulse;
-        // Glassmorphic soft edges — higher minimum blur for dreamy look
-        const blur = Math.max(12, blurBase - effectiveLevel * blurRange);
+        // Wrap around screen edges
+        if (particle.x < 0) particle.x = width;
+        if (particle.x > width) particle.x = 0;
+        if (particle.y < 0) particle.y = height;
+        if (particle.y > height) particle.y = 0;
 
-        // Glassmorphic gradient with reduced opacity for softer look
-        const coreOpacity = (baseOpacity + effectiveLevel * opacityScale) * 0.6;
-        const midOpacity = (baseOpacity * 0.6 + effectiveLevel * opacityScale * 0.5) * 0.5;
-        const edgeOpacity = (baseOpacity * 0.25 + effectiveLevel * opacityScale * 0.2) * 0.4;
-        const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, coreOpacity));
-        radial.addColorStop(0.25, hexToRgba(blob.color, coreOpacity * 0.85));
-        radial.addColorStop(0.5, hexToRgba(blob.color, midOpacity));
-        radial.addColorStop(0.75, hexToRgba(blob.color, edgeOpacity));
-        radial.addColorStop(1, hexToRgba(blob.color, 0));
+        // Render particle
+        const opacity = 0.3 + effectiveLevel * 0.5;
+        const size = particle.size * (1 + effectiveLevel * 0.5);
+
         context.save();
         context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.05 + effectiveLevel * saturationBoost * 0.5}) blur(${blur}px)`;
-        context.fillStyle = radial;
+        context.filter = `blur(1px)`;
+        context.fillStyle = hexToRgba(particle.color, opacity);
         context.beginPath();
-        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.arc(particle.x, particle.y, size, 0, Math.PI * 2);
         context.fill();
         context.restore();
       }
