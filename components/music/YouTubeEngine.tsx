@@ -79,7 +79,7 @@ function sendPlayerCommand(player: ExtendedPlayer, func: string, args: unknown[]
       return false;
     }
 
-    console.log(`Sending YouTube command: ${func}`, args);
+    console.warn(`Sending YouTube command: ${func}`, args);
     targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
     return true;
   } catch (error) {
@@ -408,7 +408,7 @@ export function YouTubeEngine() {
                 return;
               }
 
-              console.log("YouTube player ready");
+              console.warn("YouTube player ready");
               markResolved();
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
@@ -440,10 +440,10 @@ export function YouTubeEngine() {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
 
-              console.log("Registering YouTube player controls");
+              console.warn("Registering YouTube player controls");
               registerControls({
                 play: () => {
-                  console.log("Play command called");
+                  console.warn("Play command called");
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
@@ -451,13 +451,13 @@ export function YouTubeEngine() {
                   sendPlayerCommand(activePlayer, "playVideo");
                 },
                 pause: () => {
-                  console.log("Pause command called");
+                  console.warn("Pause command called");
                   sendPlayerCommand(activePlayer, "pauseVideo");
                 },
                 toggle: () => {
-                  console.log("Toggle command called");
+                  console.warn("Toggle command called");
                   const state = player.getPlayerState();
-                  console.log("Current player state:", state);
+                  console.warn("Current player state:", state);
                   if (state === window.YT?.PlayerState.PLAYING) {
                     if (shouldRestoreAudio()) {
                       restoreAudio(activePlayer);
