@@ -18,7 +18,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { DEFAULT_MUSIC_URL } from "@/lib/seed-data";
@@ -31,9 +31,6 @@ declare global {
     YT?: typeof YT;
     onYouTubeIframeAPIReady?: () => void;
     __youtubeApiReadyPromise__?: Promise<typeof YT>;
-    YTConfig?: {
-      host?: string;
-    };
   }
 }
 
@@ -99,11 +96,6 @@ function loadYouTubeApi() {
   }
 
   window.__youtubeApiReadyPromise__ = new Promise<typeof YT>((resolve) => {
-    window.YTConfig = {
-      ...(window.YTConfig ?? {}),
-      host: "https://www.youtube.com",
-    };
-
     const previousReady = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = () => resolve(window.YT as typeof YT);
 
@@ -139,22 +131,18 @@ export function MusicPlayer() {
     footerTakeover,
     engineStatus,
     errorMessage,
-    registerControls,
-    loadMusicUrl,
     setPlayerReady,
     setPlayerError,
     syncTrack,
     setVisualLevel,
-    togglePlayback,
-    playNext,
-    playPrevious,
     setVolume,
     seekTo,
-    mute,
-    unmute,
+    setIsPlaying,
+    setIsMuted,
+    loadMusicUrl,
   } = useMusic();
 
-  const hostRef = useRef<HTMLDivElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<YT.Player | null>(null);
   const isInitializedRef = useRef(false);
   const sourceRef = useRef(source.rawUrl);
@@ -187,6 +175,149 @@ export function MusicPlayer() {
     useTransform(mouseX, [-0.5, 0.5], [-5, 5]),
     { stiffness: 150, damping: 25 }
   );
+
+  // Control methods - direct ref-based, no closures
+  const play = useCallback(() => {
+    if (!playerRef.current) return;
+    const player = playerRef.current as ExtendedPlayer;
+    
+    if (autoplayUnmutePendingRef.current || player.isMuted() || player.getVolume() === 0) {
+      player.unMute();
+      player.setVolume(volumeRef.current);
+      autoplayUnmutePendingRef.current = false;
+      setIsMuted(false);
+    }
+    
+    player.playVideo();
+    setIsPlaying(true);
+  }, [setIsPlaying, setIsMuted]);
+
+  const pause = useCallback(() => {
+    if (!playerRef.current) return;
+    playerRef.current.pauseVideo();
+    setIsPlaying(false);
+  }, [setIsPlaying]);
+
+  const toggle = useCallback(() => {
+    if (!playerRef.current) return;
+    const player = playerRef.current as ExtendedPlayer;
+    const state = player.getPlayerState();
+    const isPlayingState = state === window.YT?.PlayerState.PLAYING;
+    
+    if (isPlayingState) {
+      pause();
+    } else {
+      play();
+    }
+  }, [play, pause]);
+
+  const next = useCallback(() => {
+    if (!playerRef.current) return;
+    const player = playerRef.current as ExtendedPlayer;
+    
+    const playlist = typeof player.getPlaylist === "function" ? player.getPlaylist() : [];
+    const playlistIndex = typeof player.getPlaylistIndex === "function" ? player.getPlaylistIndex() : -1;
+    
+    if (playlistIndex >= 0 && playlist.length > 0) {
+      const nextIndex = (playlistIndex + 1) % playlist.length;
+      player.playVideoAt(nextIndex);
+      return;
+    }
+    
+    if (source.playlistId) {
+      player.loadPlaylist({
+        list: source.playlistId,
+        listType: "playlist",
+        index: 0,
+      });
+      try {
+        player.setShuffle(false);
+      } catch {
+        // Ignore
+      }
+      play();
+      return;
+    }
+    
+    player.nextVideo();
+  }, [source.playlistId, play]);
+
+  const previous = useCallback(() => {
+    if (!playerRef.current) return;
+    const player = playerRef.current as ExtendedPlayer;
+    
+    const playlist = typeof player.getPlaylist === "function" ? player.getPlaylist() : [];
+    const playlistIndex = typeof player.getPlaylistIndex === "function" ? player.getPlaylistIndex() : -1;
+    
+    if (playlistIndex >= 0 && playlist.length > 0) {
+      const previousIndex = (playlistIndex - 1 + playlist.length) % playlist.length;
+      player.playVideoAt(previousIndex);
+      return;
+    }
+    
+    if (source.playlistId) {
+      player.loadPlaylist({
+        list: source.playlistId,
+        listType: "playlist",
+        index: 0,
+      });
+      try {
+        player.setShuffle(false);
+      } catch {
+        // Ignore
+      }
+      player.seekTo(0, true);
+      return;
+    }
+    
+    player.previousVideo();
+  }, [source.playlistId]);
+
+  const handleSetVolume = useCallback((nextVolume: number) => {
+    if (!playerRef.current) return;
+    volumeRef.current = nextVolume;
+    playerRef.current.setVolume(nextVolume);
+    setVolume(nextVolume);
+  }, [setVolume]);
+
+  const handleSeekTo = useCallback((seconds: number) => {
+    if (!playerRef.current) return;
+    playerRef.current.seekTo(seconds, true);
+    seekTo(seconds);
+  }, [seekTo]);
+
+  const handleMute = useCallback((mute: boolean) => {
+    if (!playerRef.current) return;
+    if (mute) {
+      playerRef.current.mute();
+    } else {
+      playerRef.current.unMute();
+    }
+    setIsMuted(mute);
+  }, [setIsMuted]);
+
+  const handleLoad = useCallback((url: string) => {
+    if (!playerRef.current) return;
+    const parsed = parseYouTubeSource(url);
+    
+    if (parsed.playlistId) {
+      playerRef.current.loadPlaylist({
+        list: parsed.playlistId,
+        listType: "playlist",
+      });
+      const player = playerRef.current as ExtendedPlayer;
+      try {
+        player.setShuffle(false);
+      } catch {
+        // Ignore
+      }
+      return;
+    }
+    
+    if (parsed.videoId) {
+      playerRef.current.loadVideoById(parsed.videoId);
+    }
+  }, []);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -360,105 +491,11 @@ export function MusicPlayer() {
       };
     }
 
-    function resolvePlaylistPosition(player: ExtendedPlayer) {
-      const snapshot = readCurrentTrack(player);
-
-      if (snapshot.playlistIndex >= 0) {
-        return snapshot;
-      }
-
-      const resolvedIndex =
-        snapshot.videoId && snapshot.playlist.length > 0
-          ? snapshot.playlist.findIndex((entry) => entry === snapshot.videoId)
-          : -1;
-
-      if (resolvedIndex < 0) {
-        return snapshot;
-      }
-
-      return {
-        ...snapshot,
-        playlistIndex: resolvedIndex,
-      };
-    }
-
     function disableShuffle(player: ExtendedPlayer) {
       try {
         player.setShuffle(false);
       } catch (error) {
         console.warn("YouTube playlist shuffle could not be disabled.", error);
-      }
-    }
-
-    function movePlaylist(player: ExtendedPlayer, step: 1 | -1) {
-      const snapshot = resolvePlaylistPosition(player);
-      const { playlist, playlistIndex } = snapshot;
-
-      if (playlistIndex >= 0 && playlist.length > 0) {
-        if (step > 0) {
-          const nextIndex = (playlistIndex + 1) % playlist.length;
-          player.playVideoAt(nextIndex);
-          return;
-        }
-
-        const previousIndex = (playlistIndex - 1 + playlist.length) % playlist.length;
-        player.playVideoAt(previousIndex);
-        return;
-      }
-
-      if (source.playlistId) {
-        player.loadPlaylist({
-          list: source.playlistId,
-          listType: "playlist",
-          index: 0,
-        });
-        disableShuffle(player);
-
-        if (step > 0) {
-          startPlayback(player);
-        } else {
-          player.seekTo(0, true);
-        }
-
-        return;
-      }
-
-      if (step > 0) {
-        player.nextVideo();
-      } else {
-        player.previousVideo();
-      }
-    }
-
-    function applySource(player: YT.Player, rawUrl: string) {
-      const parsed = parseYouTubeSource(rawUrl);
-
-      if (parsed.playlistId) {
-        player.loadPlaylist({
-          list: parsed.playlistId,
-          listType: "playlist",
-        });
-        disableShuffle(player as ExtendedPlayer);
-        return;
-      }
-
-      if (parsed.videoId) {
-        player.loadVideoById(parsed.videoId);
-      }
-    }
-
-    function restoreAudio(player: ExtendedPlayer) {
-      try {
-        if (!player.isMuted() && player.getVolume() > 0 && !autoplayUnmutePendingRef.current) {
-          return;
-        }
-
-        player.unMute();
-        player.setVolume(volumeRef.current);
-        autoplayUnmutePendingRef.current = false;
-        syncTrack({ isMuted: false });
-      } catch (error) {
-        console.warn("YouTube player could not restore audio.", error);
       }
     }
 
@@ -523,7 +560,7 @@ export function MusicPlayer() {
 
       try {
         const api = await loadYouTubeApi();
-        if (cancelled || !hostRef.current) {
+        if (cancelled || !iframeRef.current) {
           isInitializedRef.current = false;
           return;
         }
@@ -531,24 +568,19 @@ export function MusicPlayer() {
         playlistFallbackAttemptedRef.current = false;
         defaultFallbackAttemptedRef.current = false;
 
-        const playerVars = {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          enablejsapi: 1,
-          modestbranding: 1,
-          playsinline: 1,
-          rel: 0,
-          iv_load_policy: 3,
-          origin: window.location.origin.replace(/\/$/, ""),
-          widget_referrer: window.location.href,
-        } as YT.PlayerOptions["playerVars"] & { widget_referrer?: string };
+        // Manual iframe construction with explicit origin parameter
+        const iframe = iframeRef.current;
+        const origin = window.location.origin.replace(/\/$/, "");
+        
+        if (source.videoId) {
+          iframe.src = `https://www.youtube.com/embed/${source.videoId}?enablejsapi=1&origin=${encodeURIComponent(origin)}&autoplay=1&controls=0&disablekb=1&fs=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3`;
+        } else if (source.playlistId) {
+          iframe.src = `https://www.youtube.com/embed/videoseries?enablejsapi=1&origin=${encodeURIComponent(origin)}&autoplay=1&controls=0&disablekb=1&fs=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&list=${source.playlistId}&listType=playlist`;
+        }
 
         const playerConfig: YT.PlayerOptions = {
           height: "200",
           width: "200",
-          playerVars,
           events: {
             onReady: (event) => {
               if (cancelled) {
@@ -560,9 +592,6 @@ export function MusicPlayer() {
               markResolved();
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
-
-              const shouldRestoreAudio = () =>
-                autoplayUnmutePendingRef.current || player.isMuted() || player.getVolume() === 0;
 
               if (source.playlistId) {
                 disableShuffle(player);
@@ -585,58 +614,6 @@ export function MusicPlayer() {
               } catch (error) {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
-
-              console.warn("Registering YouTube player controls");
-              registerControls({
-                play: () => {
-                  console.warn("Play command called");
-                  if (shouldRestoreAudio()) {
-                    restoreAudio(player);
-                  }
-
-                  player.playVideo();
-                },
-                pause: () => {
-                  console.warn("Pause command called");
-                  player.pauseVideo();
-                },
-                toggle: () => {
-                  console.warn("Toggle command called");
-                  const state = player.getPlayerState();
-                  console.warn("Current player state:", state);
-                  if (state === window.YT?.PlayerState.PLAYING) {
-                    if (shouldRestoreAudio()) {
-                      restoreAudio(player);
-                      return;
-                    }
-
-                    player.pauseVideo();
-                    return;
-                  }
-
-                  if (shouldRestoreAudio()) {
-                    restoreAudio(player);
-                  }
-
-                  player.playVideo();
-                },
-                next: () => movePlaylist(player, 1),
-                previous: () => movePlaylist(player, -1),
-                setVolume: (nextVolume) => {
-                  player.setVolume(nextVolume);
-                },
-                seekTo: (seconds) => {
-                  player.seekTo(seconds, true);
-                },
-                load: (url) => applySource(player, url),
-                mute: (mute) => {
-                  if (mute) {
-                    player.mute();
-                    return;
-                  }
-                  player.unMute();
-                },
-              });
 
               setPlayerReady(true);
 
@@ -665,7 +642,7 @@ export function MusicPlayer() {
 
                 if (event.data === window.YT?.PlayerState.ENDED) {
                   if (source.playlistId) {
-                    movePlaylist(player, 1);
+                    next();
                     return;
                   }
 
@@ -680,7 +657,19 @@ export function MusicPlayer() {
                 }
 
                 if (playing && autoplayUnmutePendingRef.current && playerRef.current) {
-                  restoreAudio(playerRef.current as ExtendedPlayer);
+                  const current = playerRef.current as ExtendedPlayer;
+                  try {
+                    if (!current.isMuted() && current.getVolume() > 0) {
+                      autoplayUnmutePendingRef.current = false;
+                    } else {
+                      current.unMute();
+                      current.setVolume(volumeRef.current);
+                      autoplayUnmutePendingRef.current = false;
+                      syncTrack({ isMuted: false });
+                    }
+                  } catch (error) {
+                    console.warn("YouTube audio restoration failed.", error);
+                  }
                 }
 
                 if (event.data === window.YT?.PlayerState.PLAYING || event.data === window.YT?.PlayerState.BUFFERING) {
@@ -716,11 +705,14 @@ export function MusicPlayer() {
               if (source.playlistId && fallbackVideoId && !playlistFallbackAttemptedRef.current) {
                 playlistFallbackAttemptedRef.current = true;
                 try {
-                  playerRef.current?.loadVideoById(fallbackVideoId);
-                  playerRef.current?.mute();
-                  playerRef.current?.setVolume(0);
-                  autoplayUnmutePendingRef.current = true;
-                  startPlayback(playerRef.current as ExtendedPlayer);
+                  if (playerRef.current) {
+                    playerRef.current.loadVideoById(fallbackVideoId);
+                    const player = playerRef.current as ExtendedPlayer;
+                    player.mute();
+                    player.setVolume(0);
+                    autoplayUnmutePendingRef.current = true;
+                    startPlayback(player);
+                  }
                   return;
                 } catch (error) {
                   console.warn("YouTube playlist fallback failed.", error);
@@ -742,17 +734,7 @@ export function MusicPlayer() {
           },
         };
 
-        if (source.playlistId) {
-          playerConfig.playerVars = {
-            ...playerConfig.playerVars,
-            list: source.playlistId,
-            listType: "playlist",
-          };
-        } else if (source.videoId) {
-          playerConfig.videoId = source.videoId;
-        }
-
-        playerRef.current = new api.Player(hostRef.current, playerConfig);
+        playerRef.current = new api.Player(iframe, playerConfig);
 
         // Progress tracking interval
         pollIntervalRef.current = window.setInterval(() => {
@@ -810,7 +792,7 @@ export function MusicPlayer() {
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [source.playlistId, source.rawUrl, registerControls, loadMusicUrl, setPlayerReady, setPlayerError, syncTrack, setVisualLevel]);
+  }, [source.playlistId, source.rawUrl, source.videoId, setPlayerReady, setPlayerError, syncTrack, setVisualLevel, loadMusicUrl, next]);
 
   // Source change handler
   useEffect(() => {
@@ -819,20 +801,8 @@ export function MusicPlayer() {
     }
 
     sourceRef.current = source.rawUrl;
-    const player = playerRef.current;
-
-    if (source.playlistId) {
-      player.loadPlaylist({
-        list: source.playlistId,
-        listType: "playlist",
-      });
-      return;
-    }
-
-    if (source.videoId) {
-      player.loadVideoById(source.videoId);
-    }
-  }, [source.playlistId, source.rawUrl]);
+    handleLoad(source.rawUrl);
+  }, [source.playlistId, source.rawUrl, handleLoad]);
 
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
   const takeoverFade = clamp((footerTakeover - 0.52) / 0.26, 0, 1);
@@ -863,6 +833,7 @@ export function MusicPlayer() {
       style={{
         perspective: "900px",
         transformStyle: "preserve-3d",
+        pointerEvents: "none",
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -931,13 +902,13 @@ export function MusicPlayer() {
               </motion.div>
 
               <div className="flex items-center gap-1.5">
-                <button className="glass-button-muted h-8 w-8 rounded-full p-0 pointer-events-auto" onClick={playPrevious} type="button">
+                <button className="glass-button-muted h-8 w-8 rounded-full p-0 pointer-events-auto" onClick={previous} type="button">
                   <SkipBack className="h-3.5 w-3.5" />
                 </button>
-                <button className="glass-button h-9 w-9 rounded-full p-0 pointer-events-auto" onClick={togglePlayback} type="button">
+                <button className="glass-button h-9 w-9 rounded-full p-0 pointer-events-auto" onClick={toggle} type="button">
                   {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </button>
-                <button className="glass-button-muted h-8 w-8 rounded-full p-0 pointer-events-auto" onClick={playNext} type="button">
+                <button className="glass-button-muted h-8 w-8 rounded-full p-0 pointer-events-auto" onClick={next} type="button">
                   <SkipForward className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -962,13 +933,13 @@ export function MusicPlayer() {
                     {engineStatus === "error" ? errorMessage : title}
                   </p>
                   <div className="mt-3 flex items-center gap-2">
-                    <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={playPrevious} type="button">
+                    <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={previous} type="button">
                       <SkipBack className="h-4 w-4" />
                     </button>
-                    <button className="glass-button h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={togglePlayback} type="button">
+                    <button className="glass-button h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={toggle} type="button">
                       {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                     </button>
-                    <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={playNext} type="button">
+                    <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10" onClick={next} type="button">
                       <SkipForward className="h-4 w-4" />
                     </button>
                   </div>
@@ -986,7 +957,7 @@ export function MusicPlayer() {
                   disabled={duration <= 0}
                   max={Math.max(duration, 1)}
                   min={0}
-                  onChange={(event) => seekTo(Number(event.target.value))}
+                  onChange={(event) => handleSeekTo(Number(event.target.value))}
                   style={{
                     background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${progress}%, rgba(255,255,255,0.22) ${progress}%, rgba(255,255,255,0.22) 100%)`,
                   }}
@@ -1001,13 +972,13 @@ export function MusicPlayer() {
                   className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto sm:h-10 sm:w-10"
                   onClick={() => {
                     if (isMuted || volume === 0) {
-                      unmute();
+                      handleMute(false);
                       if (volume === 0) {
-                        setVolume(50);
+                        handleSetVolume(50);
                       }
                       return;
                     }
-                    mute();
+                    handleMute(true);
                   }}
                   type="button"
                 >
@@ -1018,7 +989,7 @@ export function MusicPlayer() {
                   className="h-2 w-full cursor-pointer appearance-none rounded-full accent-[rgb(var(--accent-rgb))] pointer-events-auto"
                   max={100}
                   min={0}
-                  onChange={(event) => setVolume(Number(event.target.value))}
+                  onChange={(event) => handleSetVolume(Number(event.target.value))}
                   style={{
                     background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(255,255,255,0.22) ${volume}%, rgba(255,255,255,0.22) 100%)`,
                   }}
@@ -1044,6 +1015,7 @@ export function MusicPlayer() {
         style={{
           perspective: "725px",
           transformStyle: "preserve-3d",
+          pointerEvents: "none",
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -1068,13 +1040,13 @@ export function MusicPlayer() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={playPrevious} type="button">
+                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={previous} type="button">
                   <SkipBack className="h-4 w-4" />
                 </button>
-                <button className="glass-button h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={togglePlayback} type="button">
+                <button className="glass-button h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={toggle} type="button">
                   {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </button>
-                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={playNext} type="button">
+                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={next} type="button">
                   <SkipForward className="h-4 w-4" />
                 </button>
               </div>
@@ -1107,11 +1079,13 @@ export function MusicPlayer() {
 
   return (
     <>
-      {/* Hidden YouTube iframe */}
-      <div
-        ref={hostRef}
+      {/* Hidden YouTube iframe - manually constructed */}
+      <iframe
+        ref={iframeRef}
         className="pointer-events-none absolute left-0 top-0 h-[200px] w-[200px] opacity-0"
         style={{ position: 'absolute', zIndex: -1 }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
 
       {/* Conditional rendering based on footer takeover */}

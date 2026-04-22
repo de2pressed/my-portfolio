@@ -17,18 +17,6 @@ import { extractYouTubeVideoId, parseYouTubeSource, type ParsedYouTubeSource } f
 
 type EngineStatus = "idle" | "loading" | "ready" | "error";
 
-type PlayerControls = {
-  play: () => void;
-  pause: () => void;
-  toggle: () => void;
-  next: () => void;
-  previous: () => void;
-  setVolume: (value: number) => void;
-  seekTo: (seconds: number) => void;
-  load: (url: string) => void;
-  mute: (mute: boolean) => void;
-};
-
 type MusicContextValue = {
   source: ParsedYouTubeSource;
   title: string;
@@ -57,14 +45,8 @@ type MusicContextValue = {
   setVisualLevel: (value: number) => void;
   setVolume: (value: number) => void;
   seekTo: (seconds: number) => void;
-  registerControls: (controls: PlayerControls) => void;
-  togglePlayback: () => void;
-  playNext: () => void;
-  playPrevious: () => void;
-  play: () => void;
-  pause: () => void;
-  mute: () => void;
-  unmute: () => void;
+  setIsPlaying: (playing: boolean) => void;
+  setIsMuted: (muted: boolean) => void;
   loadMusicUrl: (url: string) => void;
 };
 
@@ -83,17 +65,9 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [visualLevel, setVisualLevelState] = useState(0.2);
   const [footerTakeover, setFooterTakeover] = useState(0);
-  const [controls, setControls] = useState<PlayerControls | null>(null);
   const thumbnailSourceId = source.videoId ?? extractYouTubeVideoId(source.rawUrl);
   const thumbnail = useResolvedYouTubeThumbnail(thumbnailSourceId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
-  const controlsRef = useRef<PlayerControls | null>(null);
-  const pendingPlayRef = useRef(false);
-  const musicUrlRef = useRef(musicUrl);
-
-  useEffect(() => {
-    controlsRef.current = controls;
-  }, [controls]);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,8 +78,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
           cache: "no-store",
         });
         const payload = (await response.json()) as { value?: string };
-        if (!cancelled && payload.value && payload.value !== musicUrlRef.current) {
-          musicUrlRef.current = payload.value;
+        if (!cancelled && payload.value && payload.value !== musicUrl) {
           setMusicUrl(payload.value);
           setSource(parseYouTubeSource(payload.value));
           setTitle("Loading soundtrack...");
@@ -122,14 +95,12 @@ export function MusicProvider({ children }: PropsWithChildren) {
     const handleMusicUrlUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<string>;
       const nextUrl = customEvent.detail;
-      if (typeof nextUrl === "string" && nextUrl && nextUrl !== musicUrlRef.current) {
-        musicUrlRef.current = nextUrl;
+      if (typeof nextUrl === "string" && nextUrl && nextUrl !== musicUrl) {
         setMusicUrl(nextUrl);
         setSource(parseYouTubeSource(nextUrl));
         setTitle("Loading soundtrack...");
         setCurrentTime(0);
         setDuration(0);
-        controlsRef.current?.load(nextUrl);
       }
     };
 
@@ -149,16 +120,6 @@ export function MusicProvider({ children }: PropsWithChildren) {
 
     resetPalette();
   }, [resetPalette, setPaletteFromThumbnail, thumbnail]);
-
-  const registerControls = useCallback((nextControls: PlayerControls) => {
-    controlsRef.current = nextControls;
-    setControls(nextControls);
-
-    if (pendingPlayRef.current) {
-      nextControls.play();
-      pendingPlayRef.current = false;
-    }
-  }, []);
 
   const syncTrack = useCallback((payload: {
     title?: string | null;
@@ -225,64 +186,24 @@ export function MusicProvider({ children }: PropsWithChildren) {
 
   const setVolume = useCallback((value: number) => {
     setVolumeState(value);
-    controlsRef.current?.setVolume(value);
   }, []);
 
   const seekTo = useCallback((seconds: number) => {
     const nextSeconds = Math.max(0, duration > 0 ? Math.min(duration, seconds) : seconds);
     setCurrentTime(nextSeconds);
-    controlsRef.current?.seekTo(nextSeconds);
   }, [duration]);
 
-  const togglePlayback = useCallback(() => {
-    controlsRef.current?.toggle();
-  }, []);
-
-  const playNext = useCallback(() => {
-    controlsRef.current?.next();
-  }, []);
-
-  const playPrevious = useCallback(() => {
-    controlsRef.current?.previous();
-  }, []);
-
-  const play = useCallback(() => {
-    if (controlsRef.current) {
-      controlsRef.current.play();
-      return;
-    }
-
-    pendingPlayRef.current = true;
-  }, []);
-
-  const pause = useCallback(() => {
-    controlsRef.current?.pause();
-    pendingPlayRef.current = false;
-  }, []);
-
-  const mute = useCallback(() => {
-    setIsMuted(true);
-    controlsRef.current?.mute(true);
-  }, []);
-
-  const unmute = useCallback(() => {
-    setIsMuted(false);
-    controlsRef.current?.mute(false);
-  }, []);
-
   const loadMusicUrl = useCallback((url: string) => {
-    if (url === musicUrlRef.current) {
+    if (url === musicUrl) {
       return;
     }
 
-    musicUrlRef.current = url;
     setMusicUrl(url);
     setSource(parseYouTubeSource(url));
     setTitle("Loading soundtrack...");
     setCurrentTime(0);
     setDuration(0);
-    controlsRef.current?.load(url);
-  }, []);
+  }, [musicUrl]);
 
   return (
     <MusicContext.Provider
@@ -307,14 +228,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
         setVisualLevel,
         setVolume,
         seekTo,
-        registerControls,
-        togglePlayback,
-        playNext,
-        playPrevious,
-        play,
-        pause,
-        mute,
-        unmute,
+        setIsPlaying,
+        setIsMuted,
         loadMusicUrl,
       }}
     >
