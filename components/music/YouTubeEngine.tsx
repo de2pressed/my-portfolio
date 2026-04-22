@@ -80,7 +80,7 @@ function sendPlayerCommand(player: ExtendedPlayer, func: string, args: unknown[]
     }
 
     console.warn(`Sending YouTube command: ${func}`, args);
-    targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+    targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "https://www.youtube.com");
     return true;
   } catch (error) {
     console.warn(`YouTube ${func} command failed.`, error);

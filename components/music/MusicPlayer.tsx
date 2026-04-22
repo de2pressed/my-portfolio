@@ -166,17 +166,18 @@ export function MusicPlayer() {
     );
 
   return (
-    <GlassHover 
-      className={cn(
-        "fixed bottom-4 right-4 z-40 md:bottom-6 md:right-6",
-        isMinimized
-          ? "h-[11rem] w-[11rem] sm:h-[11.5rem] sm:w-[11.5rem]"
-          : "w-[calc(100vw-2rem)] max-w-[28rem] sm:max-w-[30rem]",
-        footerTakeover > 0.72 && "pointer-events-none",
-      )} 
-      config={MINIMAL_CONFIG}
-      disabled={footerTakeover > 0.52 && footerTakeover < 0.72}
-    >
+    <>
+      {footerTakeover <= 0.72 && (
+        <GlassHover 
+          className={cn(
+            "fixed bottom-4 right-4 z-40 md:bottom-6 md:right-6",
+            isMinimized
+              ? "h-[11rem] w-[11rem] sm:h-[11.5rem] sm:w-[11.5rem]"
+              : "w-[calc(100vw-2rem)] max-w-[28rem] sm:max-w-[30rem]",
+          )} 
+          config={MINIMAL_CONFIG}
+          disabled={footerTakeover > 0.52 && footerTakeover < 0.72}
+        >
       <motion.aside
         className={cn(
           "overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3),0_0_0_1px_rgba(var(--glass-border-rgb),0.1)] backdrop-blur-2xl",
@@ -351,5 +352,7 @@ export function MusicPlayer() {
       </AnimatePresence>
       </motion.aside>
     </GlassHover>
+      )}
+    </>
   );
 }

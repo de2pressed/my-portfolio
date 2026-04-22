@@ -132,11 +132,11 @@ export const MINIMAL_CONFIG: TiltConfig = {
 };
 
 export const BALANCED_CONFIG: TiltConfig = {
-  maxRotation: 12,
-  perspective: 600,
+  maxRotation: 7,
+  perspective: 725,
   intensity: 1.0,
-  springStiffness: 150,
-  springDamping: 25,
-  sheenOpacity: 0.4,
+  springStiffness: 120,
+  springDamping: 35,
+  sheenOpacity: 0.25,
   enableSheen: true,
 };
