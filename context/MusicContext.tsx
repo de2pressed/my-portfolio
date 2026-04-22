@@ -16,6 +16,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { extractYouTubeVideoId, parseYouTubeSource, type ParsedYouTubeSource } from "@/lib/youtube";
 
 type EngineStatus = "idle" | "loading" | "ready" | "error";
+type LayoutMode = "standalone" | "footer";
 
 type MusicContextValue = {
   source: ParsedYouTubeSource;
@@ -30,6 +31,7 @@ type MusicContextValue = {
   errorMessage: string | null;
   visualLevel: number;
   footerTakeover: number;
+  layoutMode: LayoutMode;
   musicUrl: string;
   setFooterTakeover: (value: number) => void;
   setPlayerReady: (ready: boolean) => void;
@@ -65,6 +67,13 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [visualLevel, setVisualLevelState] = useState(0.2);
   const [footerTakeover, setFooterTakeover] = useState(0);
+  const layoutModeRef = useRef<LayoutMode>("standalone");
+  const layoutMode: LayoutMode =
+    footerTakeover >= 0.72 ? "footer" : footerTakeover < 0.68 ? "standalone" : layoutModeRef.current;
+
+  useEffect(() => {
+    layoutModeRef.current = layoutMode;
+  }, [layoutMode]);
   const thumbnailSourceId = source.videoId ?? extractYouTubeVideoId(source.rawUrl);
   const thumbnail = useResolvedYouTubeThumbnail(thumbnailSourceId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
@@ -220,6 +229,7 @@ export function MusicProvider({ children }: PropsWithChildren) {
         errorMessage,
         visualLevel,
         footerTakeover,
+        layoutMode,
         musicUrl,
         setFooterTakeover,
         setPlayerReady,
