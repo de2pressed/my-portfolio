@@ -150,7 +150,7 @@ export function AmbientBackground() {
 
     let animationFrame = 0;
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const blobCount = mediaQuery.matches ? 8 : 12;
+    const blobCount = mediaQuery.matches ? 7 : 11;
     const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
     const canvasPalette = fallbackPalette.map(boostCanvasColor);
     const anchorPositions = mediaQuery.matches
@@ -159,7 +159,6 @@ export function AmbientBackground() {
           { x: 0.52, y: 0.09 },
           { x: 0.92, y: 0.14 },
           { x: 0.16, y: 0.34 },
-          { x: 0.52, y: 0.42 },
           { x: 0.86, y: 0.36 },
           { x: 0.08, y: 0.82 },
           { x: 0.66, y: 0.84 },
@@ -172,7 +171,6 @@ export function AmbientBackground() {
           { x: 0.92, y: 0.12 },
           { x: 0.08, y: 0.34 },
           { x: 0.32, y: 0.26 },
-          { x: 0.56, y: 0.3 },
           { x: 0.82, y: 0.28 },
           { x: 0.95, y: 0.48 },
           { x: 0.1, y: 0.82 },
@@ -418,18 +416,22 @@ export function AmbientBackground() {
         y += Math.cos(blobTime * 0.19 + phaseOffset) * blob.orbitY * 0.12 * orbitalDamp + swayY;
 
         const radius = blob.size * pulse;
-        const blur = blurBase - effectiveLevel * blurRange;
+        // Enforce minimum blur for soft premium edges — never go below 6px
+        const blur = Math.max(6, blurBase - effectiveLevel * blurRange);
 
-        // Per-band opacity: each band uses its own base + scale
-        // Bass: size changes big, opacity subtle
-        // High/Texture: size barely changes, opacity flickers dramatically
+        // Premium smooth gradient with 5 stops for buttery falloff
+        const coreOpacity = baseOpacity + effectiveLevel * opacityScale;
+        const midOpacity = baseOpacity * 0.6 + effectiveLevel * opacityScale * 0.5;
+        const edgeOpacity = baseOpacity * 0.25 + effectiveLevel * opacityScale * 0.2;
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, baseOpacity + effectiveLevel * opacityScale));
-        radial.addColorStop(0.55, hexToRgba(blob.color, baseOpacity * 0.5 + effectiveLevel * opacityScale * 0.4));
+        radial.addColorStop(0, hexToRgba(blob.color, coreOpacity));
+        radial.addColorStop(0.25, hexToRgba(blob.color, coreOpacity * 0.85));
+        radial.addColorStop(0.5, hexToRgba(blob.color, midOpacity));
+        radial.addColorStop(0.75, hexToRgba(blob.color, edgeOpacity));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
-        context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.15 + effectiveLevel * saturationBoost}) contrast(${1.04 + effectiveLevel * 0.06}) blur(${blur}px)`;
+        context.globalCompositeOperation = "lighter";
+        context.filter = `saturate(${1.1 + effectiveLevel * saturationBoost}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
