@@ -89,13 +89,17 @@ export function ExperienceShell({ children }: PropsWithChildren) {
       return;
     }
 
+    if (phase === "loading" || phase === "handoff") {
+      return;
+    }
+
     if (autoplayAttemptedRef.current) {
       return;
     }
 
     autoplayAttemptedRef.current = true;
     play();
-  }, [consent, engineStatus, hydrated, isPublicRoute, play]);
+  }, [consent, engineStatus, hydrated, isPublicRoute, play, phase]);
 
   function handleDecision(decision: "accepted" | "rejected") {
     play();
