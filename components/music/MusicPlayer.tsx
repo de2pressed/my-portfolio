@@ -1006,8 +1006,6 @@ export function MusicPlayer() {
 
   // Footer-merged layout
   const renderFooterLayout = () => {
-    const { energy } = useMusicFrequency();
-
     return (
       <motion.div
         ref={hoverRef}
@@ -1028,49 +1026,81 @@ export function MusicPlayer() {
             transformStyle: "preserve-3d",
           }}
         >
-          <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
-            <div className="relative min-h-[260px] overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)]">
+          <div className="flex items-center gap-4">
+            <div className="relative h-20 w-20 overflow-hidden rounded-[22px] bg-[rgba(10,10,14,0.34)]">
               {renderArtwork()}
             </div>
 
-            <div className="flex flex-col justify-between gap-6 rounded-[24px] bg-[rgba(10,10,14,0.32)] p-5">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.28em] text-ink/56">Immersive music zone</p>
-                <h3 className="mt-2 text-2xl font-semibold text-ink">{title}</h3>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={previous} type="button">
-                  <SkipBack className="h-4 w-4" />
-                </button>
-                <button className="glass-button h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={toggle} type="button">
-                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </button>
-                <button className="glass-button-muted h-12 w-12 rounded-full p-0 pointer-events-auto" onClick={next} type="button">
-                  <SkipForward className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Visualizer bar */}
-              <div className="flex items-end gap-[3px] h-8">
-                {Array.from({ length: 24 }).map((_, i) => {
-                  const phase = (i / 24) * Math.PI * 2;
-                  const barEnergy = isPlaying ? energy * (0.3 + Math.sin(phase + performance.now() / 200) * 0.7) : 0.05;
-                  const height = 4 + barEnergy * 28;
-                  return (
-                    <div
-                      key={i}
-                      className="w-1.5 rounded-full bg-gradient-to-t from-[rgba(var(--accent-rgb),0.4)] to-[rgba(var(--teal-rgb),0.6)]"
-                      style={{
-                        height: `${Math.min(32, Math.max(4, height))}px`,
-                        opacity: 0.3 + barEnergy * 0.7,
-                        transition: 'height 0.1s ease-out',
-                      }}
-                    />
-                  );
-                })}
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-ink/50">Powered by YouTube</p>
+              <p className="mt-1 line-clamp-2 text-sm font-semibold text-ink">
+                {engineStatus === "error" ? errorMessage : title}
+              </p>
             </div>
+
+            <div className="flex items-center gap-2">
+              <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto" onClick={previous} type="button">
+                <SkipBack className="h-4 w-4" />
+              </button>
+              <button className="glass-button h-9 w-9 rounded-full p-0 pointer-events-auto" onClick={toggle} type="button">
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </button>
+              <button className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto" onClick={next} type="button">
+                <SkipForward className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-ink/48">
+              <span>{formatPlaybackTime(currentTime)}</span>
+              <span>{duration > 0 ? formatPlaybackTime(duration) : "0:00"}</span>
+            </div>
+            <input
+              aria-label="Track progress"
+              className="h-2 w-full cursor-pointer appearance-none rounded-full accent-[rgb(var(--accent-rgb))] pointer-events-auto"
+              disabled={duration <= 0}
+              max={Math.max(duration, 1)}
+              min={0}
+              onChange={(event) => handleSeekTo(Number(event.target.value))}
+              style={{
+                background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${progress}%, rgba(255,255,255,0.22) ${progress}%, rgba(255,255,255,0.22) 100%)`,
+              }}
+              step={0.1}
+              type="range"
+              value={duration > 0 ? Math.min(currentTime, duration) : 0}
+            />
+          </div>
+
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              className="glass-button-muted h-9 w-9 rounded-full p-0 pointer-events-auto"
+              onClick={() => {
+                if (isMuted || volume === 0) {
+                  handleMute(false);
+                  if (volume === 0) {
+                    handleSetVolume(50);
+                  }
+                  return;
+                }
+                handleMute(true);
+              }}
+              type="button"
+            >
+              {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            </button>
+            <input
+              aria-label="Volume"
+              className="h-2 w-full cursor-pointer appearance-none rounded-full accent-[rgb(var(--accent-rgb))] pointer-events-auto"
+              max={100}
+              min={0}
+              onChange={(event) => handleSetVolume(Number(event.target.value))}
+              style={{
+                background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(255,255,255,0.22) ${volume}%, rgba(255,255,255,0.22) 100%)`,
+              }}
+              type="range"
+              value={volume}
+            />
           </div>
         </motion.div>
       </motion.div>

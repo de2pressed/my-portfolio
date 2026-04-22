@@ -13,11 +13,10 @@ type FooterProps = {
 export function Footer({ name, email, note }: FooterProps) {
   const ref = useRef<HTMLElement | null>(null);
   const { setFooterTakeover } = useMusic();
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    let frame = 0;
-
-    const updateProgress = () => {
+    const handleScroll = () => {
       if (!ref.current) {
         return;
       }
@@ -27,15 +26,29 @@ export function Footer({ name, email, note }: FooterProps) {
       const scrollableDistance = documentHeight - windowHeight;
       const scrollProgress = scrollableDistance > 0 ? window.scrollY / scrollableDistance : 0;
 
-      setFooterTakeover(scrollProgress);
-      frame = window.requestAnimationFrame(updateProgress);
+      // Debounce setState to avoid calling during render
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        setFooterTakeover(scrollProgress);
+        scrollTimeoutRef.current = null;
+      }, 16); // ~60fps
     };
 
-    updateProgress();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    // Initial calculation
+    handleScroll();
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateProgress);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
       setFooterTakeover(0);
     };
   }, [setFooterTakeover]);
