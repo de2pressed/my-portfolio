@@ -110,6 +110,7 @@ export function YouTubeEngine() {
   const defaultFallbackAttemptedRef = useRef(false);
   const smoothedEnergyRef = useRef(0.08);
   const energyHistoryRef = useRef<number[]>([]);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -375,9 +376,16 @@ export function YouTubeEngine() {
     }, 8000);
 
     async function boot() {
+      if (isInitializedRef.current) {
+        return;
+      }
+
+      isInitializedRef.current = true;
+
       try {
         const api = await loadYouTubeApi();
         if (cancelled || !hostRef.current) {
+          isInitializedRef.current = false;
           return;
         }
 
@@ -397,6 +405,13 @@ export function YouTubeEngine() {
           origin: window.location.origin,
           widget_referrer: window.location.href,
         } as YT.PlayerOptions["playerVars"] & { widget_referrer?: string };
+
+        // Ensure origin is set correctly for YouTube IFrame API
+        if (playerVars.origin && typeof playerVars.origin === 'string') {
+          // YouTube expects the origin to be the full URL including protocol
+          // Remove trailing slash if present
+          playerVars.origin = playerVars.origin.replace(/\/$/, '');
+        }
 
         const playerConfig: YT.PlayerOptions = {
           height: "200",
@@ -651,6 +666,7 @@ export function YouTubeEngine() {
 
     return () => {
       cancelled = true;
+      isInitializedRef.current = false;
       window.clearTimeout(safetyTimeout);
       if (pollInterval) {
         window.clearInterval(pollInterval);
