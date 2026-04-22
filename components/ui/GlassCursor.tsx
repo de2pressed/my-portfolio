@@ -128,6 +128,17 @@ export function GlassCursor() {
       const ay = (state.y - state.ty) * stiffness;
       state.vx = (state.vx + ax) * damping;
       state.vy = (state.vy + ay) * damping;
+      
+      // Snap to target when velocity and distance are negligible (eliminates wiggle)
+      const distToTarget = Math.hypot(state.x - state.tx, state.y - state.ty);
+      const velocityMagnitude = Math.hypot(state.vx, state.vy);
+      if (distToTarget < 0.1 && velocityMagnitude < 0.1) {
+        state.vx = 0;
+        state.vy = 0;
+        state.tx = state.x;
+        state.ty = state.y;
+      }
+      
       state.tx += state.vx;
       state.ty += state.vy;
 
@@ -149,6 +160,17 @@ export function GlassCursor() {
         const tay = (target.ty - trail.ty) * speed;
         trail.vx = (trail.vx + tax) * 0.9;
         trail.vy = (trail.vy + tay) * 0.9;
+        
+        // Snap to target when velocity and distance are negligible (eliminates wiggle)
+        const trailDist = Math.hypot(target.tx - trail.tx, target.ty - trail.ty);
+        const trailVel = Math.hypot(trail.vx, trail.vy);
+        if (trailDist < 0.1 && trailVel < 0.1) {
+          trail.vx = 0;
+          trail.vy = 0;
+          trail.tx = target.tx;
+          trail.ty = target.ty;
+        }
+        
         trail.tx += trail.vx;
         trail.ty += trail.vy;
 

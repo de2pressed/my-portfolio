@@ -82,8 +82,6 @@ export function GlassHover({ children, className = "", config, disabled = false,
       className={className}
       style={{
         perspective: effectiveConfig.perspective,
-        rotateX,
-        rotateY,
         transformStyle: "preserve-3d",
       }}
       onMouseMove={handleMouseMove}
