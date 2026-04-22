@@ -178,7 +178,7 @@ export function AmbientBackground() {
 
       // Idle animation: when paused, use gentle sine wave from wall-clock time
       const isIdle = baseLevel === 0;
-      const idleSignal = isIdle ? 0.15 + 0.1 * Math.sin(t * 0.5) : 0;
+      const idleSignal = isIdle ? 0.4 + 0.15 * Math.sin(t * 0.5) : 0;
 
       for (const gradient of gradients) {
         const bandRole = gradient.bandRole;

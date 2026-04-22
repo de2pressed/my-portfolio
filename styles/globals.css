@@ -45,26 +45,26 @@ body::after {
 
 ::selection {
   background: rgba(var(--accent-rgb), 0.84);
-  color: rgb(8, 8, 10);
+  color: rgb(var(--canvas-rgb));
   text-shadow: none;
 }
 
 ::-moz-selection {
   background: rgba(var(--accent-rgb), 0.84);
-  color: rgb(8, 8, 10);
+  color: rgb(var(--canvas-rgb));
   text-shadow: none;
 }
 
 input::selection,
 textarea::selection {
   background: rgba(var(--accent-rgb), 0.84);
-  color: rgb(8, 8, 10);
+  color: rgb(var(--canvas-rgb));
 }
 
 input::-moz-selection,
 textarea::-moz-selection {
   background: rgba(var(--accent-rgb), 0.84);
-  color: rgb(8, 8, 10);
+  color: rgb(var(--canvas-rgb));
 }
 
 * {

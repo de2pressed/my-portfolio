@@ -324,10 +324,13 @@ export function MusicPlayer() {
               </button>
               <input
                 aria-label="Volume"
-                className="h-2 w-full accent-[rgb(var(--accent-rgb))]"
+                className="h-2 w-full cursor-pointer appearance-none rounded-full accent-[rgb(var(--accent-rgb))]"
                 max={100}
                 min={0}
                 onChange={(event) => setVolume(Number(event.target.value))}
+                style={{
+                  background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(var(--glass-border-rgb), 0.3) ${volume}%, rgba(var(--glass-border-rgb), 0.3) 100%)`,
+                }}
                 type="range"
                 value={volume}
               />
