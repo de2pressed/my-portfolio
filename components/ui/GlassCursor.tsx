@@ -16,9 +16,11 @@ function clamp(value: number, min: number, max: number) {
 export function GlassCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const trailRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const pointer = useRef({ x: -100, y: -100, tx: -100, ty: -100 });
-  const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100 })));
+  const pointer = useRef({ x: -100, y: -100, tx: -100, ty: -100, vx: 0, vy: 0 });
+  const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100, vx: 0, vy: 0 })));
   const interactive = useRef(false);
+  const isPressed = useRef(false);
+  const rotation = useRef(0);
   const bindings = useRef(
     new Map<
       Element,
@@ -51,8 +53,30 @@ export function GlassCursor() {
     };
 
     const updatePosition = (event: PointerEvent) => {
+      const prevX = pointer.current.x;
+      const prevY = pointer.current.y;
       pointer.current.x = event.clientX;
       pointer.current.y = event.clientY;
+      
+      // Calculate velocity for rotation
+      const dx = pointer.current.x - prevX;
+      const dy = pointer.current.y - prevY;
+      pointer.current.vx = dx;
+      pointer.current.vy = dy;
+      
+      // Calculate rotation based on movement direction
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        const targetRotation = Math.atan2(dy, dx) * (180 / Math.PI);
+        rotation.current += (targetRotation - rotation.current) * 0.15;
+      }
+    };
+
+    const handlePointerDown = () => {
+      isPressed.current = true;
+    };
+
+    const handlePointerUp = () => {
+      isPressed.current = false;
     };
 
     const bindInteractiveTargets = () => {
@@ -79,19 +103,38 @@ export function GlassCursor() {
 
     const tick = () => {
       const state = pointer.current;
-      state.tx += (state.x - state.tx) * 0.24;
-      state.ty += (state.y - state.ty) * 0.24;
+      
+      // Spring physics for main cursor
+      const stiffness = 0.24;
+      const damping = 0.82;
+      const ax = (state.x - state.tx) * stiffness;
+      const ay = (state.y - state.ty) * stiffness;
+      state.vx = (state.vx + ax) * damping;
+      state.vy = (state.vy + ay) * damping;
+      state.tx += state.vx;
+      state.ty += state.vy;
+
+      // Apply press animation
+      const pressScale = isPressed.current ? 0.85 : 1;
+      const pressRotation = isPressed.current ? -15 : 0;
 
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0)`;
+        cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0) rotate(${rotation.current + pressRotation}deg) scale(${pressScale})`;
       }
 
+      // Spring physics for trail with momentum
       for (let index = 0; index < TRAIL_COUNT; index += 1) {
         const trail = trailStates.current[index];
         const target = index === 0 ? state : trailStates.current[index - 1];
         const speed = TRAIL_SPEEDS[index] ?? 0.05;
-        trail.tx += (target.tx - trail.tx) * speed;
-        trail.ty += (target.ty - trail.ty) * speed;
+        
+        // Spring physics for each trail segment
+        const tax = (target.tx - trail.tx) * speed;
+        const tay = (target.ty - trail.ty) * speed;
+        trail.vx = (trail.vx + tax) * 0.9;
+        trail.vy = (trail.vy + tay) * 0.9;
+        trail.tx += trail.vx;
+        trail.ty += trail.vy;
 
         const node = trailRefs.current[index];
         if (!node) {
@@ -104,12 +147,16 @@ export function GlassCursor() {
         const opacity = interactive.current ? 0 : distanceFade * baseFade;
         const size = 12 - index * 1.4;
 
+        // Color gradient based on position
+        const hue = (state.tx / window.innerWidth) * 60 + 280; // Purple to pink range
+        const color = `hsla(${hue}, 70%, 60%, ${opacity.toFixed(3)})`;
+
         node.style.width = `${size}px`;
         node.style.height = `${size}px`;
         node.style.transform = `translate3d(${trail.tx - size / 2}px, ${trail.ty - size / 2}px, 0)`;
         node.style.opacity = `${opacity.toFixed(3)}`;
-        node.style.background = "rgba(var(--accent-rgb), 0.9)";
-        node.style.boxShadow = `0 0 ${10 + index * 2}px rgba(var(--accent-rgb), ${Math.max(0.08, opacity * 0.65)})`;
+        node.style.background = color;
+        node.style.boxShadow = `0 0 ${10 + index * 2}px ${color}`;
       }
 
       frame = window.requestAnimationFrame(tick);
@@ -119,6 +166,8 @@ export function GlassCursor() {
     syncCursorStyle();
 
     window.addEventListener("pointermove", updatePosition);
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointerup", handlePointerUp);
     frame = window.requestAnimationFrame(tick);
 
     const observer = new MutationObserver(bindInteractiveTargets);
@@ -129,6 +178,8 @@ export function GlassCursor() {
 
     return () => {
       window.removeEventListener("pointermove", updatePosition);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerup", handlePointerUp);
       observer.disconnect();
       bindings.current.forEach(({ enter, leave }, element) => {
         element.removeEventListener("pointerenter", enter);
@@ -150,7 +201,7 @@ export function GlassCursor() {
           className="absolute left-0 top-0 rounded-full"
           style={{
             opacity: 0,
-            willChange: "transform, width, height, opacity, box-shadow",
+            willChange: "transform, width, height, opacity, box-shadow, background",
           }}
         />
       ))}

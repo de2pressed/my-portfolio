@@ -22,7 +22,7 @@ export function About({ summary, education }: AboutProps) {
         transition={{ type: "spring", stiffness: 100, damping: 20, mass: 0.9 }}
         viewport={{ once: true, amount: 0.3 }}
         whileInView={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -4, scale: 1.01 }}
+        whileHover={{ y: -6, scale: 1.01, boxShadow: "0 0 0 1px rgba(var(--lavender-rgb), 0.12), 0 28px 70px rgba(5,5,8,0.38)" }}
       >
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <div>

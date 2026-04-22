@@ -126,7 +126,7 @@ export function Reviews({ reviews }: ReviewsProps) {
                     transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.06 }}
                     viewport={{ once: true }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileHover={{ y: -6, scale: 1.02, boxShadow: "0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 0 36px rgba(var(--accent-rgb), calc(var(--review-glow-alpha) + 0.08))" }}
                   >
                     <p className="text-lg font-semibold text-ink">{review.display_name}</p>
                     <p className="mt-4 text-sm leading-7 text-ink/72">{content}</p>
@@ -163,26 +163,26 @@ export function Reviews({ reviews }: ReviewsProps) {
             transition={{ type: "spring", stiffness: 96, damping: 18 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -3, scale: 1.005 }}
+            whileHover={{ y: -4, scale: 1.01, boxShadow: "0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 0 36px rgba(var(--accent-rgb), calc(var(--review-glow-alpha) + 0.08))" }}
           >
             <p className="text-xs uppercase tracking-[0.26em] text-ink/52">Leave a review</p>
             <div className="grid gap-4">
               <input
-                className="rounded-[20px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="rounded-[20px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_0_0_4px_rgba(var(--accent-rgb),0.12)] focus:scale-[1.01]"
                 onChange={(event) => setForm((current) => ({ ...current, display_name: event.target.value }))}
                 placeholder="Display name"
                 type="text"
                 value={form.display_name}
               />
               <input
-                className="rounded-[20px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="rounded-[20px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_0_0_4px_rgba(var(--accent-rgb),0.12)] focus:scale-[1.01]"
                 onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                 placeholder="Email"
                 type="email"
                 value={form.email}
               />
               <textarea
-                className="min-h-[180px] rounded-[24px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_4px_rgba(var(--accent-rgb),0.08)]"
+                className="min-h-[180px] rounded-[24px] bg-[rgba(10,10,14,0.34)] px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/42 backdrop-blur-xl transition-all duration-300 focus:bg-[rgba(10,10,14,0.42)] focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_0_0_4px_rgba(var(--accent-rgb),0.12)] focus:scale-[1.01]"
                 onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
                 placeholder="Message"
                 value={form.message}

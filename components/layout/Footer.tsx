@@ -92,6 +92,7 @@ export function Footer({ name, email, note }: FooterProps) {
               opacity: cardProgress,
               y: 22 - cardProgress * 26,
               scale: 0.88 + cardProgress * 0.12,
+              rotateX: (2 - cardProgress * 2) * 0.5,
               rotate: 2 - cardProgress * 2,
               boxShadow: `0 24px 90px rgba(5,5,8,${0.28 + cardProgress * 0.08}), 0 0 0 1px rgba(var(--accent-rgb), ${
                 0.1 + cardProgress * 0.04
@@ -100,6 +101,7 @@ export function Footer({ name, email, note }: FooterProps) {
             whileHover={{
               y: 12 - cardProgress * 20,
               scale: 0.92 + cardProgress * 0.14,
+              rotateX: (1.5 - cardProgress * 1.5) * 0.3,
               rotate: 1.5 - cardProgress * 1.5,
               boxShadow: `0 32px 100px rgba(5,5,8,${0.32 + cardProgress * 0.1}), 0 0 0 1px rgba(var(--accent-rgb), ${
                 0.12 + cardProgress * 0.05
@@ -110,6 +112,7 @@ export function Footer({ name, email, note }: FooterProps) {
               y: { type: "spring", stiffness: 240, damping: 26, mass: 0.9 },
               scale: { type: "spring", stiffness: 240, damping: 24, mass: 0.9 },
               rotate: { type: "spring", stiffness: 260, damping: 24, mass: 0.8 },
+              rotateX: { type: "spring", stiffness: 220, damping: 25, mass: 0.85 },
               boxShadow: { duration: 0.22, ease: "easeOut" },
             }}
           >

@@ -31,7 +31,7 @@ export function Skills({ skills }: SkillsProps) {
               transition={{ type: "spring", stiffness: 100, damping: 19, delay: index * 0.08 }}
               viewport={{ once: true, amount: 0.25 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -4, scale: 1.01 }}
+              whileHover={{ y: -6, scale: 1.02, boxShadow: "0 0 0 1px rgba(var(--teal-rgb), 0.12), 0 24px 60px rgba(5,5,8,0.36)" }}
             >
               <p className="text-xs uppercase tracking-[0.26em] text-ink/52">{category}</p>
               <div className="mt-5 flex flex-wrap gap-3">

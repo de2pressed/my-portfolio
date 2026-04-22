@@ -27,7 +27,7 @@ export function Experience({ experience }: ExperienceProps) {
               transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.09 }}
               viewport={{ once: true, amount: 0.25 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -4, scale: 1.01 }}
+              whileHover={{ y: -6, scale: 1.01, boxShadow: "0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 28px 70px rgba(5,5,8,0.38)" }}
             >
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <div>

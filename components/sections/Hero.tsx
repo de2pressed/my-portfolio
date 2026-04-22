@@ -143,7 +143,7 @@ export function Hero({ name, tagline, intro, location, email, phone }: HeroProps
             transition={{ type: "spring", stiffness: 92, damping: 18, delay: 0.38 }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, x: 0 }}
-            whileHover={{ y: -6, rotateX: -2, scale: 1.01 }}
+            whileHover={{ y: -8, rotateX: -4, rotateY: 2, scale: 1.02, boxShadow: "0 0 0 1px rgba(var(--accent-rgb), 0.15), 0 32px 80px rgba(5,5,8,0.4)" }}
           >
             <div className="space-y-4">
               <p className="text-[11px] uppercase tracking-[0.28em] text-ink/54">Current focus</p>

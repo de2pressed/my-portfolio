@@ -26,7 +26,7 @@ export function Projects({ projects }: ProjectsProps) {
               key={project.id}
               transition={{ type: "spring", stiffness: 96, damping: 18, delay: index * 0.09 }}
               viewport={{ once: true, amount: 0.25 }}
-              whileHover={{ rotateX: -3, rotateY: 3, y: -6, scale: 1.01 }}
+              whileHover={{ rotateX: -3, rotateY: 3, y: -8, scale: 1.02, boxShadow: "0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 28px 70px rgba(5,5,8,0.38)" }}
               whileInView={{ opacity: 1, y: 0 }}
             >
               <div>

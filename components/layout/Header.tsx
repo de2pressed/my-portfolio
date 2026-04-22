@@ -98,7 +98,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 mx-auto rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
@@ -126,6 +126,7 @@ export function Header({ name }: HeaderProps) {
                     strokeLinecap="round"
                     strokeWidth="2.2"
                     transform="rotate(-90 14 14)"
+                    style={{ filter: "drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.4))" }}
                   />
                 </svg>
               </span>
@@ -138,9 +139,9 @@ export function Header({ name }: HeaderProps) {
 
           <nav className="hidden items-center gap-2 md:flex">
             {navItems.map((item) => (
-              <button
+              <motion.button
                 className={cn(
-                  "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300",
+                  "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300 relative overflow-hidden",
                   activeSection === item.id
                     ? "glass-button text-ink shadow-glass"
                     : "glass-button-muted text-ink/72",
@@ -149,9 +150,11 @@ export function Header({ name }: HeaderProps) {
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {item.label}
-              </button>
+              </motion.button>
             ))}
           </nav>
 
@@ -182,8 +185,8 @@ export function Header({ name }: HeaderProps) {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="space-y-3">
-                {navItems.map((item) => (
-                  <button
+                {navItems.map((item, index) => (
+                  <motion.button
                     className={cn(
                       "flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] transition-all duration-300",
                       activeSection === item.id
@@ -194,9 +197,14 @@ export function Header({ name }: HeaderProps) {
                     key={item.id}
                     onClick={() => navigateTo(item.id)}
                     type="button"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.2 }}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {item.label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </motion.div>
