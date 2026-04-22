@@ -75,9 +75,11 @@ function sendPlayerCommand(player: ExtendedPlayer, func: string, args: unknown[]
     const targetWindow = iframe?.contentWindow;
 
     if (!targetWindow) {
+      console.warn(`YouTube ${func} command failed: no iframe contentWindow`);
       return false;
     }
 
+    console.log(`Sending YouTube command: ${func}`, args);
     targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
     return true;
   } catch (error) {
@@ -406,6 +408,7 @@ export function YouTubeEngine() {
                 return;
               }
 
+              console.log("YouTube player ready");
               markResolved();
               playerRef.current = player;
               previousTimeRef.current = player.getCurrentTime();
@@ -437,8 +440,10 @@ export function YouTubeEngine() {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
 
+              console.log("Registering YouTube player controls");
               registerControls({
                 play: () => {
+                  console.log("Play command called");
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
@@ -446,10 +451,13 @@ export function YouTubeEngine() {
                   sendPlayerCommand(activePlayer, "playVideo");
                 },
                 pause: () => {
+                  console.log("Pause command called");
                   sendPlayerCommand(activePlayer, "pauseVideo");
                 },
                 toggle: () => {
+                  console.log("Toggle command called");
                   const state = player.getPlayerState();
+                  console.log("Current player state:", state);
                   if (state === window.YT?.PlayerState.PLAYING) {
                     if (shouldRestoreAudio()) {
                       restoreAudio(activePlayer);
@@ -691,7 +699,8 @@ export function YouTubeEngine() {
   return (
     <div
       ref={hostRef}
-      className="pointer-events-none fixed left-[-9999px] top-[-9999px] h-[200px] w-[200px] opacity-0"
+      className="pointer-events-none absolute left-0 top-0 h-[200px] w-[200px] opacity-0"
+      style={{ position: 'absolute', zIndex: -1 }}
     />
   );
 }
