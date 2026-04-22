@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { useMusicFrequency } from "@/hooks/useMusicFrequency";
+import { GlassHover } from "@/components/ui/GlassHover";
 import { cn } from "@/lib/utils";
 
 const MINIMIZED_KEY = "portfolio-music-player-minimized";
@@ -165,25 +166,32 @@ export function MusicPlayer() {
     );
 
   return (
-    <motion.aside
-      className={cn(
-        "fixed bottom-4 right-4 z-40 overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
+    <GlassHover className={cn(
+        "fixed bottom-4 right-4 z-40 md:bottom-6 md:right-6",
         isMinimized
-          ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
-          : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4 z-50",
+          ? "h-[11rem] w-[11rem] sm:h-[11.5rem] sm:w-[11.5rem]"
+          : "w-[calc(100vw-2rem)] max-w-[28rem] sm:max-w-[30rem]",
         footerTakeover > 0.72 && "pointer-events-none",
-      )}
-      layout
-      animate={{
-        opacity: 1 - takeoverFade,
-        x: footerTakeover * (isMinimized ? -22 : -34),
-        y: takeoverDepth * (isMinimized ? 360 : 480),
-        scale: 1 + takeoverDepth * 0.24,
-        rotate: takeoverDepth * -3,
-      }}
-      style={{ filter: takeoverFilter }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      )} intensity={0.8} maxRotation={6}
     >
+      <motion.aside
+        className={cn(
+          "overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3),0_0_0_1px_rgba(var(--glass-border-rgb),0.1)] backdrop-blur-2xl",
+          isMinimized
+            ? "h-full w-full rounded-[28px] p-3"
+            : "h-full w-full rounded-[30px] p-3 sm:p-4 z-50",
+        )}
+        layout
+        animate={{
+          opacity: 1 - takeoverFade,
+          x: footerTakeover * (isMinimized ? -22 : -34),
+          y: takeoverDepth * (isMinimized ? 360 : 480),
+          scale: 1 + takeoverDepth * 0.24,
+          rotate: takeoverDepth * -3,
+        }}
+        style={{ filter: takeoverFilter }}
+        transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      >
       <button
         aria-label={isMinimized ? "Expand player" : "Minimize player"}
         className="glass-button-muted absolute right-3 top-3 z-10 h-9 w-9 rounded-full p-0"
@@ -338,6 +346,7 @@ export function MusicPlayer() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.aside>
+      </motion.aside>
+    </GlassHover>
   );
 }
