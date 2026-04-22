@@ -280,8 +280,8 @@ export function AmbientBackground() {
       }
 
       // Song time drives the visualizer — different song positions = different patterns
-      // This makes the visualizer evolve with the song instead of repeating the same loop
-      const songT = songTimeRef.current;
+      // Subtract 10ms to delay visuals so they align with audio reaching the ears
+      const songT = Math.max(0, songTimeRef.current - 0.01);
       const songDur = durationRef.current || 180; // default 3 min
       const songProgress = songT / songDur; // 0..1 across the whole song
 
@@ -295,66 +295,88 @@ export function AmbientBackground() {
         const bandRole = index % 4; // 0=bass, 1=mid, 2=high, 3=texture
 
         // Song-structure drift: use the song's actual position to shift patterns
-        // Different parts of the song (intro, verse, chorus) get different visual patterns
-        // This is what makes it feel synced to the song instead of repeating
         const structureDrift = Math.sin(songProgress * Math.PI * 4 + phaseOffset) * 0.2;
         const structureDrift2 = Math.cos(songProgress * Math.PI * 6 + phaseOffset * 0.7) * 0.15;
 
-        // Each band has its OWN distinct frequency and behavior
-        // No mixing — a bass blob ONLY shows bass, a high blob ONLY shows high
+        // Per-band staggered time offset so bands don't all peak simultaneously
+        // Bass hits first, then mid, then high, then texture — like a real drum hit cascade
+        const bandDelay = bandRole * 0.04; // 0, 40ms, 80ms, 120ms stagger
+        const bandT = Math.max(0, songT - bandDelay);
+
+        // Each band has its OWN distinct frequency, behavior, and PRIMARY VISUAL CHANNEL
+        // Bass = SIZE dominant, Mid = SIZE + OPACITY balanced, High = OPACITY flicker, Texture = OPACITY ripple only
         let bandSignal: number;
         let pulseScale: number;
         let pulseCap: number;
         let swayAmount: number;
         let swayFreq: number;
+        let baseOpacity: number;
         let opacityScale: number;
+        let blurBase: number;
+        let blurRange: number;
+        let saturationBoost: number;
 
         switch (bandRole) {
           case 0: {
-            // BASS — heavy kick, sharp attack + slow decay
-            // Use song time so the pattern follows the actual track position
+            // BASS — heavy kick, SIZE is the primary channel
+            // Sharp attack + slow decay, big heave
             const freq = 0.7 + structureDrift;
-            // Sharp attack: only the positive peak, raised to high power for snappy hit
-            const rawBass = Math.sin(songT * freq * Math.PI * 2 + phaseOffset);
+            const rawBass = Math.sin(bandT * freq * Math.PI * 2 + phaseOffset);
             bandSignal = rawBass > 0 ? Math.pow(rawBass, 0.6) : Math.pow(Math.abs(rawBass), 3) * 0.15;
-            pulseScale = 1.2;    // up to 2.2× size at peak — very visible
-            pulseCap = 2.2;
-            swayAmount = 16;     // big positional heave
+            pulseScale = 1.3;     // up to 2.3× — SIZE dominant
+            pulseCap = 2.3;
+            swayAmount = 18;      // big positional heave
             swayFreq = freq;
-            opacityScale = 0.6;  // bold opacity swings
+            baseOpacity = 0.28;   // lower base opacity
+            opacityScale = 0.35;  // opacity changes LESS — size is the star
+            blurBase = 24;
+            blurRange = 16;       // more blur reduction = sharper at peak
+            saturationBoost = 0.4;
             break;
           }
           case 1: {
-            // MID — smooth rhythmic pulse, like vocals/melody
+            // MID — smooth rhythmic pulse, SIZE + OPACITY balanced
             const freq = 1.5 + structureDrift * 0.7;
-            bandSignal = Math.pow(Math.abs(Math.sin(songT * freq * Math.PI * 2 + phaseOffset * 1.3)), 1.5);
-            pulseScale = 0.7;   // up to 1.7× size
-            pulseCap = 1.75;
-            swayAmount = 10;    // moderate sway
+            bandSignal = Math.pow(Math.abs(Math.sin(bandT * freq * Math.PI * 2 + phaseOffset * 1.3)), 1.5);
+            pulseScale = 0.75;    // moderate size change
+            pulseCap = 1.8;
+            swayAmount = 12;     // moderate sway
             swayFreq = freq * 0.8;
-            opacityScale = 0.45;
+            baseOpacity = 0.26;
+            opacityScale = 0.5;  // balanced opacity change
+            blurBase = 20;
+            blurRange = 12;
+            saturationBoost = 0.3;
             break;
           }
           case 2: {
-            // HIGH — sharp flicker, like hi-hats/snares
+            // HIGH — sharp flicker, OPACITY is the primary channel
             const freq = 3.2 + structureDrift2;
-            bandSignal = Math.pow(Math.abs(Math.cos(songT * freq * Math.PI * 2 + phaseOffset * 0.7)), 3);
-            pulseScale = 0.4;   // up to 1.4× — small size, sharp flicker
-            pulseCap = 1.45;
-            swayAmount = 5;     // small jitter
+            bandSignal = Math.pow(Math.abs(Math.cos(bandT * freq * Math.PI * 2 + phaseOffset * 0.7)), 3);
+            pulseScale = 0.25;   // minimal size change — OPACITY is the star
+            pulseCap = 1.3;
+            swayAmount = 6;      // small jitter
             swayFreq = freq * 0.6;
-            opacityScale = 0.55; // opacity flickers more than size
+            baseOpacity = 0.2;   // lower base — flickers FROM dim
+            opacityScale = 0.7;  // BIG opacity swings — the main visual
+            blurBase = 14;
+            blurRange = 8;
+            saturationBoost = 0.2;
             break;
           }
           default: {
-            // TEXTURE — fast fine ripple, like atmosphere/reverb
+            // TEXTURE — fast fine ripple, OPACITY ONLY — barely any size change
             const freq = 5.5 + structureDrift2 * 0.5;
-            bandSignal = Math.abs(Math.sin(songT * freq * Math.PI * 2 + phaseOffset * 2.1));
-            pulseScale = 0.2;   // barely changes size — 1.2× max
-            pulseCap = 1.25;
-            swayAmount = 3;     // minimal movement
+            bandSignal = Math.abs(Math.sin(bandT * freq * Math.PI * 2 + phaseOffset * 2.1));
+            pulseScale = 0.08;   // almost NO size change
+            pulseCap = 1.1;
+            swayAmount = 3;      // minimal movement
             swayFreq = freq * 0.4;
-            opacityScale = 0.65; // mainly opacity ripple, not size
+            baseOpacity = 0.18;  // starts dim
+            opacityScale = 0.8;  // OPACITY ripple is the ONLY visual channel
+            blurBase = 10;
+            blurRange = 6;
+            saturationBoost = 0.15;
             break;
           }
         }
@@ -368,7 +390,7 @@ export function AmbientBackground() {
         const pulse = Math.min(pulseCap, Math.max(1.0, rawPulse));
 
         // Reduce default orbital movement when music is active so visualizer is more visible
-        const orbitalDamp = 1 - baseLevel * 0.6; // 40% orbital at full energy
+        const orbitalDamp = 1 - baseLevel * 0.6;
 
         // Position movement
         const crossSweep = (Math.sin(blobTime * 0.32 + phaseOffset) + 1) / 2;
@@ -376,8 +398,8 @@ export function AmbientBackground() {
         let y = height * blob.anchorY;
 
         // Band-specific sway driven by song time
-        const swayX = effectiveLevel * Math.sin(songT * swayFreq * Math.PI * 2 + phaseOffset * 3.0) * swayAmount;
-        const swayY = effectiveLevel * Math.cos(songT * swayFreq * Math.PI * 1.6 + phaseOffset * 2.5) * swayAmount * 0.6;
+        const swayX = effectiveLevel * Math.sin(bandT * swayFreq * Math.PI * 2 + phaseOffset * 3.0) * swayAmount;
+        const swayY = effectiveLevel * Math.cos(bandT * swayFreq * Math.PI * 1.6 + phaseOffset * 2.5) * swayAmount * 0.6;
 
         if (blob.kind === "cross") {
           x += (crossSweep - 0.5) * width * 0.28 * orbitalDamp + Math.sin(blobTime * 0.2 + phaseOffset) * blob.orbitX * 0.18 * orbitalDamp;
@@ -397,16 +419,18 @@ export function AmbientBackground() {
 
         const radius = blob.size * pulse;
         const largeBlob = blob.size >= 96;
-        const blur = largeBlob ? 22 - effectiveLevel * 14 : 16 - effectiveLevel * 8;
+        const blur = blurBase - effectiveLevel * blurRange;
 
-        // Opacity driven by band — high/texture blobs flicker in opacity, bass/mid in size
+        // Per-band opacity: each band uses its own base + scale
+        // Bass: size changes big, opacity subtle
+        // High/Texture: size barely changes, opacity flickers dramatically
         const radial = context.createRadialGradient(x, y, 0, x, y, radius);
-        radial.addColorStop(0, hexToRgba(blob.color, (largeBlob ? 0.3 : 0.24) + effectiveLevel * opacityScale));
-        radial.addColorStop(0.55, hexToRgba(blob.color, (largeBlob ? 0.14 : 0.1) + effectiveLevel * opacityScale * 0.4));
+        radial.addColorStop(0, hexToRgba(blob.color, baseOpacity + effectiveLevel * opacityScale));
+        radial.addColorStop(0.55, hexToRgba(blob.color, baseOpacity * 0.5 + effectiveLevel * opacityScale * 0.4));
         radial.addColorStop(1, hexToRgba(blob.color, 0));
         context.save();
         context.globalCompositeOperation = "screen";
-        context.filter = `saturate(${1.2 + effectiveLevel * 0.28}) contrast(${1.05 + effectiveLevel * 0.08}) blur(${blur}px)`;
+        context.filter = `saturate(${1.15 + effectiveLevel * saturationBoost}) contrast(${1.04 + effectiveLevel * 0.06}) blur(${blur}px)`;
         context.fillStyle = radial;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
