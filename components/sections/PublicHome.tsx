@@ -19,23 +19,23 @@ import type { PortfolioData } from "@/lib/types";
 import { getSiteContentValue } from "@/lib/utils";
 
 // Lazy load below-fold sections for code splitting
-const About = dynamic(() => import("@/components/sections/About").then(mod => ({ default: mod.About })), {
+const About = dynamic(() => import("@/components/sections/About").then(mod => mod.About), {
   loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
 });
 
-const Experience = dynamic(() => import("@/components/sections/Experience").then(mod => ({ default: mod.Experience })), {
+const Experience = dynamic(() => import("@/components/sections/Experience").then(mod => mod.Experience), {
   loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
 });
 
-const Projects = dynamic(() => import("@/components/sections/Projects").then(mod => ({ default: mod.Projects })), {
+const Projects = dynamic(() => import("@/components/sections/Projects").then(mod => mod.Projects), {
   loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
 });
 
-const Reviews = dynamic(() => import("@/components/sections/Reviews").then(mod => ({ default: mod.Reviews })), {
+const Reviews = dynamic(() => import("@/components/sections/Reviews").then(mod => mod.Reviews), {
   loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
 });
 
-const Skills = dynamic(() => import("@/components/sections/Skills").then(mod => ({ default: mod.Skills })), {
+const Skills = dynamic(() => import("@/components/sections/Skills").then(mod => mod.Skills), {
   loading: () => <div className="h-96 animate-pulse bg-[rgba(10,10,14,0.3)]" />,
 });
 
