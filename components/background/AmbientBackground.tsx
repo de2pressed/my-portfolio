@@ -17,7 +17,7 @@ function hexToRgba(hex: string, alpha: number) {
 
 export function AmbientBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { energy, currentTime, duration, thumbnailColors } = useMusicFrequency();
+  const { energy, currentTime, duration, thumbnailColors, isPlaying } = useMusicFrequency();
   const { palette } = useThemeColors();
   const energyRef = useRef(energy);
   const paletteRef = useRef(palette);
@@ -25,6 +25,8 @@ export function AmbientBackground() {
   const songTimeRef = useRef(0);
   const durationRef = useRef(0);
   const songTimeUpdateRef = useRef(0);
+  const isPlayingRef = useRef(isPlaying);
+  const smoothedSignalsRef = useRef([0, 0, 0, 0, 0]); // EMA smoothing for 5 bands
 
   useEffect(() => {
     energyRef.current = energy;
@@ -48,6 +50,10 @@ export function AmbientBackground() {
   }, [duration]);
 
   useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -67,7 +73,7 @@ export function AmbientBackground() {
       anchorY: number;
       radius: number;
       color: string;
-      bandRole: number; // 0=bass, 1=mid, 2=high, 3=texture
+      bandRole: number; // 0=bass, 1=mid, 2=high, 3=texture, 4=vocal
       phaseOffset: number;
     };
 
@@ -130,6 +136,17 @@ export function AmbientBackground() {
         bandRole: 3,
         phaseOffset: 4.5,
       },
+      {
+        // VOCAL — center
+        x: width * 0.5,
+        y: height * 0.5,
+        anchorX: 0.5,
+        anchorY: 0.5,
+        radius: Math.min(width, height) * 0.35,
+        color: thumbnailColorsRef.current[0],
+        bandRole: 4,
+        phaseOffset: 6,
+      },
     ];
 
     const draw = (time: number) => {
@@ -155,6 +172,14 @@ export function AmbientBackground() {
       const songDur = durationRef.current || 180; // default 3 min
       const songProgress = songT / songDur; // 0..1 across the whole song
 
+      // Chorus detection: boost signals during typical chorus sections (0.25-0.4, 0.65-0.8)
+      const isChorus = (songProgress >= 0.25 && songProgress <= 0.4) || (songProgress >= 0.65 && songProgress <= 0.8);
+      const chorusBoost = isChorus ? 1.3 : 1.0;
+
+      // Idle animation: when paused, use gentle sine wave from wall-clock time
+      const isIdle = baseLevel === 0;
+      const idleSignal = isIdle ? 0.15 + 0.1 * Math.sin(t * 0.5) : 0;
+
       for (const gradient of gradients) {
         const bandRole = gradient.bandRole;
         const phaseOffset = gradient.phaseOffset;
@@ -168,9 +193,9 @@ export function AmbientBackground() {
         const bandT = Math.max(0, songT - bandDelay);
 
         // Band-specific signal
-        let bandSignal: number;
-        let radiusScale: number;
-        let opacityScale: number;
+        let bandSignal = 0;
+        let radiusScale = 1;
+        let opacityScale = 0.5;
 
         switch (bandRole) {
           case 0: {
@@ -197,20 +222,17 @@ export function AmbientBackground() {
             break;
           }
           case 2: {
-            // HIGH — sharp transient spikes with noise-like component (4-6 Hz)
-            // Uses high frequency with sharp power curve for snare/hi-hat transients
-            const highFreq = 5.0 + structureDrift2 * 1.5;
+            // HIGH — reduced frequency (2.5 Hz) to eliminate flicker, no noise
+            // Uses moderate frequency with power curve for snare/hi-hat transients
+            const highFreq = 2.5 + structureDrift2 * 0.5;
             const rawHigh = Math.sin(bandT * highFreq * Math.PI * 2 + phaseOffset);
-            // Add noise-like variation using secondary high-frequency component
-            const noise = Math.sin(bandT * highFreq * 3.7 * Math.PI * 2 + phaseOffset * 1.5) * 0.3;
-            const combined = rawHigh + noise;
-            // Sharp power curve for transient spikes
-            bandSignal = Math.pow(Math.abs(combined), 3) * 0.8;
+            // Moderate power curve for visible but smooth transients
+            bandSignal = Math.pow(Math.abs(rawHigh), 2) * 0.7;
             radiusScale = 0.6;
             opacityScale = 0.8;
             break;
           }
-          default: {
+          case 3: {
             // TEXTURE — continuous ambient variation from summed high frequencies (8-16 Hz)
             // Sum of 3 sines at different frequencies for complex, non-periodic appearance
             const t1 = Math.sin(bandT * 8.0 * Math.PI * 2 + phaseOffset);
@@ -224,9 +246,28 @@ export function AmbientBackground() {
             opacityScale = 0.35;
             break;
           }
+          case 4: {
+            // VOCAL — mid-high frequency (3.5 Hz) with asymmetric sustain for vocal-like behavior
+            const vocalFreq = 3.5 + structureDrift * 0.4;
+            const rawVocal = Math.sin(bandT * vocalFreq * Math.PI * 2 + phaseOffset);
+            // Asymmetric: positive values sustain (power 0.5), negative values decay (power 2)
+            bandSignal = rawVocal > 0 ? Math.pow(rawVocal, 0.5) : Math.pow(Math.abs(rawVocal), 2) * 0.2;
+            radiusScale = 1.0;
+            opacityScale = 0.7;
+            break;
+          }
         }
 
-        const effectiveLevel = baseLevel * (0.3 + bandSignal * 0.7);
+        // Apply EMA smoothing to reduce flicker
+        const alpha = 0.3; // Smoothing factor
+        const smoothed = alpha * bandSignal + (1 - alpha) * smoothedSignalsRef.current[bandRole];
+        smoothedSignalsRef.current[bandRole] = smoothed;
+        bandSignal = smoothed;
+
+        // Apply chorus boost for song structure sync
+        bandSignal *= chorusBoost;
+
+        const effectiveLevel = isIdle ? idleSignal : baseLevel * (0.3 + bandSignal * 0.7);
 
         // Update gradient position based on movement pattern
         let x = width * gradient.anchorX;
@@ -252,7 +293,7 @@ export function AmbientBackground() {
           const lissajousFreqY = 0.003;
           x += Math.sin(t * lissajousFreqX + phaseOffset) * lissajousA;
           y += Math.sin(t * lissajousFreqY + phaseOffset * 0.7) * lissajousB;
-        } else {
+        } else if (bandRole === 3) {
           // TEXTURE: spirals slowly around anchor
           const spiralRadius = 40 + effectiveLevel * 30;
           const spiralSpeed = 0.0008;
@@ -261,6 +302,14 @@ export function AmbientBackground() {
           const radius = spiralRadius + Math.sin(t * spiralExpansion) * 20;
           x += Math.cos(angle) * radius;
           y += Math.sin(angle) * radius;
+        } else {
+          // VOCAL: gentle breathing/undulating motion (expands and contracts from center)
+          const breatheRadius = 20 + effectiveLevel * 40;
+          const breatheFreq = 0.0012;
+          const breatheX = Math.sin(t * breatheFreq + phaseOffset) * breatheRadius;
+          const breatheY = Math.cos(t * breatheFreq * 0.8 + phaseOffset * 0.6) * breatheRadius;
+          x += breatheX;
+          y += breatheY;
         }
 
         // Update gradient config
