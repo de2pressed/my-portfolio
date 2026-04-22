@@ -663,14 +663,8 @@ export function YouTubeEngine() {
       playerRef.current = null;
     };
   }, [
-    loadMusicUrl,
-    registerControls,
-    setPlayerError,
-    setPlayerReady,
-    setVisualLevel,
     source.playlistId,
     source.rawUrl,
-    syncTrack,
   ]);
 
   useEffect(() => {
