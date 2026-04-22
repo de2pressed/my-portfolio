@@ -172,7 +172,7 @@ export function MusicPlayer() {
           ? "h-[11rem] w-[11rem] sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] sm:max-w-[30rem]",
         footerTakeover > 0.72 && "pointer-events-none",
-      )} intensity={0.8} maxRotation={6}
+      )} intensity={1} maxRotation={12} perspective={500}
     >
       <motion.aside
         className={cn(
