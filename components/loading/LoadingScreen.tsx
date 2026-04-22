@@ -51,7 +51,7 @@ export function LoadingScreen({ phase, musicReady, handoffToCookie }: LoadingScr
   return (
     <motion.div
       className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(8,8,14,0.92),rgba(14,14,20,0.7)_38%,rgba(18,18,26,0.98)_100%)] px-4"
-      initial={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
       animate={{
         opacity: 1,
         backdropFilter: phase === "handoff" ? "blur(24px)" : "blur(0px)",
