@@ -154,7 +154,6 @@ export function AmbientBackground() {
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const blobCount = mediaQuery.matches ? 7 : 11;
     const fallbackPalette = palette.length > 0 ? palette : ["#151019", "#b93ca7", "#7b5fd1", "#f0dcff"];
-    const canvasPalette = fallbackPalette.map(boostCanvasColor);
     const anchorPositions = mediaQuery.matches
       ? [
           { x: 0.06, y: 0.08 },
