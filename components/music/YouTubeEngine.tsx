@@ -124,6 +124,10 @@ export function YouTubeEngine() {
         return;
       }
 
+      if (hostRef.current.children.length > 0) {
+        hostRef.current.innerHTML = "";
+      }
+
       const playerVars: YT.PlayerVars = {
         autoplay: 0,
         controls: 0,
@@ -420,8 +424,15 @@ export function YouTubeEngine() {
     return () => {
       cancelled = true;
       if (playerRef.current) {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch (error) {
+          console.warn("Failed to destroy YouTube player.", error);
+        }
         playerRef.current = null;
+      }
+      if (hostRef.current) {
+        hostRef.current.innerHTML = "";
       }
     };
   }, [source.rawUrl, source.videoId, source.playlistId, registerControls, setPlayerReady, setPlayerError, syncTrack, volume]);
