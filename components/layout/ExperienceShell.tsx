@@ -4,13 +4,14 @@ import type { PropsWithChildren } from "react";
 
 import { AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AmbientBackground } from "@/components/background/AmbientBackground";
 import { CookieConsent } from "@/components/loading/CookieConsent";
 import { LoadingScreen } from "@/components/loading/LoadingScreen";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
+import { YouTubeEngine } from "@/components/music/YouTubeEngine";
 import { GlassCursor } from "@/components/ui/GlassCursor";
 import { VersionBadge } from "@/components/ui/VersionBadge";
 import { useCookie } from "@/context/CookieContext";
@@ -19,9 +20,10 @@ import { useMusic } from "@/context/MusicContext";
 export function ExperienceShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const { consent, hydrated, setConsent, storageAvailable } = useCookie();
-  const { engineStatus } = useMusic();
+  const { engineStatus, play } = useMusic();
   const [phase, setPhase] = useState<"loading" | "handoff" | "cookie" | "none">("loading");
   const [revealed, setRevealed] = useState(false);
+  const autoplayAttemptedRef = useRef(false);
 
   const musicReady = engineStatus === "ready" || engineStatus === "error";
   const isPublicRoute = pathname === "/";
@@ -73,10 +75,38 @@ export function ExperienceShell({ children }: PropsWithChildren) {
   }, [phase]);
 
   function handleDecision(decision: "accepted" | "rejected") {
+    play();
     setConsent(decision);
     setPhase("none");
     window.setTimeout(() => setRevealed(true), 160);
   }
+
+  useEffect(() => {
+    if (!hydrated || !isPublicRoute) {
+      autoplayAttemptedRef.current = false;
+      return;
+    }
+
+    if (consent === "unknown") {
+      autoplayAttemptedRef.current = false;
+      return;
+    }
+
+    if (engineStatus !== "ready" && engineStatus !== "error") {
+      return;
+    }
+
+    if (phase === "loading" || phase === "handoff") {
+      return;
+    }
+
+    if (autoplayAttemptedRef.current) {
+      return;
+    }
+
+    autoplayAttemptedRef.current = true;
+    play();
+  }, [consent, engineStatus, hydrated, isPublicRoute, play, phase]);
 
   const showLoading = phase === "loading" || phase === "handoff";
   const showCookie = phase === "cookie";
@@ -85,6 +115,7 @@ export function ExperienceShell({ children }: PropsWithChildren) {
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
+      <YouTubeEngine />
       <GlassCursor />
 
       <div className={hideContent ? "pointer-events-none opacity-0 transition-opacity duration-700" : "transition-opacity duration-[1200ms] opacity-100"}>
