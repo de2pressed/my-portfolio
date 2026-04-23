@@ -128,6 +128,7 @@ This release focuses on improving the ambient background music reactivity, moder
 - Moved the docked card's tilt onto a non-interactive shell and kept the footer control row on a `pointer-events-auto` content layer so the transformed glass surface no longer interferes with button clicks
 - Marked the footer section's ambient full-bleed overlay as non-interactive and lifted the content grid above it so the decorative background cannot block clicks on the docked controls
 - Moved the tilt target back onto the footer card wrapper itself and left only the sheen layer inert, so the hover motion stays intact without burying the controls under a non-interactive ancestor
+- Added `pointerdown` activation for the docked footer controls with a click fallback so the controls fire immediately even while the footer card is still animating through its 3D state
 
 ## Files Modified
 

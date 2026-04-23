@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { usePanelTilt } from "@/hooks/usePanelTilt";
@@ -28,6 +28,7 @@ export function Footer({ name, email, note }: FooterProps) {
   const ref = useRef<HTMLElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const footerControlPressRef = useRef(0);
   const {
     title,
     thumbnail,
@@ -109,6 +110,21 @@ export function Footer({ name, email, note }: FooterProps) {
     ) : (
       <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(var(--accent-rgb),0.36),rgba(var(--lavender-rgb),0.14))]" />
     );
+
+  const handleFooterControlPointerDown = (action: () => void) => (event: ReactPointerEvent<HTMLButtonElement>) => {
+    footerControlPressRef.current = performance.now();
+    event.preventDefault();
+    action();
+  };
+
+  const handleFooterControlClick = (action: () => void) => (event: ReactMouseEvent<HTMLButtonElement>) => {
+    if (performance.now() - footerControlPressRef.current < 350) {
+      event.preventDefault();
+      return;
+    }
+
+    action();
+  };
 
   return (
     <footer className="section-wrap pb-14 pt-4" ref={ref}>
@@ -194,19 +210,26 @@ export function Footer({ name, email, note }: FooterProps) {
                   <div className="flex items-center gap-2">
                     <button
                       className="glass-button-muted relative z-[2] h-10 w-10 rounded-full p-0"
-                      onClick={playPrevious}
+                      onClick={handleFooterControlClick(playPrevious)}
+                      onPointerDown={handleFooterControlPointerDown(playPrevious)}
                       type="button"
                     >
                       <SkipBack className="h-4 w-4" />
                     </button>
                     <button
                       className="glass-button relative z-[2] h-10 w-10 rounded-full p-0"
-                      onClick={togglePlayback}
+                      onClick={handleFooterControlClick(togglePlayback)}
+                      onPointerDown={handleFooterControlPointerDown(togglePlayback)}
                       type="button"
                     >
                       {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                     </button>
-                    <button className="glass-button-muted relative z-[2] h-10 w-10 rounded-full p-0" onClick={playNext} type="button">
+                    <button
+                      className="glass-button-muted relative z-[2] h-10 w-10 rounded-full p-0"
+                      onClick={handleFooterControlClick(playNext)}
+                      onPointerDown={handleFooterControlPointerDown(playNext)}
+                      type="button"
+                    >
                       <SkipForward className="h-4 w-4" />
                     </button>
                   </div>
