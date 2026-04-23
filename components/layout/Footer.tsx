@@ -151,7 +151,7 @@ export function Footer({ name, email, note }: FooterProps) {
           >
             <div
               ref={panelRef}
-              className="pointer-events-none relative isolate overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.58)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-[16px]"
+              className="relative isolate overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.58)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-[16px]"
             >
               <div
                 aria-hidden="true"
