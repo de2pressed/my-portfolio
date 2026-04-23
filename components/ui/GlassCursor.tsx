@@ -16,8 +16,8 @@ function clamp(value: number, min: number, max: number) {
 export function GlassCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const trailRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const pointer = useRef({ x: -100, y: -100, tx: -100, ty: -100, vx: 0, vy: 0 });
-  const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100, vx: 0, vy: 0 })));
+  const pointer = useRef({ x: -100, y: -100, tx: -100, ty: -100 });
+  const trailStates = useRef(Array.from({ length: TRAIL_COUNT }, () => ({ tx: -100, ty: -100 })));
   const interactive = useRef(false);
   const isPressed = useRef(false);
   const hasMoved = useRef(false);
@@ -62,8 +62,6 @@ export function GlassCursor() {
     };
 
     const updatePosition = (event: PointerEvent) => {
-      const prevX = pointer.current.x;
-      const prevY = pointer.current.y;
       pointer.current.x = event.clientX;
       pointer.current.y = event.clientY;
 
@@ -71,12 +69,6 @@ export function GlassCursor() {
         hasMoved.current = true;
         syncCursorStyle();
       }
-
-      // Calculate velocity for spring physics
-      const dx = pointer.current.x - prevX;
-      const dy = pointer.current.y - prevY;
-      pointer.current.vx = dx;
-      pointer.current.vy = dy;
     };
 
     const handlePointerDown = () => {
@@ -121,26 +113,16 @@ export function GlassCursor() {
       
       lastFrameTime = timestamp - (elapsed % FRAME_INTERVAL);
       
-      // Spring physics for main cursor
-      const stiffness = 0.24;
-      const damping = 0.82;
-      const ax = (state.x - state.tx) * stiffness;
-      const ay = (state.y - state.ty) * stiffness;
-      state.vx = (state.vx + ax) * damping;
-      state.vy = (state.vy + ay) * damping;
-      
-      // Snap to target when velocity and distance are negligible (eliminates wiggle)
       const distToTarget = Math.hypot(state.x - state.tx, state.y - state.ty);
-      const velocityMagnitude = Math.hypot(state.vx, state.vy);
-      if (distToTarget < 0.1 && velocityMagnitude < 0.1) {
-        state.vx = 0;
-        state.vy = 0;
+      const mainFollow = distToTarget > 26 ? 0.42 : distToTarget > 6 ? 0.3 : 0.22;
+
+      if (distToTarget < 0.18) {
         state.tx = state.x;
         state.ty = state.y;
+      } else {
+        state.tx += (state.x - state.tx) * mainFollow;
+        state.ty += (state.y - state.ty) * mainFollow;
       }
-      
-      state.tx += state.vx;
-      state.ty += state.vy;
 
       // Apply press animation
       const pressScale = isPressed.current ? 0.85 : 1;
@@ -149,30 +131,19 @@ export function GlassCursor() {
         cursorRef.current.style.transform = `translate3d(${state.tx - TIP_OFFSET_X}px, ${state.ty - TIP_OFFSET_Y}px, 0) scale(${pressScale})`;
       }
 
-      // Spring physics for trail with momentum
       for (let index = 0; index < TRAIL_COUNT; index += 1) {
         const trail = trailStates.current[index];
         const target = index === 0 ? state : trailStates.current[index - 1];
         const speed = TRAIL_SPEEDS[index] ?? 0.05;
-        
-        // Spring physics for each trail segment
-        const tax = (target.tx - trail.tx) * speed;
-        const tay = (target.ty - trail.ty) * speed;
-        trail.vx = (trail.vx + tax) * 0.9;
-        trail.vy = (trail.vy + tay) * 0.9;
-        
-        // Snap to target when velocity and distance are negligible (eliminates wiggle)
+
         const trailDist = Math.hypot(target.tx - trail.tx, target.ty - trail.ty);
-        const trailVel = Math.hypot(trail.vx, trail.vy);
-        if (trailDist < 0.1 && trailVel < 0.1) {
-          trail.vx = 0;
-          trail.vy = 0;
+        if (trailDist < 0.24) {
           trail.tx = target.tx;
           trail.ty = target.ty;
+        } else {
+          trail.tx += (target.tx - trail.tx) * speed;
+          trail.ty += (target.ty - trail.ty) * speed;
         }
-        
-        trail.tx += trail.vx;
-        trail.ty += trail.vy;
 
         const node = trailRefs.current[index];
         if (!node) {

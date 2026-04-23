@@ -81,6 +81,7 @@ Important behavior:
 - the footer and compact player now crop the thumbnail more tightly and avoid a brown wash overlay so the album art reads cleaner
 - the footer takeover is now derived from the footer panel entering the viewport instead of whole-page scroll percentage
 - the footer renders its own integrated music-zone card, and the floating player only hands off pointer control once that footer card is ready
+- the floating player and footer music card now share a softer merge curve with reduced rotation, later fade, and pane-like depth so the handoff feels cleaner
 - the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
 - the minimized disc now carries a waveform ring that responds to the shared music energy level
 - if a thumbnail is not available in higher quality, the resolver falls back through `maxresdefault`, `sddefault`, and `hqdefault`
@@ -124,6 +125,7 @@ The header now uses intersection observers to keep the active section highlighte
 The cursor was recently reduced in size so it feels lighter and closer to the reference treatment.
 - the header now includes a scroll progress ring that fills from the top of the page toward the footer
 - the cursor now emits a small accent-colored trail on fine pointers, but suppresses the trail while hovering interactive targets
+- the cursor movement now uses damped interpolation without spring overshoot so it settles cleanly instead of wiggling at rest
 - the hero section applies a lightweight parallax offset so the text column and feature card separate slightly as the page scrolls
 - the review cards carry a subtle palette-driven glow pulse that rises with the music energy
 - the floating music player and footer card now use a single takeover choreography with a shared scroll ramp instead of independent fades

@@ -31,6 +31,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function smoothstep(value: number) {
+  const clamped = clamp(value, 0, 1);
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
 function formatPlaybackTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) {
     return "0:00";
@@ -146,11 +151,15 @@ export function MusicPlayer() {
   }, [isMinimized]);
 
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
-  const takeoverFade = clamp((footerTakeover - 0.62) / 0.26, 0, 1);
-  const takeoverDepth = clamp(footerTakeover, 0, 1) * clamp(footerTakeover, 0, 1);
-  const takeoverBlur = takeoverFade * 10;
+  const mergeProgress = smoothstep((footerTakeover - 0.36) / 0.48);
+  const takeoverFade = smoothstep((footerTakeover - 0.68) / 0.18);
+  const takeoverDepth = mergeProgress * mergeProgress;
+  const takeoverBlur = 2 + takeoverFade * 8;
   const takeoverFilter = `blur(${takeoverBlur}px)`;
   const playerHandedOff = layoutMode === "footer" && footerTakeover > 0.82;
+  const paneLift = 1 - mergeProgress * 0.14;
+  const paneSheenOpacity = 0.18 + (1 - mergeProgress) * 0.1;
+  const paneGlowOpacity = 0.16 + (1 - mergeProgress) * 0.08;
 
   const renderArtwork = () =>
     thumbnail ? (
@@ -169,7 +178,7 @@ export function MusicPlayer() {
   return (
     <motion.aside
       className={cn(
-        "fixed bottom-4 right-4 z-40 overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
+        "fixed bottom-4 right-4 z-40 isolate overflow-hidden bg-[rgba(10,10,14,0.42)] shadow-[0_18px_60px_rgba(5,5,8,0.3)] backdrop-blur-2xl md:bottom-6 md:right-6",
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4 z-50",
@@ -178,14 +187,47 @@ export function MusicPlayer() {
       layout
       animate={{
         opacity: 1 - takeoverFade,
-        x: takeoverFade * (isMinimized ? -18 : -42),
-        y: takeoverDepth * (isMinimized ? 260 : 340),
-        scale: 1 + takeoverDepth * 0.14,
-        rotate: takeoverFade * -2,
+        x: mergeProgress * (isMinimized ? -14 : -36),
+        y: takeoverDepth * (isMinimized ? 220 : 312),
+        scale: 1 - mergeProgress * (isMinimized ? 0.06 : 0.08),
+        rotate: takeoverFade * -1.2,
+        rotateX: 7 - mergeProgress * 7,
+        rotateY: 4 - mergeProgress * 4,
       }}
-      style={{ filter: takeoverFilter }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        filter: `saturate(${(1.04 - mergeProgress * 0.08).toFixed(3)}) ${takeoverFilter}`,
+        transformStyle: "preserve-3d",
+      }}
+      transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
     >
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-[inherit]",
+          isMinimized ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-22px_36px_rgba(0,0,0,0.28)]" : "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-28px_48px_rgba(0,0,0,0.32)]",
+        )}
+        style={{
+          background: `linear-gradient(145deg, rgba(255,255,255,${paneSheenOpacity.toFixed(3)}) 0%, rgba(255,255,255,0.045) 16%, rgba(255,255,255,0.012) 38%, rgba(6,6,9,0.18) 100%)`,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-[1px] rounded-[inherit]"
+        style={{
+          transform: `translateZ(${(14 * paneLift).toFixed(2)}px)`,
+          background: `radial-gradient(circle at top left, rgba(255,255,255,${paneSheenOpacity.toFixed(3)}), transparent 34%), radial-gradient(circle at 80% 18%, rgba(var(--accent-rgb),${paneGlowOpacity.toFixed(3)}), transparent 38%), linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01) 24%, rgba(8,8,12,0.08) 100%)`,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-8 -top-10 h-24"
+        style={{
+          opacity: 0.28 - mergeProgress * 0.08,
+          background: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 42%, transparent 100%)",
+          filter: "blur(18px)",
+        }}
+      />
+
       <button
         aria-label={isMinimized ? "Expand player" : "Minimize player"}
         className="glass-button-muted absolute right-3 top-3 z-10 h-9 w-9 rounded-full p-0"
@@ -199,7 +241,7 @@ export function MusicPlayer() {
         {isMinimized ? (
           <motion.div
             key="minimized"
-            className="flex h-full flex-col items-center justify-start gap-2 pt-7"
+            className="relative z-[1] flex h-full flex-col items-center justify-start gap-2 pt-7"
             initial={{ opacity: 0, scale: 0.94, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 8 }}
@@ -256,7 +298,7 @@ export function MusicPlayer() {
         ) : (
           <motion.div
             key="expanded"
-            className="pr-10"
+            className="relative z-[1] pr-10"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}

@@ -18,6 +18,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function smoothstep(value: number) {
+  const clamped = clamp(value, 0, 1);
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
 export function Footer({ name, email, note }: FooterProps) {
   const ref = useRef<HTMLElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -75,8 +80,11 @@ export function Footer({ name, email, note }: FooterProps) {
     };
   }, [setFooterTakeover]);
 
-  const footerCardReveal = clamp((footerTakeover - 0.28) / 0.52, 0, 1);
+  const footerCardReveal = smoothstep((footerTakeover - 0.34) / 0.46);
   const footerCardReady = footerCardReveal > 0.7 || layoutMode === "footer";
+  const footerPaneLift = 0.88 + footerCardReveal * 0.12;
+  const footerGlowOpacity = 0.14 + footerCardReveal * 0.08;
+  const footerSheenOpacity = 0.08 + footerCardReveal * 0.1;
 
   const renderArtwork = () =>
     thumbnail ? (
@@ -114,21 +122,48 @@ export function Footer({ name, email, note }: FooterProps) {
 
           <motion.aside
             className={cn(
-              "relative overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.42)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-2xl",
+              "relative isolate overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.42)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-2xl",
               footerCardReady ? "pointer-events-auto" : "pointer-events-none",
             )}
             initial={false}
             animate={{
               opacity: footerCardReveal,
-              y: 44 * (1 - footerCardReveal),
-              scale: 0.92 + footerCardReveal * 0.08,
-              rotate: 2 - footerCardReveal * 2,
+              x: 24 * (1 - footerCardReveal),
+              y: 36 * (1 - footerCardReveal),
+              scale: 0.9 + footerCardReveal * 0.1,
+              rotate: 1.6 - footerCardReveal * 1.6,
+              rotateX: 8 - footerCardReveal * 8,
+              rotateY: -5 + footerCardReveal * 5,
             }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformStyle: "preserve-3d" }}
+            transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(var(--accent-rgb),0.14),transparent_38%)]" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),inset_0_-26px_44px_rgba(0,0,0,0.3)]"
+              style={{
+                background: `linear-gradient(145deg, rgba(255,255,255,${footerSheenOpacity.toFixed(3)}) 0%, rgba(255,255,255,0.04) 18%, rgba(255,255,255,0.012) 40%, rgba(6,6,9,0.18) 100%)`,
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-[1px] rounded-[inherit]"
+              style={{
+                transform: `translateZ(${(12 * footerPaneLift).toFixed(2)}px)`,
+                background: `radial-gradient(circle at top left, rgba(255,255,255,${footerSheenOpacity.toFixed(3)}), transparent 34%), radial-gradient(circle at 76% 20%, rgba(var(--accent-rgb),${footerGlowOpacity.toFixed(3)}), transparent 36%), linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.008) 24%, rgba(8,8,12,0.08) 100%)`,
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-x-10 -top-10 h-24"
+              style={{
+                opacity: 0.18 + footerCardReveal * 0.12,
+                background: "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035) 42%, transparent 100%)",
+                filter: "blur(18px)",
+              }}
+            />
 
-            <div className="relative grid gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
+            <div className="relative z-[1] grid gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
               <div className="relative h-40 overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)] sm:h-44">
                 {renderArtwork()}
               </div>

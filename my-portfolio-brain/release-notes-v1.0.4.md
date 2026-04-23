@@ -100,6 +100,15 @@ This release focuses on improving the ambient background music reactivity, moder
 - Added `onInput` handling for progress and volume sliders so drag interactions feel immediate
 - Relaxed the hidden-player mounted check so valid player controls are not blocked by an overly strict iframe `src` test
 
+### Motion And Glass Polish
+
+**Problem:** The footer handoff still felt slightly mechanical, the custom cursor could wiggle as it settled, and the music surfaces lacked the thicker 3D pane quality from the visual reference.
+
+**Solution:**
+- Smoothed the player/footer merge with softer easing, reduced rotation, and a later fade so the floating card feels like it is docking instead of dropping away
+- Reworked the cursor motion to use clean damped interpolation instead of spring momentum, which removes the end-of-motion wobble while keeping the trailing glow
+- Added layered pane highlights, interior edge lighting, and top-sheen bloom to both the floating player and the footer music-zone card so both states read as thicker glass surfaces
+
 ## Files Modified
 
 - `lib/colorExtractor.ts`
@@ -138,3 +147,5 @@ This release focuses on improving the ambient background music reactivity, moder
 - [ ] Verify music player cleans up properly on unmount
 - [ ] Verify the floating player remains interactive until the footer music zone is visibly ready
 - [ ] Verify the footer music zone appears and the floating player hands off into it as the footer enters view
+- [ ] Verify the cursor stops cleanly without visible wobble after pointer movement ends
+- [ ] Verify both floating and footer music cards keep their new 3D glass pane treatment without breaking existing controls or takeover timing
