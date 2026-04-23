@@ -82,6 +82,8 @@ Important behavior:
 - the footer takeover is now derived from the footer panel entering the viewport instead of whole-page scroll percentage
 - the footer renders its own integrated music-zone card, and the floating player only hands off pointer control once that footer card is ready
 - the floating player and footer music card now share a softer merge curve with reduced rotation, later fade, and pane-like depth so the handoff feels cleaner
+- the floating player and footer card now use a shared pointer-driven tilt helper on fine pointers, so the visible panel rotates in 3D under the cursor instead of relying on static faux-depth alone
+- the glass treatment now avoids always-on content blur and uses denser panel fill with lighter sheen overlays so text stays readable while the surface still feels glazed
 - the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
 - the minimized disc now carries a waveform ring that responds to the shared music energy level
 - if a thumbnail is not available in higher quality, the resolver falls back through `maxresdefault`, `sddefault`, and `hqdefault`

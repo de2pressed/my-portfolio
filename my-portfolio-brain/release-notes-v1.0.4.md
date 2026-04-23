@@ -109,6 +109,15 @@ This release focuses on improving the ambient background music reactivity, moder
 - Reworked the cursor motion to use clean damped interpolation instead of spring momentum, which removes the end-of-motion wobble while keeping the trailing glow
 - Added layered pane highlights, interior edge lighting, and top-sheen bloom to both the floating player and the footer music-zone card so both states read as thicker glass surfaces
 
+### Glass Readability And True Hover Tilt
+
+**Problem:** The floating player was still slightly soft because its merge wrapper kept a baseline blur filter applied even while idle, and the prior "3D" look was mostly static styling instead of an actual hover-driven panel rotation.
+
+**Solution:**
+- Removed the always-on wrapper blur from the floating player so titles and control labels render crisp again
+- Tightened the glass surface with denser fill and lower overlay haze so the panel reads clearly against the animated background
+- Added a shared pointer-driven tilt hook for the floating player and footer music card, so both visible panels rotate in 3D as the cursor moves across them without interfering with the existing footer takeover or playback controls
+
 ## Files Modified
 
 - `lib/colorExtractor.ts`
@@ -117,6 +126,7 @@ This release focuses on improving the ambient background music reactivity, moder
 - `components/music/MusicPlayer.tsx`
 - `context/MusicContext.tsx`
 - `hooks/useMusicFrequency.ts`
+- `hooks/usePanelTilt.ts`
 - `components/layout/Header.tsx`
 - `components/layout/Footer.tsx`
 - `components/ui/VersionBadge.tsx`
