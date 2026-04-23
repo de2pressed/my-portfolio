@@ -83,6 +83,7 @@ Important behavior:
 - the footer renders its own integrated music-zone card, and the floating player only hands off pointer control once that footer card is ready
 - the floating player now uses the same reveal threshold as the footer card before dropping pointer control, and the footer card raises above the floating layer during takeover so footer controls do not get intermittently blocked
 - the docked footer card now keeps its tilt on a non-interactive shell while the control row lives in a `pointer-events-auto` content layer, so the 3D effect does not sit in the click path
+- the footer section's full-bleed ambient overlay is now `pointer-events-none` and the content grid sits above it, so the docked music card is not blocked by its own decorative background layer
 - the floating player and footer music card now share a softer merge curve with reduced rotation, later fade, and pane-like depth so the handoff feels cleaner
 - the floating player and footer card now use a shared pointer-driven tilt helper on fine pointers, so the visible panel rotates in 3D under the cursor instead of relying on static faux-depth alone
 - the glass treatment now avoids always-on content blur and uses denser panel fill with lighter sheen overlays so text stays readable while the surface still feels glazed

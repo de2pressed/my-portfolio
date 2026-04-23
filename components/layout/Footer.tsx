@@ -113,9 +113,9 @@ export function Footer({ name, email, note }: FooterProps) {
   return (
     <footer className="section-wrap pb-14 pt-4" ref={ref}>
       <section className="glass-panel relative overflow-hidden rounded-[36px] px-6 py-8 md:px-10 md:py-10" id="footer">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--teal-rgb),0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(var(--accent-rgb),0.18),transparent_28%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--teal-rgb),0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(var(--accent-rgb),0.18),transparent_28%)]" />
 
-        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.96fr)] lg:items-center">
+        <div className="relative z-[1] grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.96fr)] lg:items-center">
           <div className="space-y-5">
             <h2 className="max-w-[12ch] text-3xl font-semibold leading-[0.94] text-ink md:text-5xl">
               Scroll low enough and the soundtrack takes the room.
