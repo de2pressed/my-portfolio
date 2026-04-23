@@ -11,22 +11,19 @@ type ExtendedPlayer = YT.Player & {
   getVolume: () => number;
 };
 
-function sendPlayerCommand(player: ExtendedPlayer, func: string, args: unknown[] = []) {
+async function fetchVideoMetadata(videoId: string) {
   try {
-    const iframe = typeof player.getIframe === "function" ? player.getIframe() : null;
-    const targetWindow = iframe?.contentWindow;
-
-    if (!targetWindow) {
-      console.warn(`YouTube ${func} command failed: no iframe contentWindow`);
-      return false;
+    const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (!response.ok) {
+      return null;
     }
-
-    console.warn(`Sending YouTube command: ${func}`, args);
-    targetWindow.postMessage(JSON.stringify({ event: "command", func, args }), "*");
-    return true;
-  } catch (error) {
-    console.warn(`YouTube ${func} command failed.`, error);
-    return false;
+    const data = await response.json();
+    return {
+      title: data.title,
+      thumbnail: data.thumbnail_url,
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -161,54 +158,38 @@ export function YouTubeEngine() {
               disableShuffle(activePlayer);
 
               try {
-                sendPlayerCommand(activePlayer, "setVolume", [0]);
-                sendPlayerCommand(activePlayer, "mute");
+                activePlayer.setVolume(0);
+                activePlayer.mute();
               } catch (error) {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
 
               autoplayUnmutePendingRef.current = true;
 
-              try {
-                sendPlayerCommand(activePlayer, "setVolume", [0]);
-                sendPlayerCommand(activePlayer, "mute");
-              } catch (error) {
-                console.warn("YouTube mute bootstrap failed.", error);
-              }
-
-              console.warn("Registering YouTube player controls");
               registerControls({
                 play: () => {
-                  console.warn("Play command called");
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
-
-                  sendPlayerCommand(activePlayer, "playVideo");
+                  activePlayer.playVideo();
                 },
                 pause: () => {
-                  console.warn("Pause command called");
-                  sendPlayerCommand(activePlayer, "pauseVideo");
+                  activePlayer.pauseVideo();
                 },
                 toggle: () => {
-                  console.warn("Toggle command called");
                   const state = player.getPlayerState();
-                  console.warn("Current player state:", state);
                   if (state === window.YT?.PlayerState.PLAYING) {
                     if (shouldRestoreAudio()) {
                       restoreAudio(activePlayer);
                       return;
                     }
-
-                    sendPlayerCommand(activePlayer, "pauseVideo");
+                    activePlayer.pauseVideo();
                     return;
                   }
-
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
-
-                  sendPlayerCommand(activePlayer, "playVideo");
+                  activePlayer.playVideo();
                 },
                 next: () => {
                   if (source.playlistId) {
@@ -221,10 +202,10 @@ export function YouTubeEngine() {
                   }
                 },
                 setVolume: (value: number) => {
-                  sendPlayerCommand(activePlayer, "setVolume", [value]);
+                  activePlayer.setVolume(value);
                 },
                 seekTo: (seconds: number) => {
-                  sendPlayerCommand(activePlayer, "seekTo", [seconds, true]);
+                  activePlayer.seekTo(seconds, true);
                 },
                 load: (url: string) => {
                   const parsed = parseYouTubeSource(url);
@@ -235,9 +216,9 @@ export function YouTubeEngine() {
                 },
                 mute: (mute: boolean) => {
                   if (mute) {
-                    sendPlayerCommand(activePlayer, "mute");
+                    activePlayer.mute();
                   } else {
-                    sendPlayerCommand(activePlayer, "unMute");
+                    activePlayer.unMute();
                   }
                 },
               });
@@ -248,48 +229,48 @@ export function YouTubeEngine() {
                 isPlaying: false,
               });
 
+              fetchVideoMetadata(videoId).then((metadata) => {
+                if (metadata) {
+                  syncTrack({
+                    title: metadata.title,
+                    videoId,
+                  });
+                }
+              });
+
               player.playVideo();
             } else {
               try {
-                sendPlayerCommand(activePlayer, "setVolume", [0]);
-                sendPlayerCommand(activePlayer, "mute");
+                activePlayer.setVolume(0);
+                activePlayer.mute();
               } catch (error) {
                 console.warn("YouTube mute bootstrap failed.", error);
               }
 
-              console.warn("Registering YouTube player controls");
               registerControls({
                 play: () => {
-                  console.warn("Play command called");
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
-
-                  sendPlayerCommand(activePlayer, "playVideo");
+                  activePlayer.playVideo();
                 },
                 pause: () => {
-                  console.warn("Pause command called");
-                  sendPlayerCommand(activePlayer, "pauseVideo");
+                  activePlayer.pauseVideo();
                 },
                 toggle: () => {
-                  console.warn("Toggle command called");
                   const state = player.getPlayerState();
-                  console.warn("Current player state:", state);
                   if (state === window.YT?.PlayerState.PLAYING) {
                     if (shouldRestoreAudio()) {
                       restoreAudio(activePlayer);
                       return;
                     }
-
-                    sendPlayerCommand(activePlayer, "pauseVideo");
+                    activePlayer.pauseVideo();
                     return;
                   }
-
                   if (shouldRestoreAudio()) {
                     restoreAudio(activePlayer);
                   }
-
-                  sendPlayerCommand(activePlayer, "playVideo");
+                  activePlayer.playVideo();
                 },
                 next: () => {
                   const nextVideoId = extractYouTubeVideoId(source.rawUrl);
@@ -304,10 +285,10 @@ export function YouTubeEngine() {
                   }
                 },
                 setVolume: (value: number) => {
-                  sendPlayerCommand(activePlayer, "setVolume", [value]);
+                  activePlayer.setVolume(value);
                 },
                 seekTo: (seconds: number) => {
-                  sendPlayerCommand(activePlayer, "seekTo", [seconds, true]);
+                  activePlayer.seekTo(seconds, true);
                 },
                 load: (url: string) => {
                   const parsed = parseYouTubeSource(url);
@@ -318,9 +299,9 @@ export function YouTubeEngine() {
                 },
                 mute: (mute: boolean) => {
                   if (mute) {
-                    sendPlayerCommand(activePlayer, "mute");
+                    activePlayer.mute();
                   } else {
-                    sendPlayerCommand(activePlayer, "unMute");
+                    activePlayer.unMute();
                   }
                 },
               });
@@ -329,6 +310,15 @@ export function YouTubeEngine() {
                 title: "Loading video...",
                 videoId,
                 isPlaying: false,
+              });
+
+              fetchVideoMetadata(videoId).then((metadata) => {
+                if (metadata) {
+                  syncTrack({
+                    title: metadata.title,
+                    videoId,
+                  });
+                }
               });
             }
 
@@ -395,7 +385,7 @@ export function YouTubeEngine() {
 
     function disableShuffle(player: ExtendedPlayer) {
       try {
-        sendPlayerCommand(player, "setShuffle", [false]);
+        player.setShuffle(false);
       } catch (error) {
         console.warn("Failed to disable shuffle.", error);
       }
@@ -403,8 +393,8 @@ export function YouTubeEngine() {
 
     function restoreAudio(player: ExtendedPlayer) {
       try {
-        sendPlayerCommand(player, "setVolume", [volumeRef.current]);
-        sendPlayerCommand(player, "unMute");
+        player.setVolume(volumeRef.current);
+        player.unMute();
       } catch (error) {
         console.warn("Failed to restore audio.", error);
       }
