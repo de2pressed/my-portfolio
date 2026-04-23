@@ -98,7 +98,7 @@ export function Header({ name }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed inset-x-4 top-4 z-30 rounded-full bg-[rgba(10,10,14,0.56)] px-4 py-3 shadow-[0_8px_32px_rgba(4,5,8,0.32),0_0_0_1px_rgba(var(--glass-border-rgb),0.12)] backdrop-blur-xl sm:inset-x-6 lg:inset-x-8">
+      <header className="fixed inset-x-4 top-4 z-30 rounded-full bg-[rgba(10,10,14,0.46)] px-4 py-3 shadow-glow backdrop-blur-2xl sm:inset-x-6 lg:inset-x-8">
         <div className="flex items-center justify-between gap-4">
           <button
             className={cn("text-left transition-opacity duration-300", activeSection === "hero" ? "opacity-100" : "opacity-80")}
@@ -126,7 +126,7 @@ export function Header({ name }: HeaderProps) {
                     strokeLinecap="round"
                     strokeWidth="2.2"
                     transform="rotate(-90 14 14)"
-                    style={{ filter: "drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.6)) drop-shadow(0 0 12px rgba(var(--accent-rgb), 0.3))" }}
+                    style={{ filter: "drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.4))" }}
                   />
                 </svg>
               </span>
@@ -143,38 +143,29 @@ export function Header({ name }: HeaderProps) {
                 className={cn(
                   "px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all duration-300 relative overflow-hidden",
                   activeSection === item.id
-                    ? "glass-button text-ink shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_24px_rgba(var(--accent-rgb),0.24)]"
+                    ? "glass-button text-ink shadow-glass"
                     : "glass-button-muted text-ink/72",
                 )}
                 aria-current={activeSection === item.id ? "page" : undefined}
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 type="button"
-                whileHover={{ 
-                  scale: 1.08,
-                  boxShadow: activeSection === item.id 
-                    ? "0 0 0 1px rgba(var(--accent-rgb),0.24),0 0 32px rgba(var(--accent-rgb),0.32)"
-                    : "0 0 0 1px rgba(var(--accent-rgb),0.12),0 0 20px rgba(var(--accent-rgb),0.16)"
-                }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {item.label}
               </motion.button>
             ))}
           </nav>
 
-          <motion.button
+          <button
             aria-label={open ? "Close menu" : "Open menu"}
             className="glass-button-muted h-11 w-11 rounded-full p-0 md:hidden"
             onClick={() => setOpen((current) => !current)}
             type="button"
-            whileHover={{ scale: 1.1, boxShadow: "0 0 0 1px rgba(var(--accent-rgb),0.16),0 0 20px rgba(var(--accent-rgb),0.2)" }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </motion.button>
+          </button>
         </div>
       </header>
 
@@ -199,7 +190,7 @@ export function Header({ name }: HeaderProps) {
                     className={cn(
                       "flex w-full items-center justify-between rounded-[22px] px-5 py-4 text-left text-sm uppercase tracking-[0.2em] transition-all duration-300",
                       activeSection === item.id
-                        ? "glass-button text-ink shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_24px_rgba(var(--accent-rgb),0.24)]"
+                        ? "glass-button text-ink shadow-glass"
                         : "glass-button-muted text-ink/76",
                     )}
                     aria-current={activeSection === item.id ? "page" : undefined}
@@ -209,14 +200,8 @@ export function Header({ name }: HeaderProps) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.2 }}
-                    whileHover={{ 
-                      scale: 1.04, 
-                      x: 6,
-                      boxShadow: activeSection === item.id
-                        ? "0 0 0 1px rgba(var(--accent-rgb),0.24),0 0 32px rgba(var(--accent-rgb),0.32)"
-                        : "0 0 0 1px rgba(var(--accent-rgb),0.12),0 0 20px rgba(var(--accent-rgb),0.16)"
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {item.label}
                   </motion.button>
