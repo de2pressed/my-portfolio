@@ -435,6 +435,11 @@ export function YouTubeEngine() {
       }
 
       const player = playerRef.current as ExtendedPlayer;
+      
+      if (typeof player.getCurrentTime !== "function" || typeof player.getDuration !== "function") {
+        return;
+      }
+
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration();
 
@@ -458,6 +463,10 @@ export function YouTubeEngine() {
 
   function calculateVisualLevel(player: ExtendedPlayer): number {
     try {
+      if (typeof player.getCurrentTime !== "function" || typeof player.getDuration !== "function") {
+        return 0;
+      }
+
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration();
       const progress = duration > 0 ? currentTime / duration : 0;
