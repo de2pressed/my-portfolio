@@ -21,11 +21,15 @@ If you are continuing work in this repo, read in this order:
 ## Common Failure Modes
 
 - Rebuilding the YouTube player on unrelated state updates.
+- Reintroducing custom postMessage control paths instead of the official YouTube Player API methods.
+- Calling player methods without first checking that the iframe is still mounted in the hidden host.
+- Forgetting to forward `setVolume`, `seekTo`, or `loadMusicUrl` through the registered music controls.
 - Breaking the fallback store by updating one layer but not the seeds or types.
 - Forgetting to keep hidden reviews out of public reads.
 - Forgetting that `/admin` and `/login` should both end up at `/admin/login`.
 - Changing metadata without keeping `public/favicon.svg` and `public/og.png` in sync.
 - Skipping the release note when a changelog item changes runtime behavior.
+- Forgetting to destroy the active player before clearing or reusing the hidden host element.
 
 ## Current Constraints And Conventions
 
@@ -59,6 +63,11 @@ Follow this order:
 Do not reintroduce these problems:
 
 - `components/music/YouTubeEngine.tsx` must stay stable across volume changes
+- `components/music/YouTubeEngine.tsx` must use direct YouTube API methods, not postMessage
+- `components/music/YouTubeEngine.tsx` must guard control calls against detached iframes
+- `components/music/YouTubeEngine.tsx` must keep playlist recovery based on the active video ID when `getPlaylistIndex()` is missing or stale
+- `components/music/YouTubeEngine.tsx` must properly destroy the active player before clearing the hidden host on rebuild or cleanup
+- `context/MusicContext.tsx` must continue forwarding volume, seek, and source-load changes to the registered controls
 - `context/MusicContext.tsx` and `context/ThemeContext.tsx` should keep stable callbacks
 - `app/admin/page.tsx` should continue redirecting to `/admin/login`
 - `app/login/page.tsx` should continue redirecting to `/admin/login`

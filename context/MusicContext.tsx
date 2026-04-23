@@ -88,12 +88,19 @@ export function MusicProvider({ children }: PropsWithChildren) {
   const [visualLevel, setVisualLevelState] = useState(0.2);
   const [footerTakeover, setFooterTakeover] = useState(0);
   const layoutModeRef = useRef<LayoutMode>("standalone");
+  const musicUrlRef = useRef(musicUrl);
+  const controlsRef = useRef<PlayerControls | null>(null);
   const layoutMode: LayoutMode =
     footerTakeover >= 0.72 ? "footer" : footerTakeover < 0.68 ? "standalone" : layoutModeRef.current;
 
   useEffect(() => {
     layoutModeRef.current = layoutMode;
   }, [layoutMode]);
+
+  useEffect(() => {
+    musicUrlRef.current = musicUrl;
+  }, [musicUrl]);
+
   const thumbnailSourceId = source.videoId ?? extractYouTubeVideoId(source.rawUrl);
   const thumbnail = useResolvedYouTubeThumbnail(thumbnailSourceId);
   const { resetPalette, setPaletteFromThumbnail } = useTheme();
@@ -107,7 +114,8 @@ export function MusicProvider({ children }: PropsWithChildren) {
           cache: "no-store",
         });
         const payload = (await response.json()) as { value?: string };
-        if (!cancelled && payload.value && payload.value !== musicUrl) {
+        if (!cancelled && payload.value && payload.value !== musicUrlRef.current) {
+          musicUrlRef.current = payload.value;
           setMusicUrl(payload.value);
           setSource(parseYouTubeSource(payload.value));
           setTitle("Loading soundtrack...");
@@ -124,12 +132,14 @@ export function MusicProvider({ children }: PropsWithChildren) {
     const handleMusicUrlUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<string>;
       const nextUrl = customEvent.detail;
-      if (typeof nextUrl === "string" && nextUrl && nextUrl !== musicUrl) {
+      if (typeof nextUrl === "string" && nextUrl && nextUrl !== musicUrlRef.current) {
+        musicUrlRef.current = nextUrl;
         setMusicUrl(nextUrl);
         setSource(parseYouTubeSource(nextUrl));
         setTitle("Loading soundtrack...");
         setCurrentTime(0);
         setDuration(0);
+        controlsRef.current?.load(nextUrl);
       }
     };
 
@@ -214,27 +224,31 @@ export function MusicProvider({ children }: PropsWithChildren) {
   }, []);
 
   const setVolume = useCallback((value: number) => {
-    setVolumeState(value);
+    const nextValue = Math.max(0, Math.min(100, value));
+    setVolumeState(nextValue);
+    controlsRef.current?.setVolume(nextValue);
   }, []);
 
   const seekTo = useCallback((seconds: number) => {
     const nextSeconds = Math.max(0, duration > 0 ? Math.min(duration, seconds) : seconds);
     setCurrentTime(nextSeconds);
+    controlsRef.current?.seekTo(nextSeconds);
   }, [duration]);
 
   const loadMusicUrl = useCallback((url: string) => {
-    if (url === musicUrl) {
+    if (url === musicUrlRef.current) {
       return;
     }
 
+    musicUrlRef.current = url;
     setMusicUrl(url);
     setSource(parseYouTubeSource(url));
     setTitle("Loading soundtrack...");
     setCurrentTime(0);
     setDuration(0);
-  }, [musicUrl]);
+    controlsRef.current?.load(url);
+  }, []);
 
-  const controlsRef = useRef<PlayerControls | null>(null);
   const pendingPlayRef = useRef(false);
 
   const registerControls = useCallback((nextControls: PlayerControls) => {

@@ -69,7 +69,18 @@ Important state comes from:
 
 - cookie consent stored in localStorage
 - music engine readiness and playback state
+- YouTube player instance and control registration
+- active video ID synced from the player so the thumbnail proxy and palette can follow track changes
 - thumbnail-derived palette state
 - footer takeover progress driven by scroll
 - analytics opt-in and event collection
 - Supabase data when available, otherwise fallback store data
+
+## Current Known Issues And Fixes
+
+The music player has been hardened against several runtime errors:
+
+- Fixed: origin mismatch and YouTube widget null `src` errors by keeping a stable player instance and refusing to call player methods on a detached iframe
+- Fixed: broken volume, seek, and source-load controls by forwarding those actions through the registered player controls in music context
+- Fixed: single-track looping on playlist sources by reloading and resolving playlist position from the active video ID when YouTube reports `getPlaylistIndex() === -1`
+- Fixed: track title and artwork drift by syncing the current video ID from player state instead of relying on brittle external metadata fetches

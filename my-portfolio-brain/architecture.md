@@ -65,8 +65,12 @@ Important behavior:
 - if a playlist boot fails, the engine falls back to the track's video ID so the player does not get stuck in a hard unavailable state
 - if YouTube exposes no playlist queue on first load, the engine explicitly reloads the playlist so next/previous navigation has a real queue to work with
 - if the player reports a playlist index of `-1`, the engine resolves the current track from the loaded video ID before deciding whether to advance
-- player commands now go directly to the iframe `contentWindow` with a wildcard `postMessage` target so deployed origins do not trip YouTube's internal origin check on play, pause, seek, mute, volume, and playlist navigation
-- the embed enables the JS API explicitly and supplies `widget_referrer` so the command bridge stays valid on Vercel preview origins
+- player commands use direct YouTube Player API methods (playVideo, pauseVideo, setVolume, mute, unMute, seekTo, setShuffle) instead of postMessage to avoid origin mismatch errors
+- every player command checks that the hidden YouTube iframe is still mounted before touching the widget API
+- source changes are pushed through a dedicated load bridge instead of rebuilding the player instance
+- the music context forwards volume, seek, and source-load actions to the registered controls so the UI and iframe stay in sync
+- polling reads current time and duration through safe helpers so early or stale player reads do not crash the shell
+- player creation destroys any existing instance before clearing the hidden host element, and cleanup follows the same order
 - current time, duration, and seek position are part of the shared music state
 - the current track thumbnail drives the palette and the music artwork
 - the music context seeds thumbnail extraction from the raw music URL when the parsed playlist source does not carry a video ID
@@ -162,6 +166,10 @@ The current code already contains the important hardening changes:
 - `context/ThemeContext.tsx` now uses stable callbacks
 - `components/music/YouTubeEngine.tsx` no longer rebuilds on every volume change
 - `components/music/YouTubeEngine.tsx` now loops single-track playback on `ENDED`
+- `components/music/YouTubeEngine.tsx` uses direct YouTube API methods instead of postMessage to fix origin mismatch errors
+- `components/music/YouTubeEngine.tsx` now guards every control call behind an iframe-mounted check to avoid widget API null `src` errors
+- `components/music/YouTubeEngine.tsx` includes safe polling helpers and playlist index recovery
+- `context/MusicContext.tsx` forwards volume, seek, and source-load changes to the registered player controls
 - `components/ui/GlassCursor.tsx` now sits above overlays and renders as a high-contrast pointer
 - `app/admin/page.tsx` redirects to `/admin/login`
 - `app/login/page.tsx` redirects to `/admin/login`

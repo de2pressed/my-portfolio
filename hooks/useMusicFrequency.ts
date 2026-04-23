@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMusic } from "@/context/MusicContext";
 import { extractPaletteFromImage } from "@/lib/colorExtractor";
@@ -103,17 +103,20 @@ export function useMusicFrequency() {
   const [thumbnailColors, setThumbnailColors] = useState<string[]>([]);
 
   useEffect(() => {
-    if (thumbnail) {
-      extractPaletteFromImage(thumbnail)
-        .then((colors) => {
-          const boostedColors = colors.slice(0, 4).map(boostColor);
-          setThumbnailColors(boostedColors);
-        })
-        .catch((error) => {
-          console.warn("Failed to extract thumbnail colors:", error);
-          setThumbnailColors([]);
-        });
+    if (!thumbnail) {
+      setThumbnailColors([]);
+      return;
     }
+
+    extractPaletteFromImage(thumbnail)
+      .then((colors) => {
+        const boostedColors = colors.slice(0, 4).map(boostColor);
+        setThumbnailColors(boostedColors);
+      })
+      .catch((error) => {
+        console.warn("Failed to extract thumbnail colors:", error);
+        setThumbnailColors([]);
+      });
   }, [thumbnail]);
 
   return {

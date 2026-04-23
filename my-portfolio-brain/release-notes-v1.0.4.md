@@ -60,12 +60,43 @@ This release focuses on improving the ambient background music reactivity, moder
 - On hover: lifts up (y: 12 vs 22 base), scales up (0.92 vs 0.88 base), reduces rotation (1.5° vs 2° base)
 - Enhanced shadow on hover with larger blur (32px vs 24px) and stronger accent glow
 
+### YouTube Player Bug Fixes
+
+**Problem:** Multiple runtime errors were still occurring with the YouTube music player:
+- postMessage origin mismatch warnings when controlling playback
+- controls updating React state without actually controlling the player
+- `Cannot read properties of null (reading 'src')` error from YouTube widget API
+- playlist sources getting stuck on the first track or losing next/previous order
+
+**Solution (`components/music/YouTubeEngine.tsx`):**
+
+**Stable Player Lifecycle:**
+- Rewrote the engine so the YouTube player is created once, not rebuilt on volume changes or other unrelated state updates
+- Source changes now flow through a dedicated load bridge instead of recreating the iframe
+- Cleanup now destroys the active player before clearing the hidden host element
+
+**Guarded Direct API Methods:**
+- Kept the official YouTube Player API method path instead of custom postMessage commands
+- Added iframe-mounted guards around play, pause, seek, mute, unmute, volume, and playlist navigation calls
+- This avoids both origin mismatch warnings and the widget API null `src` crash that happens when a detached player object is used
+
+**Control Bridge Repair (`context/MusicContext.tsx`):**
+- Restored forwarding for `setVolume`, `seekTo`, and `loadMusicUrl` so the UI controls reach the real player again
+- Kept pending first-play behavior intact so the cookie handoff and first gesture still wake the soundtrack correctly
+
+**Playlist Recovery:**
+- Added playlist index recovery from the active video ID when YouTube reports `getPlaylistIndex() === -1`
+- Reloaded playlist sources through the stable load bridge when the queue is missing instead of falling back into single-video behavior
+- Single videos still loop on `ENDED`, while playlist sources advance through the queue
+
 ## Files Modified
 
 - `lib/colorExtractor.ts`
 - `components/background/AmbientBackground.tsx`
 - `components/music/YouTubeEngine.tsx`
 - `components/music/MusicPlayer.tsx`
+- `context/MusicContext.tsx`
+- `hooks/useMusicFrequency.ts`
 - `components/layout/Header.tsx`
 - `components/layout/Footer.tsx`
 - `components/ui/VersionBadge.tsx`
@@ -73,6 +104,9 @@ This release focuses on improving the ambient background music reactivity, moder
 - `components/loading/LoadingScreen.tsx`
 - `components/sections/Reviews.tsx`
 - `my-portfolio-brain/architecture.md`
+- `my-portfolio-brain/README.md`
+- `my-portfolio-brain/project-overview.md`
+- `my-portfolio-brain/working-guide.md`
 
 ## Testing Checklist
 
@@ -83,3 +117,11 @@ This release focuses on improving the ambient background music reactivity, moder
 - [ ] Verify white borders are removed from all listed components
 - [ ] Verify footer music player has smooth 3D float hover effect
 - [ ] Test across different album art thumbnails to ensure color extraction works consistently
+- [ ] Verify no postMessage origin mismatch warnings in console
+- [ ] Verify music plays and volume changes work without recreating or killing the player
+- [ ] Verify track title and cover art appear correctly
+- [ ] Verify no YouTube widget API null src errors
+- [ ] Verify seek and mute controls update the real player, not just React state
+- [ ] Verify playlist URLs advance in order and next/previous do not collapse into first-track looping
+- [ ] Verify music player initializes cleanly on page load
+- [ ] Verify music player cleans up properly on unmount

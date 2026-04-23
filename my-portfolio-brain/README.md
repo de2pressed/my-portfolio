@@ -4,15 +4,16 @@ This folder is the handoff pack for the portfolio project. It is written so anot
 
 Start here, then read the linked docs in order:
 
-1. [Release notes v1.0.3](./release-notes-v1.0.3.md)
-2. [Release notes v1.0.2](./release-notes-v1.0.2.md)
-3. [Release notes v1.0.1](./release-notes-v1.0.1.md)
-4. [Project overview](./project-overview.md)
-5. [Architecture](./architecture.md)
-6. [Data model](./data-model.md)
-7. [Routes and flows](./routes-and-flows.md)
-8. [File map](./file-map.md)
-9. [Working guide](./working-guide.md)
+1. [Release notes v1.0.4](./release-notes-v1.0.4.md)
+2. [Release notes v1.0.3](./release-notes-v1.0.3.md)
+3. [Release notes v1.0.2](./release-notes-v1.0.2.md)
+4. [Release notes v1.0.1](./release-notes-v1.0.1.md)
+5. [Project overview](./project-overview.md)
+6. [Architecture](./architecture.md)
+7. [Data model](./data-model.md)
+8. [Routes and flows](./routes-and-flows.md)
+9. [File map](./file-map.md)
+10. [Working guide](./working-guide.md)
 
 ## One-Screen Summary
 
@@ -28,6 +29,10 @@ Start here, then read the linked docs in order:
   - the YouTube player no longer gets rebuilt on every volume change
   - social metadata points at local preview assets
   - single-video soundtrack playback now loops at `ENDED`
+  - music context forwards volume, seek, and source-load actions to the registered player controls
+  - YouTube player commands use official Player API methods only while the iframe is still mounted, which avoids origin mismatch and null `src` widget errors
+  - playlist navigation resolves the current item from the active video ID when YouTube loses playlist index state
+  - player cleanup destroys the active instance before clearing the hidden host element
 
 ## Current Repo Structure
 
