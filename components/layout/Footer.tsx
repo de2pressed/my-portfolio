@@ -151,7 +151,7 @@ export function Footer({ name, email, note }: FooterProps) {
           >
             <div
               ref={panelRef}
-              className="relative isolate overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.58)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-[16px]"
+              className="pointer-events-none relative isolate overflow-hidden rounded-[30px] bg-[rgba(10,10,14,0.58)] p-4 shadow-[0_24px_60px_rgba(5,5,8,0.28)] backdrop-blur-[16px]"
             >
               <div
                 aria-hidden="true"
@@ -178,7 +178,7 @@ export function Footer({ name, email, note }: FooterProps) {
                 }}
               />
 
-              <div className="relative z-[1] grid gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
+              <div className="pointer-events-auto relative z-[1] grid gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
                 <div className="relative h-40 overflow-hidden rounded-[24px] bg-[rgba(10,10,14,0.34)] sm:h-44">
                   {renderArtwork()}
                 </div>
@@ -193,20 +193,20 @@ export function Footer({ name, email, note }: FooterProps) {
 
                   <div className="flex items-center gap-2">
                     <button
-                      className="glass-button-muted h-10 w-10 rounded-full p-0"
+                      className="glass-button-muted relative z-[2] h-10 w-10 rounded-full p-0"
                       onClick={playPrevious}
                       type="button"
                     >
                       <SkipBack className="h-4 w-4" />
                     </button>
                     <button
-                      className="glass-button h-10 w-10 rounded-full p-0"
+                      className="glass-button relative z-[2] h-10 w-10 rounded-full p-0"
                       onClick={togglePlayback}
                       type="button"
                     >
                       {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                     </button>
-                    <button className="glass-button-muted h-10 w-10 rounded-full p-0" onClick={playNext} type="button">
+                    <button className="glass-button-muted relative z-[2] h-10 w-10 rounded-full p-0" onClick={playNext} type="button">
                       <SkipForward className="h-4 w-4" />
                     </button>
                   </div>

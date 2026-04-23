@@ -125,6 +125,7 @@ This release focuses on improving the ambient background music reactivity, moder
 **Solution:**
 - Aligned the floating player's pointer handoff threshold with the footer card's actual reveal threshold
 - Lowered the floating player in the stack once handed off and raised the footer music card above it during takeover so footer buttons reliably receive input
+- Moved the docked card's tilt onto a non-interactive shell and kept the footer control row on a `pointer-events-auto` content layer so the transformed glass surface no longer interferes with button clicks
 
 ## Files Modified
 
