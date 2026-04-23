@@ -81,6 +81,7 @@ Important behavior:
 - the footer and compact player now crop the thumbnail more tightly and avoid a brown wash overlay so the album art reads cleaner
 - the footer takeover is now derived from the footer panel entering the viewport instead of whole-page scroll percentage
 - the footer renders its own integrated music-zone card, and the floating player only hands off pointer control once that footer card is ready
+- the floating player now uses the same reveal threshold as the footer card before dropping pointer control, and the footer card raises above the floating layer during takeover so footer controls do not get intermittently blocked
 - the floating player and footer music card now share a softer merge curve with reduced rotation, later fade, and pane-like depth so the handoff feels cleaner
 - the floating player and footer card now use a shared pointer-driven tilt helper on fine pointers, so the visible panel rotates in 3D under the cursor instead of relying on static faux-depth alone
 - the glass treatment now avoids always-on content blur and uses denser panel fill with lighter sheen overlays so text stays readable while the surface still feels glazed

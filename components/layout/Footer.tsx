@@ -133,6 +133,7 @@ export function Footer({ name, email, note }: FooterProps) {
           <motion.aside
             className={cn(
               "relative",
+              footerCardReady && "z-[60]",
               footerCardReady ? "pointer-events-auto" : "pointer-events-none",
             )}
             initial={false}

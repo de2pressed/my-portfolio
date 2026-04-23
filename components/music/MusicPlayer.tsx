@@ -156,7 +156,8 @@ export function MusicPlayer() {
   const mergeProgress = smoothstep((footerTakeover - 0.36) / 0.48);
   const takeoverFade = smoothstep((footerTakeover - 0.68) / 0.18);
   const takeoverDepth = mergeProgress * mergeProgress;
-  const playerHandedOff = layoutMode === "footer" && footerTakeover > 0.82;
+  const footerCardReveal = smoothstep((footerTakeover - 0.34) / 0.46);
+  const playerHandedOff = footerCardReveal > 0.7 || layoutMode === "footer";
   const paneLift = 1 - mergeProgress * 0.14;
   const paneSheenOpacity = 0.11 + (1 - mergeProgress) * 0.06;
   const paneGlowOpacity = 0.1 + (1 - mergeProgress) * 0.06;
@@ -190,7 +191,7 @@ export function MusicPlayer() {
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] sm:h-[11.5rem] sm:w-[11.5rem]"
           : "z-50 w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] sm:max-w-[30rem]",
-        playerHandedOff && "pointer-events-none",
+        playerHandedOff && "pointer-events-none z-10",
       )}
       layout
       animate={{

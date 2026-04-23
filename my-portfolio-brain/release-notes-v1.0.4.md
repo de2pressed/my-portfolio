@@ -118,6 +118,14 @@ This release focuses on improving the ambient background music reactivity, moder
 - Tightened the glass surface with denser fill and lower overlay haze so the panel reads clearly against the animated background
 - Added a shared pointer-driven tilt hook for the floating player and footer music card, so both visible panels rotate in 3D as the cursor moves across them without interfering with the existing footer takeover or playback controls
 
+### Footer Control Handoff Alignment
+
+**Problem:** Footer playback controls could feel inconsistent because the floating player stayed interactive above the footer for longer than the footer card's own reveal threshold, leaving a scroll range where the fixed player could still steal clicks.
+
+**Solution:**
+- Aligned the floating player's pointer handoff threshold with the footer card's actual reveal threshold
+- Lowered the floating player in the stack once handed off and raised the footer music card above it during takeover so footer buttons reliably receive input
+
 ## Files Modified
 
 - `lib/colorExtractor.ts`
