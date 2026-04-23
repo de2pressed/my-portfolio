@@ -65,6 +65,7 @@ export function MusicPlayer() {
     currentTime,
     duration,
     footerTakeover,
+    layoutMode,
     engineStatus,
     errorMessage,
     togglePlayback,
@@ -145,10 +146,11 @@ export function MusicPlayer() {
   }, [isMinimized]);
 
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
-  const takeoverFade = clamp((footerTakeover - 0.52) / 0.26, 0, 1);
-  const takeoverDepth = footerTakeover * footerTakeover;
-  const takeoverBlur = takeoverFade * 8;
+  const takeoverFade = clamp((footerTakeover - 0.62) / 0.26, 0, 1);
+  const takeoverDepth = clamp(footerTakeover, 0, 1) * clamp(footerTakeover, 0, 1);
+  const takeoverBlur = takeoverFade * 10;
   const takeoverFilter = `blur(${takeoverBlur}px)`;
+  const playerHandedOff = layoutMode === "footer" && footerTakeover > 0.82;
 
   const renderArtwork = () =>
     thumbnail ? (
@@ -171,15 +173,15 @@ export function MusicPlayer() {
         isMinimized
           ? "h-[11rem] w-[11rem] rounded-[28px] p-3 sm:h-[11.5rem] sm:w-[11.5rem]"
           : "w-[calc(100vw-2rem)] max-w-[28rem] rounded-[30px] p-3 sm:max-w-[30rem] sm:p-4 z-50",
-        footerTakeover > 0.72 && "pointer-events-none",
+        playerHandedOff && "pointer-events-none",
       )}
       layout
       animate={{
         opacity: 1 - takeoverFade,
-        x: footerTakeover * (isMinimized ? -22 : -34),
-        y: takeoverDepth * (isMinimized ? 360 : 480),
-        scale: 1 + takeoverDepth * 0.24,
-        rotate: takeoverDepth * -3,
+        x: takeoverFade * (isMinimized ? -18 : -42),
+        y: takeoverDepth * (isMinimized ? 260 : 340),
+        scale: 1 + takeoverDepth * 0.14,
+        rotate: takeoverFade * -2,
       }}
       style={{ filter: takeoverFilter }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
@@ -296,6 +298,7 @@ export function MusicPlayer() {
                 max={Math.max(duration, 1)}
                 min={0}
                 onChange={(event) => seekTo(Number(event.target.value))}
+                onInput={(event) => seekTo(Number((event.target as HTMLInputElement).value))}
                 style={{
                   background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${progress}%, rgba(255,255,255,0.22) ${progress}%, rgba(255,255,255,0.22) 100%)`,
                 }}
@@ -328,6 +331,7 @@ export function MusicPlayer() {
                 max={100}
                 min={0}
                 onChange={(event) => setVolume(Number(event.target.value))}
+                onInput={(event) => setVolume(Number((event.target as HTMLInputElement).value))}
                 style={{
                   background: `linear-gradient(90deg, rgb(var(--accent-rgb)) 0%, rgb(var(--accent-rgb)) ${volume}%, rgba(255,255,255,0.22) ${volume}%, rgba(255,255,255,0.22) 100%)`,
                 }}

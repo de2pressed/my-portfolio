@@ -80,7 +80,11 @@ function isPlayerOperational(player: ExtendedPlayer | null, host: HTMLDivElement
   }
 
   const iframe = getPlayerIframe(player);
-  return Boolean(iframe && iframe.src && host.contains(iframe) && iframe.ownerDocument?.body?.contains(iframe));
+  return Boolean(
+    iframe &&
+      iframe.isConnected &&
+      (host.contains(iframe) || iframe.ownerDocument?.documentElement?.contains(iframe)),
+  );
 }
 
 function readCurrentTime(player: ExtendedPlayer) {

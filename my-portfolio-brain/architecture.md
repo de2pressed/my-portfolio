@@ -79,7 +79,8 @@ Important behavior:
 - the floating player applies its blur as a plain style value instead of an animated filter so Framer Motion does not emit invalid negative blur keyframes
 - thumbnail extraction now uses a same-origin proxy so the browser can read YouTube pixels and extract palette colors reliably
 - the footer and compact player now crop the thumbnail more tightly and avoid a brown wash overlay so the album art reads cleaner
-- the footer takeover grows as the user scrolls toward the footer
+- the footer takeover is now derived from the footer panel entering the viewport instead of whole-page scroll percentage
+- the footer renders its own integrated music-zone card, and the floating player only hands off pointer control once that footer card is ready
 - the floating player can collapse into a minimized disc mode and persists that preference in `localStorage`
 - the minimized disc now carries a waveform ring that responds to the shared music energy level
 - if a thumbnail is not available in higher quality, the resolver falls back through `maxresdefault`, `sddefault`, and `hqdefault`

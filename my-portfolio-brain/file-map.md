@@ -32,7 +32,7 @@
 - `components/layout/AppProviders.tsx` - provider composition
 - `components/layout/ExperienceShell.tsx` - loading, consent, first-gesture playback, reveal, and shell orchestration
 - `components/layout/Header.tsx` - public site header
-- `components/layout/Footer.tsx` - footer takeover and music-driven end of page
+- `components/layout/Footer.tsx` - footer takeover driver and the integrated footer music zone card
 - `components/layout/PageTransition.tsx` - page motion wrapper
 
 ## UI And Loading

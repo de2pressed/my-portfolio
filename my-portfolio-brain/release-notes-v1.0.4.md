@@ -89,6 +89,17 @@ This release focuses on improving the ambient background music reactivity, moder
 - Reloaded playlist sources through the stable load bridge when the queue is missing instead of falling back into single-video behavior
 - Single videos still loop on `ENDED`, while playlist sources advance through the queue
 
+### Footer Takeover And Control Follow-Up
+
+**Problem:** After stabilizing playback, the floating player still did not feel connected to the footer and some visible controls could appear dead once the old global-scroll takeover logic started disabling pointer interaction too early.
+
+**Solution:**
+- Rebased footer takeover progress on the footer panel entering the viewport instead of total document scroll percentage
+- Added an integrated footer music-zone card so the floating player has a real destination to hand off into
+- Delayed pointer handoff until the footer card is actually ready, which keeps the floating player's buttons and sliders interactive longer
+- Added `onInput` handling for progress and volume sliders so drag interactions feel immediate
+- Relaxed the hidden-player mounted check so valid player controls are not blocked by an overly strict iframe `src` test
+
 ## Files Modified
 
 - `lib/colorExtractor.ts`
@@ -125,3 +136,5 @@ This release focuses on improving the ambient background music reactivity, moder
 - [ ] Verify playlist URLs advance in order and next/previous do not collapse into first-track looping
 - [ ] Verify music player initializes cleanly on page load
 - [ ] Verify music player cleans up properly on unmount
+- [ ] Verify the floating player remains interactive until the footer music zone is visibly ready
+- [ ] Verify the footer music zone appears and the floating player hands off into it as the footer enters view
