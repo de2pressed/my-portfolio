@@ -18,6 +18,18 @@ import { extractYouTubeVideoId, parseYouTubeSource, type ParsedYouTubeSource } f
 type EngineStatus = "idle" | "loading" | "ready" | "error";
 type LayoutMode = "standalone" | "footer";
 
+type PlayerControls = {
+  play: () => void;
+  pause: () => void;
+  toggle: () => void;
+  next: () => void;
+  previous: () => void;
+  setVolume: (value: number) => void;
+  seekTo: (seconds: number) => void;
+  load: (url: string) => void;
+  mute: (mute: boolean) => void;
+};
+
 type MusicContextValue = {
   source: ParsedYouTubeSource;
   title: string;
@@ -50,6 +62,14 @@ type MusicContextValue = {
   setIsPlaying: (playing: boolean) => void;
   setIsMuted: (muted: boolean) => void;
   loadMusicUrl: (url: string) => void;
+  togglePlayback: () => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  mute: () => void;
+  unmute: () => void;
+  play: () => void;
+  pause: () => void;
+  registerControls: (controls: PlayerControls) => void;
 };
 
 const MusicContext = createContext<MusicContextValue | null>(null);
@@ -214,6 +234,54 @@ export function MusicProvider({ children }: PropsWithChildren) {
     setDuration(0);
   }, [musicUrl]);
 
+  const controlsRef = useRef<PlayerControls | null>(null);
+  const pendingPlayRef = useRef(false);
+
+  const registerControls = useCallback((nextControls: PlayerControls) => {
+    controlsRef.current = nextControls;
+
+    if (pendingPlayRef.current) {
+      nextControls.play();
+      pendingPlayRef.current = false;
+    }
+  }, []);
+
+  const togglePlayback = useCallback(() => {
+    controlsRef.current?.toggle();
+  }, []);
+
+  const playNext = useCallback(() => {
+    controlsRef.current?.next();
+  }, []);
+
+  const playPrevious = useCallback(() => {
+    controlsRef.current?.previous();
+  }, []);
+
+  const play = useCallback(() => {
+    if (controlsRef.current) {
+      controlsRef.current.play();
+      return;
+    }
+
+    pendingPlayRef.current = true;
+  }, []);
+
+  const pause = useCallback(() => {
+    controlsRef.current?.pause();
+    pendingPlayRef.current = false;
+  }, []);
+
+  const mute = useCallback(() => {
+    setIsMuted(true);
+    controlsRef.current?.mute(true);
+  }, []);
+
+  const unmute = useCallback(() => {
+    setIsMuted(false);
+    controlsRef.current?.mute(false);
+  }, []);
+
   return (
     <MusicContext.Provider
       value={{
@@ -241,6 +309,14 @@ export function MusicProvider({ children }: PropsWithChildren) {
         setIsPlaying,
         setIsMuted,
         loadMusicUrl,
+        togglePlayback,
+        playNext,
+        playPrevious,
+        mute,
+        unmute,
+        play,
+        pause,
+        registerControls,
       }}
     >
       {children}
