@@ -110,7 +110,11 @@ export function YouTubeEngine() {
     }
 
     function initializePlayer() {
-      if (cancelled || !hostRef.current) {
+      if (cancelled || !hostRef.current || typeof window.YT === "undefined" || typeof window.YT.Player === "undefined") {
+        return;
+      }
+
+      if (!document.body.contains(hostRef.current)) {
         return;
       }
 
@@ -141,11 +145,12 @@ export function YouTubeEngine() {
         width: "200",
         playerVars,
         events: {
-          onReady: () => {
-            if (cancelled) {
+          onReady: (event: YT.PlayerEvent) => {
+            if (cancelled || !event.target) {
               return;
             }
 
+            const player = event.target;
             console.warn("YouTube player ready");
             markResolved();
             playerRef.current = player;
@@ -155,7 +160,11 @@ export function YouTubeEngine() {
               autoplayUnmutePendingRef.current || activePlayer.isMuted() || activePlayer.getVolume() === 0;
 
             if (source.playlistId) {
-              disableShuffle(activePlayer);
+              try {
+                activePlayer.setShuffle(false);
+              } catch (error) {
+                console.warn("Failed to disable shuffle.", error);
+              }
 
               try {
                 activePlayer.setVolume(0);
@@ -380,14 +389,12 @@ export function YouTubeEngine() {
         },
       };
 
-      const player = new window.YT.Player(hostRef.current, playerConfig);
-    }
-
-    function disableShuffle(player: ExtendedPlayer) {
       try {
-        player.setShuffle(false);
+        const player = new window.YT.Player(hostRef.current, playerConfig);
+        playerRef.current = player;
       } catch (error) {
-        console.warn("Failed to disable shuffle.", error);
+        console.warn("Failed to create YouTube player.", error);
+        setPlayerError("Failed to initialize YouTube player");
       }
     }
 
